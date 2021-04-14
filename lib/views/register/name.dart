@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:zesti/theme/theme.dart';
 import 'package:zesti/views/shared/input.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:zesti/views/signup/birthday.dart';
+import 'package:zesti/views/register/birthday.dart';
 
 class DropdownState extends StatefulWidget {
   const DropdownState({Key? key}) : super(key: key);

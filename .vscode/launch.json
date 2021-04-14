@@ -9,6 +9,11 @@
       "request": "launch",
       "program": "lib/main.dart",
       "type": "dart"
+
+      // For Leon, for some reason won't work on Android emulator without this
+      "args": [
+        "--no-sound-null-safety"
+      ]
     }
   ]
 }

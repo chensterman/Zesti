@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:zesti/theme/theme.dart';
-import 'package:zesti/views/signup/name.dart';
+import 'package:zesti/views/register/name.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:zesti/views/shared/input.dart';
 
