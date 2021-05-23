@@ -1,21 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:zesti/theme/theme.dart';
 import 'package:zesti/views/auth/signin.dart';
-import 'package:zesti/views/register/phone.dart';
 import 'package:zesti/services/auth.dart';
 
 class SignUp extends StatefulWidget {
-  //final Function toggleView;
-  //SignUp({this.toggleView});
-
   @override
   _SignUpState createState() => _SignUpState();
 }
 
 class _SignUpState extends State<SignUp> {
-  // Get instance of AuthService class from "auth.dart"
-  // final AuthService _auth = AuthService();
-
   // Validation of entered values
   final _formKey = GlobalKey<FormState>();
 
@@ -35,7 +28,7 @@ class _SignUpState extends State<SignUp> {
         elevation: 0.0,
         title: Text('Sign up for Zesti'),
         actions: <Widget>[
-          FlatButton.icon(
+          TextButton.icon(
               onPressed: () {
                 Navigator.push(
                   context,
@@ -43,7 +36,7 @@ class _SignUpState extends State<SignUp> {
                 );
               },
               icon: Icon(Icons.person),
-              label: Text('Sign In'))
+              label: Text('Sign In')),
         ],
       ),
       body: Container(

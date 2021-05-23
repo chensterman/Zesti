@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:zesti/theme/theme.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:provider/provider.dart';
+import 'package:zesti/theme/theme.dart';
+import 'package:zesti/services/database.dart';
+import 'package:zesti/views/register/identity.dart';
 
 class NumberLine extends StatelessWidget {
   NumberLine({@required this.width, @required this.text});
@@ -22,10 +27,18 @@ class NumberLine extends StatelessWidget {
   }
 }
 
-class Birthday extends StatelessWidget {
+class Birthday extends StatefulWidget {
+  @override
+  _BirthdayState createState() => _BirthdayState();
+}
+
+class _BirthdayState extends State<Birthday> {
+  DateTime birthday = DateTime.now();
+
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
+    final user = Provider.of<User?>(context);
 
     return Scaffold(
       body: Center(
@@ -82,6 +95,8 @@ class Birthday extends StatelessWidget {
                                     date.timeZoneOffset.inHours.toString());
                               }, onConfirm: (date) {
                                 print('confirm $date');
+                                birthday = date;
+                                print(birthday);
                               },
                                   currentTime: DateTime.now(),
                                   locale: LocaleType.en);
@@ -101,7 +116,20 @@ class Birthday extends StatelessWidget {
                                 shape: new RoundedRectangleBorder(
                                     borderRadius:
                                         new BorderRadius.circular(30.0))),
-                            onPressed: () {},
+                            onPressed: () async {
+                              if (user == null) {
+                                print("Error");
+                              } else {
+                                await DatabaseService(uid: user.uid)
+                                    .updateBirthday(
+                                        Timestamp.fromDate(birthday));
+                              }
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => Identity()),
+                              );
+                            },
                             child: Text("Confirm"),
                           )),
                     )

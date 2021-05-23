@@ -32,22 +32,15 @@ class _SignInState extends State<SignIn> {
         elevation: 0.0,
         title: Text('Sign in to Zesti'),
         actions: <Widget>[
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-                primary: CustomTheme.lightTheme.primaryColor,
-                padding: const EdgeInsets.only(
-                    left: 30, top: 10, right: 30, bottom: 10),
-                shape: new RoundedRectangleBorder(
-                    borderRadius: new BorderRadius.circular(30.0))),
-            onPressed: () {
-              //widget.toggleView();
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => SignUp()),
-              );
-            },
-            child: Text("Sign Up"),
-          )
+          TextButton.icon(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => SignUp()),
+                );
+              },
+              icon: Icon(Icons.person),
+              label: Text('Sign Up')),
         ],
       ),
       body: Container(

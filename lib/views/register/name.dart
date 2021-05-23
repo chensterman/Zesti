@@ -1,56 +1,33 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
+import 'package:zesti/services/database.dart';
 import 'package:zesti/theme/theme.dart';
-import 'package:zesti/views/shared/input.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:zesti/views/register/birthday.dart';
 
-class DropdownState extends StatefulWidget {
-  const DropdownState({Key? key}) : super(key: key);
-
+class Name extends StatefulWidget {
   @override
-  Dropdown createState() => Dropdown();
+  _NameState createState() => _NameState();
 }
 
-class Dropdown extends State<DropdownState> {
-  String dropdownValue = '+1';
+class _NameState extends State<Name> {
+  final _formKey = GlobalKey<FormState>();
+  String first = '';
+  String last = '';
 
-  @override
-  Widget build(BuildContext context) {
-    return DropdownButton<String>(
-      value: dropdownValue,
-      icon: const Icon(Icons.arrow_drop_down),
-      iconSize: 24,
-      elevation: 16,
-      underline: Container(
-        height: 2,
-        color: CustomTheme.lightTheme.primaryColor,
-      ),
-      onChanged: (String? newValue) {
-        setState(() {
-          dropdownValue = newValue!;
-        });
-      },
-      items: <String>['+1', '+2', '+3', '+4']
-          .map<DropdownMenuItem<String>>((String value) {
-        return DropdownMenuItem<String>(
-          value: value,
-          child: Text(value),
-        );
-      }).toList(),
-    );
-  }
-}
-
-class Name extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
+    final user = Provider.of<User?>(context);
 
     return Scaffold(
       body: Center(
         child: Container(
-            width: size.width * CustomTheme.containerWidth,
-            padding: const EdgeInsets.all(20),
+          width: size.width * CustomTheme.containerWidth,
+          padding: const EdgeInsets.all(20),
+          child: Form(
+            key: _formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
@@ -62,16 +39,32 @@ class Name extends StatelessWidget {
                     style: CustomTheme.lightTheme.textTheme.headline1,
                   ),
                 ),
-                InputState(
-                  width: size.width,
-                  hintText: "First",
-                ),
-                InputState(
-                  width: size.width,
-                  hintText: "Last",
+                TextFormField(
+                  validator: (val) {
+                    if (val == null || val.isEmpty) {
+                      return "Please enter a first name.";
+                    }
+                  },
+                  onChanged: (val) {
+                    setState(() => first = val);
+                  },
+                  decoration: const InputDecoration(hintText: "First"),
                 ),
                 Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                ),
+                TextFormField(
+                    validator: (val) {
+                      if (val == null || val.isEmpty) {
+                        return "Please enter a last name.";
+                      }
+                    },
+                    onChanged: (val) {
+                      setState(() => last = val);
+                    },
+                    decoration: const InputDecoration(hintText: "Last")),
+                Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 16.0),
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
                           primary: CustomTheme.lightTheme.primaryColor,
@@ -79,7 +72,15 @@ class Name extends StatelessWidget {
                               left: 30, top: 10, right: 30, bottom: 10),
                           shape: new RoundedRectangleBorder(
                               borderRadius: new BorderRadius.circular(30.0))),
-                      onPressed: () {
+                      onPressed: () async {
+                        if (_formKey.currentState!.validate()) {
+                          if (user == null) {
+                            print("Error");
+                          } else {
+                            await DatabaseService(uid: user.uid)
+                                .updateName(first, last);
+                          }
+                        }
                         Navigator.push(
                           context,
                           MaterialPageRoute(builder: (context) => Birthday()),
@@ -92,9 +93,11 @@ class Name extends StatelessWidget {
                   height: size.height * 0.3,
                   child: SvgPicture.asset("assets/name.svg",
                       semanticsLabel: "Name"),
-                )
+                ),
               ],
-            )),
+            ),
+          ),
+        ),
       ),
     );
   }
