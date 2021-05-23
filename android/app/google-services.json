@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "508027656486",
+    "project_id": "zesti-4b3e6",
+    "storage_bucket": "zesti-4b3e6.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:508027656486:android:5415cdf2bea18a344409e7",
+        "android_client_info": {
+          "package_name": "com.zestiapp.zesti"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "508027656486-5esdkhtp1002v5lcpmtkanauhlu5r1qs.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCI0Tus8JVhfLRr1zyzcK_RuSMhpm9ZNzI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "508027656486-5esdkhtp1002v5lcpmtkanauhlu5r1qs.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,8 +1,8 @@
-//import 'package:aelo_prototype/screens/services/fireauth.dart';
 import 'package:flutter/material.dart';
 import 'package:zesti/theme/theme.dart';
 import 'package:zesti/views/auth/signin.dart';
 import 'package:zesti/views/register/phone.dart';
+import 'package:zesti/services/auth.dart';
 
 class SignUp extends StatefulWidget {
   //final Function toggleView;
@@ -13,7 +13,8 @@ class SignUp extends StatefulWidget {
 }
 
 class _SignUpState extends State<SignUp> {
-  //final AuthService _auth = AuthService();
+  // Get instance of AuthService class from "auth.dart"
+  // final AuthService _auth = AuthService();
 
   // Validation of entered values
   final _formKey = GlobalKey<FormState>();
@@ -97,19 +98,8 @@ class _SignUpState extends State<SignUp> {
                         shape: new RoundedRectangleBorder(
                             borderRadius: new BorderRadius.circular(30.0))),
                     onPressed: () {
-                      //async {
-
                       if (_formKey.currentState!.validate()) {
-                        /*
-                        dynamic result = await _auth.signUpEmail(email, password);
-                        if (result == null) {
-                          setState(() => error = "Please enter a valid email");
-                        }
-                        */
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => Phone()),
-                        );
+                        AuthService().signUp(email, password);
                       }
                     },
                     child: Text("Sign up"),

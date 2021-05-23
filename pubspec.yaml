@@ -21,6 +21,15 @@ environment:
   sdk: ">=2.12.0 <3.0.0"
 
 dependencies:
+
+  # Firebase
+  firebase_core: ^1.2.0
+  firebase_auth: ^1.2.0
+  cloud_firestore: ^2.2.0
+
+  # Provider package to listen for authentication streams
+  provider: ^5.0.0
+
   flutter:
     sdk: flutter
 

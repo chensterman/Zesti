@@ -1,7 +1,7 @@
-//import 'package:aelo_prototype/screens/services/fireauth.dart';
 import "package:flutter/material.dart";
 import 'package:zesti/theme/theme.dart';
 import 'package:zesti/views/auth/signup.dart';
+import 'package:zesti/services/auth.dart';
 
 class SignIn extends StatefulWidget {
   //final Function toggleView;
@@ -12,7 +12,7 @@ class SignIn extends StatefulWidget {
 }
 
 class _SignInState extends State<SignIn> {
-  //final AuthService _auth = AuthService();
+  // final AuthService _auth = AuthService();
 
   // Validation of entered values
   final _formKey = GlobalKey<FormState>();
@@ -32,16 +32,22 @@ class _SignInState extends State<SignIn> {
         elevation: 0.0,
         title: Text('Sign in to Zesti'),
         actions: <Widget>[
-          FlatButton.icon(
-              onPressed: () {
-                //widget.toggleView();
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => SignUp()),
-                );
-              },
-              icon: Icon(Icons.person),
-              label: Text('Sign Up'))
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+                primary: CustomTheme.lightTheme.primaryColor,
+                padding: const EdgeInsets.only(
+                    left: 30, top: 10, right: 30, bottom: 10),
+                shape: new RoundedRectangleBorder(
+                    borderRadius: new BorderRadius.circular(30.0))),
+            onPressed: () {
+              //widget.toggleView();
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => SignUp()),
+              );
+            },
+            child: Text("Sign Up"),
+          )
         ],
       ),
       body: Container(
@@ -93,15 +99,8 @@ class _SignInState extends State<SignIn> {
                         shape: new RoundedRectangleBorder(
                             borderRadius: new BorderRadius.circular(30.0))),
                     onPressed: () {
-                      //async {
-
                       if (_formKey.currentState!.validate()) {
-                        /*
-                        dynamic result = await _auth.signUpEmail(email, password);
-                        if (result == null) {
-                          setState(() => error = "Please enter a valid email");
-                        }
-                        */
+                        AuthService().signIn(email, password);
                       }
                     },
                     child: Text("Sign in"),
