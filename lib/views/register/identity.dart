@@ -73,7 +73,7 @@ class Identity extends StatelessWidget {
                           MaterialPageRoute(builder: (context) => Interest()),
                         );
                       },
-                      child: Text("Man"),
+                      child: Text("Woman"),
                     )),
                 Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8.0),
