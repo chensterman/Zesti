@@ -30,7 +30,7 @@ class Interest extends StatelessWidget {
                   ),
                 ),
                 Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 16.0),
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
                           primary: CustomTheme.lightTheme.primaryColor,
@@ -53,7 +53,7 @@ class Interest extends StatelessWidget {
                       child: Text("Men"),
                     )),
                 Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 16.0),
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
                           primary: CustomTheme.lightTheme.primaryColor,
@@ -76,7 +76,7 @@ class Interest extends StatelessWidget {
                       child: Text("Women"),
                     )),
                 Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 16.0),
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
                           primary: CustomTheme.lightTheme.primaryColor,

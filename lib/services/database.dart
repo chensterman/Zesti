@@ -22,6 +22,7 @@ class DatabaseService {
           'birthday': null,
           'dating-identity': null,
           'dating-interest': null,
+          'photo-ref': null,
           'bio': null,
         })
         .then((value) => print("User added"))
@@ -69,6 +70,15 @@ class DatabaseService {
         .doc(uid)
         .update({'dating-interest': interest})
         .then((value) => print("Interest Updated"))
+        .catchError((error) => print("Failed to update user: $error"));
+  }
+
+  // Update user photo.
+  Future<void> updatePhoto(String storageRef) async {
+    await userCollection
+        .doc(uid)
+        .update({'photo-ref': storageRef})
+        .then((value) => print("Photo Updated"))
         .catchError((error) => print("Failed to update user: $error"));
   }
 

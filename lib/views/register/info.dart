@@ -38,14 +38,10 @@ class _InfoState extends State<Info> {
     setState(() => imageFile = null);
   }
 
-  Future<void> uploadImage(File image) async {
-    try {
-      await _storage
-          .ref("profpics/" + DateTime.now().toString())
-          .putFile(image);
-    } catch (e) {
-      print(e.toString());
-    }
+  Future<String> uploadImage(File image) async {
+    String storageRef = "profpics/" + DateTime.now().toString() + ".jpg";
+    await _storage.ref(storageRef).putFile(image);
+    return storageRef;
   }
 
   @override
@@ -106,6 +102,11 @@ class _InfoState extends State<Info> {
                           if (user == null) {
                             print("Error");
                           } else {
+                            if (imageFile != null) {
+                              String storageRef = await uploadImage(imageFile);
+                              await DatabaseService(uid: user.uid)
+                                  .updatePhoto(storageRef);
+                            }
                             await DatabaseService(uid: user.uid).updateBio(bio);
                           }
                         }
@@ -127,7 +128,7 @@ class _InfoState extends State<Info> {
   Widget profileImage() {
     ImageProvider<Object>? bgImage;
     if (imageFile == null) {
-      bgImage = AssetImage("assets/profile.jpeg");
+      bgImage = AssetImage("assets/profile.jpg");
     } else {
       bgImage = FileImage(File(imageFile.path));
     }
@@ -147,9 +148,22 @@ class _InfoState extends State<Info> {
                     context: context, builder: (builder) => bottomSheet());
               },
               child: Icon(
-                Icons.camera_alt,
-                color: Colors.grey,
+                Icons.add_a_photo,
+                color: Colors.green,
                 size: 28.0,
+              )),
+        ),
+        Positioned(
+          top: 10.0,
+          right: 10.0,
+          child: InkWell(
+              onTap: () {
+                clearImage();
+              },
+              child: Icon(
+                Icons.do_not_disturb_on,
+                color: Colors.red,
+                size: 36.0,
               )),
         ),
       ],
