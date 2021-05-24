@@ -15,12 +15,19 @@ class Info extends StatefulWidget {
 }
 
 class _InfoState extends State<Info> {
+  // Form widget key.
   final _formKey = GlobalKey<FormState>();
+
+  // Image and storage variables.
   dynamic imageFile;
   final ImagePicker _picker = ImagePicker();
   final FirebaseStorage _storage = FirebaseStorage.instance;
+
+  // Mutable bio.
   String bio = '';
 
+  // Image Picker:
+  //  Sets dynamic Imagefile to an image file if possible.
   Future<void> pickImage(ImageSource source) async {
     final selected = await _picker.getImage(source: source);
 
@@ -34,10 +41,16 @@ class _InfoState extends State<Info> {
     });
   }
 
+  // Clears the image:
+  //  Reverts the dynamic ImageFile back to null.
   void clearImage() {
     setState(() => imageFile = null);
   }
 
+  // Uploads image:
+  //  Creates unique storage reference (currently using DateTime) and
+  //  stores the image file onto it. Returns the storage reference as
+  //  a string in order to update the user document later.
   Future<String> uploadImage(File image) async {
     String storageRef = "profpics/" + DateTime.now().toString() + ".jpg";
     await _storage.ref(storageRef).putFile(image);
@@ -60,7 +73,7 @@ class _InfoState extends State<Info> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 20.0),
+                  padding: const EdgeInsets.symmetric(vertical: 32.0),
                   child: Text(
                     "Upload your best picture...",
                     style: CustomTheme.lightTheme.textTheme.headline1,
@@ -71,7 +84,7 @@ class _InfoState extends State<Info> {
                   child: profileImage(),
                 ),
                 Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 16.0),
+                  padding: const EdgeInsets.symmetric(vertical: 32.0),
                   child: Text(
                     "and say something cool!",
                     style: CustomTheme.lightTheme.textTheme.headline1,
@@ -80,13 +93,13 @@ class _InfoState extends State<Info> {
                 TextFormField(
                   validator: (val) {
                     if (val == null || val.isEmpty) {
-                      return "Please enter a first name.";
+                      return "Please say something at least mildly entertaining.";
                     }
                   },
                   onChanged: (val) {
                     setState(() => bio = val);
                   },
-                  decoration: const InputDecoration(hintText: "First"),
+                  decoration: const InputDecoration(hintText: "Bio"),
                 ),
                 Padding(
                     padding: const EdgeInsets.symmetric(vertical: 16.0),
@@ -98,22 +111,28 @@ class _InfoState extends State<Info> {
                           shape: new RoundedRectangleBorder(
                               borderRadius: new BorderRadius.circular(30.0))),
                       onPressed: () async {
+                        // Form validation:
+                        //  Does nothing if validation is incorrect.
                         if (_formKey.currentState!.validate()) {
-                          if (user == null) {
-                            print("Error");
-                          } else {
+                          // Check for null user.
+                          if (user != null) {
+                            // Do not upload if dynamic imageFile is null.
                             if (imageFile != null) {
+                              // Upload image and store the reference.
                               String storageRef = await uploadImage(imageFile);
+                              // Update user document with the reference.
                               await DatabaseService(uid: user.uid)
                                   .updatePhoto(storageRef);
                             }
+                            // Update user document with bio.
                             await DatabaseService(uid: user.uid).updateBio(bio);
                           }
+                          // Navigate accordingly.
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => Swipe()),
+                          );
                         }
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => Swipe()),
-                        );
                       },
                       child: Text("I'm Ready!"),
                     )),
@@ -125,13 +144,18 @@ class _InfoState extends State<Info> {
     );
   }
 
+  // Widget for profile image chooser.
   Widget profileImage() {
+    // Instantiate the background image.
     ImageProvider<Object>? bgImage;
+
+    // Update the background image according to the dynamic imageFile.
     if (imageFile == null) {
       bgImage = AssetImage("assets/profile.jpg");
     } else {
       bgImage = FileImage(File(imageFile.path));
     }
+
     return Stack(
       children: [
         CircleAvatar(
@@ -140,8 +164,8 @@ class _InfoState extends State<Info> {
           backgroundColor: Colors.white,
         ),
         Positioned(
-          bottom: 10.0,
-          right: 10.0,
+          bottom: 5.0,
+          right: 5.0,
           child: InkWell(
               onTap: () {
                 showModalBottomSheet(
@@ -149,13 +173,13 @@ class _InfoState extends State<Info> {
               },
               child: Icon(
                 Icons.add_a_photo,
-                color: Colors.green,
+                color: Colors.black,
                 size: 28.0,
               )),
         ),
         Positioned(
-          top: 10.0,
-          right: 10.0,
+          top: 2.0,
+          right: 2.0,
           child: InkWell(
               onTap: () {
                 clearImage();
@@ -170,6 +194,7 @@ class _InfoState extends State<Info> {
     );
   }
 
+  // Widget for the image choosing bottom sheet (camera or gallery).
   Widget bottomSheet() {
     Size size = MediaQuery.of(context).size;
     return Container(

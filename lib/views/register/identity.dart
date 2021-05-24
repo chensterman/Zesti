@@ -101,8 +101,8 @@ class Identity extends StatelessWidget {
                 SizedBox(
                   width: double.infinity,
                   height: size.height * 0.3,
-                  child: SvgPicture.asset("assets/name.svg",
-                      semanticsLabel: "Name"),
+                  child: SvgPicture.asset("assets/phone.svg",
+                      semanticsLabel: "Identity"),
                 ),
               ],
             ),

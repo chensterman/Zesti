@@ -80,11 +80,11 @@ class _NameState extends State<Name> {
                             await DatabaseService(uid: user.uid)
                                 .updateName(first, last);
                           }
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => Birthday()),
+                          );
                         }
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => Birthday()),
-                        );
                       },
                       child: Text("Continue"),
                     )),
