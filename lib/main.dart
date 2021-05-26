@@ -3,7 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:zesti/services/auth.dart';
-import 'package:zesti/views/wrapper.dart';
+import 'package:zesti/wrappers/authwrapper.dart';
 
 // Main function to run:
 //  Firebase must be initialized.
@@ -24,7 +24,7 @@ class App extends StatelessWidget {
         initialData: null,
         value: AuthService().user,
         child: MaterialApp(
-          home: Wrapper(),
+          home: AuthWrapper(),
         ));
   }
 }

@@ -4,15 +4,15 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:zesti/services/database.dart';
 import 'package:zesti/views/auth/start.dart';
-import 'package:zesti/views/home/swipe.dart';
+import 'package:zesti/views/home/home.dart';
 import 'package:zesti/views/register/name.dart';
 
-// Wrapper class:
+// AuthWrapper class:
 //  Listens to authentication stream.
 //  Not logged in - Start class.
 //  Logged in - Swipe class.
 //  Registration counts as login.
-class Wrapper extends StatelessWidget {
+class AuthWrapper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final user = Provider.of<User?>(context);
@@ -36,7 +36,7 @@ class Wrapper extends StatelessWidget {
           else if (snapshot.connectionState == ConnectionState.done) {
             dynamic test = snapshot.data?.data();
             if (test['account-setup']) {
-              return Swipe();
+              return Home();
             } else {
               return Name();
             }

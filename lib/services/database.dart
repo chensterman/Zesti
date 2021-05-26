@@ -46,6 +46,12 @@ class DatabaseService {
         .catchError((error) => print("Failed to update user: $error"));
   }
 
+  // Get user first name.
+  Future<String> getFirstName() async {
+    DocumentSnapshot<Object?> doc = await userCollection.doc(uid).get();
+    return doc.get('first-name');
+  }
+
   // Update user birthday.
   Future<void> updateBirthday(Timestamp birthday) async {
     await userCollection

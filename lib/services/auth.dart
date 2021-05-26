@@ -13,7 +13,7 @@ class AuthService {
   }
 
   // Method for signing up.
-  Future<String> signUp(email, password) async {
+  Future<void> signUp(email, password) async {
     try {
       // Obtain User object (FireAuth function).
       UserCredential result = await _auth.createUserWithEmailAndPassword(
@@ -22,29 +22,30 @@ class AuthService {
 
       // Check for null-user error.
       if (user == null) {
-        return "Error";
+        print("Error");
+        return;
       }
 
       // Store in database.
       await DatabaseService(uid: user.uid).createUser();
-      return "Signed Up";
+      print("Signed Up");
     } catch (e) {
-      return e.toString();
+      print(e.toString());
     }
   }
 
   // Method for singing in.
-  Future<String> signIn(email, password) async {
+  Future<void> signIn(email, password) async {
     try {
       await _auth.signInWithEmailAndPassword(email: email, password: password);
-      return "Signed In";
+      print("Signed In");
     } catch (e) {
-      return e.toString();
+      print(e.toString());
     }
   }
 
   // Method for signing out.
   Future<void> signOut() async {
-    return await _auth.signOut();
+    await _auth.signOut();
   }
 }

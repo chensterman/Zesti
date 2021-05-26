@@ -13,6 +13,10 @@ class Identity extends StatelessWidget {
     final user = Provider.of<User?>(context);
 
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: CustomTheme.lightTheme.primaryColor,
+        elevation: 0.0,
+      ),
       body: Center(
         child: Container(
           width: size.width * CustomTheme.containerWidth,

@@ -7,7 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:zesti/services/database.dart';
 import 'package:zesti/theme/theme.dart';
-import 'package:zesti/views/home/swipe.dart';
+import 'package:zesti/wrappers/cardwrapper.dart';
 
 class Info extends StatefulWidget {
   @override
@@ -62,6 +62,10 @@ class _InfoState extends State<Info> {
     Size size = MediaQuery.of(context).size;
     final user = Provider.of<User?>(context);
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: CustomTheme.lightTheme.primaryColor,
+        elevation: 0.0,
+      ),
       body: Center(
         child: Container(
           width: size.width * CustomTheme.containerWidth,
@@ -130,7 +134,8 @@ class _InfoState extends State<Info> {
                           // Navigate accordingly.
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => Swipe()),
+                            MaterialPageRoute(
+                                builder: (context) => CardWrapper()),
                           );
                         }
                       },
