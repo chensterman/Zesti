@@ -1,49 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:zesti/services/database.dart';
+import 'package:zesti/test/user.dart';
+// import 'package:zesti/services/database.dart';
 import 'package:zesti/providers/cardposition.dart';
 
 class UserCard extends StatelessWidget {
-  final user;
+  final User user;
   final bool? isUserInFocus;
-  String firstname = '';
 
   UserCard({
-    @required this.user,
-    @required this.isUserInFocus,
+    required this.user,
+    required this.isUserInFocus,
     Key? key,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: DatabaseService(uid: user.uid).getFirstName(),
-      builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
-        // Snapshot error handling.
-        if (snapshot.hasError) {
-          return Text("Error");
-        }
-        // On success, check for account setup boolen. Conditionally return
-        // homepage or beginning of registration.
-        else if (snapshot.connectionState == ConnectionState.done) {
-          String? test = snapshot.data;
-          if (test == null) {
-            return Text("Error");
-          } else {
-            firstname = test;
-            return buildCard(context);
-          }
-        }
-        // Otherwise, return a loading screen
-        else {
-          return Text("loading");
-        }
-      },
-    );
-  }
-
-  Widget buildCard(BuildContext context) {
     final provider = Provider.of<CardPositionProvider>(context);
     final swipingDirection = provider.swipingDirection;
     final size = MediaQuery.of(context).size;
@@ -54,7 +26,7 @@ class UserCard extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
         image: DecorationImage(
-          image: AssetImage("assets/profile.jpg"),
+          image: AssetImage(user.imgUrl),
           fit: BoxFit.cover,
         ),
       ),
@@ -129,31 +101,33 @@ class UserCard extends StatelessWidget {
     }
   }
 
-  Widget buildUserInfo({@required final user}) => Padding(
-        padding: const EdgeInsets.all(8),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              firstname,
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-              ),
+  Widget buildUserInfo({@required final user}) {
+    return Padding(
+      padding: const EdgeInsets.all(8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            '${user.name}, ${user.age}',
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 18,
             ),
-            SizedBox(height: 8),
-            Text(
-              "Test",
-              style: TextStyle(color: Colors.white),
-            ),
-            SizedBox(height: 4),
-            Text(
-              "Test",
-              style: TextStyle(color: Colors.white),
-            )
-          ],
-        ),
-      );
+          ),
+          SizedBox(height: 8),
+          Text(
+            user.designation,
+            style: TextStyle(color: Colors.white),
+          ),
+          SizedBox(height: 4),
+          Text(
+            '${user.mutualFriends} Mutual Friends',
+            style: TextStyle(color: Colors.white),
+          )
+        ],
+      ),
+    );
+  }
 }

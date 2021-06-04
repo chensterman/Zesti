@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+// import 'package:firebase_auth/firebase_auth.dart';
 import 'package:zesti/services/auth.dart';
 import 'package:zesti/theme/theme.dart';
 import 'package:provider/provider.dart';
+import 'package:zesti/test/dummyusers.dart';
+import 'package:zesti/test/user.dart';
 import 'package:zesti/widgets/usercard.dart';
 import 'package:zesti/providers/cardposition.dart';
 
 class Home extends StatefulWidget {
+  @override
   _HomeState createState() => _HomeState();
 }
 
@@ -14,15 +17,15 @@ class _HomeState extends State<Home> {
   // Iniital widget to display
   int _selectedIndex = 1;
 
+  // Dummy users (for testing purposes - no database interaction)
+  final List<User> users = dummyUsers;
+
   @override
   Widget build(BuildContext context) {
-    // User provider
-    final user = Provider.of<User?>(context);
-
     // Widget list for bottom nav bar
     final List<Widget> _widgetSet = <Widget>[
       Text("Profile"),
-      buildSwipe(user),
+      buildSwipe(),
       Text("Matches")
     ];
 
@@ -64,30 +67,51 @@ class _HomeState extends State<Home> {
     });
   }
 
+  // Stack of user swipe cards
+  Widget buildSwipe() {
+    return Scaffold(
+      body: Padding(
+        padding: const EdgeInsets.all(8),
+        child: Column(
+          children: [
+            users.isEmpty
+                ? Text('No more users')
+                : Stack(children: users.map(buildCard).toList()),
+            Expanded(child: Container()),
+          ],
+        ),
+      ),
+    );
+  }
+
   // User card swipe widget
-  Widget buildSwipe(final user) {
-    // final userIndex = users.indexOf(user);
-    // final isUserInFocus = userIndex == users.length - 1;
-    // Card position provider value.
-    final provider = Provider.of<CardPositionProvider>(context, listen: false);
+  Widget buildCard(User user) {
+    final userIndex = users.indexOf(user);
+    final isUserInFocus = userIndex == users.length - 1;
 
     // Mouse point listener (drag/move events).
     return Listener(
       onPointerMove: (pointerEvent) {
+        final provider =
+            Provider.of<CardPositionProvider>(context, listen: false);
         provider.updatePosition(pointerEvent.localDelta.dx);
       },
       onPointerCancel: (_) {
+        final provider =
+            Provider.of<CardPositionProvider>(context, listen: false);
         provider.resetPosition();
       },
       onPointerUp: (_) {
+        final provider =
+            Provider.of<CardPositionProvider>(context, listen: false);
         provider.resetPosition();
       },
       // The Draggable user card.
       child: Draggable(
-        child: UserCard(user: user, isUserInFocus: true),
+        child: UserCard(user: user, isUserInFocus: isUserInFocus),
         feedback: Material(
           type: MaterialType.transparency,
-          child: UserCard(user: user, isUserInFocus: true),
+          child: UserCard(user: user, isUserInFocus: isUserInFocus),
         ),
         childWhenDragging: Container(),
         onDragEnd: (details) => onDragEnd(details, user),
@@ -95,11 +119,14 @@ class _HomeState extends State<Home> {
     );
   }
 
-  void onDragEnd(DraggableDetails details, final user) {
+  void onDragEnd(DraggableDetails details, User user) {
     final minimumDrag = 100;
     if (details.offset.dx > minimumDrag) {
-    } else if (details.offset.dx < -minimumDrag) {}
-
-    setState(() {});
+      user.isSwipedOff = true;
+      setState(() => users.remove(user));
+    } else if (details.offset.dx < -minimumDrag) {
+      user.isLiked = true;
+      setState(() => users.remove(user));
+    }
   }
 }

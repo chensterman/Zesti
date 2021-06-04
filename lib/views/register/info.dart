@@ -7,7 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:zesti/services/database.dart';
 import 'package:zesti/theme/theme.dart';
-import 'package:zesti/wrappers/cardwrapper.dart';
+import 'package:zesti/wrappers/swipewrapper.dart';
 
 class Info extends StatefulWidget {
   @override
@@ -135,7 +135,7 @@ class _InfoState extends State<Info> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => CardWrapper()),
+                                builder: (context) => SwipeWrapper()),
                           );
                         }
                       },
