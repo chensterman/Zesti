@@ -169,17 +169,17 @@ class _InfoState extends State<Info> {
           backgroundColor: Colors.white,
         ),
         Positioned(
-          bottom: 5.0,
-          right: 5.0,
+          bottom: 0.0,
+          right: 4.0,
           child: InkWell(
               onTap: () {
                 showModalBottomSheet(
                     context: context, builder: (builder) => bottomSheet());
               },
               child: Icon(
-                Icons.add_a_photo,
-                color: Colors.black,
-                size: 28.0,
+                Icons.add_circle,
+                color: Colors.green,
+                size: 36.0,
               )),
         ),
         Positioned(

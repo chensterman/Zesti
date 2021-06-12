@@ -5,6 +5,7 @@ import 'package:zesti/services/database.dart';
 import 'package:zesti/theme/theme.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:zesti/views/register/birthday.dart';
+import 'package:zesti/widgets/formwidgets.dart';
 
 class Name extends StatefulWidget {
   @override
@@ -54,9 +55,7 @@ class _NameState extends State<Name> {
                   },
                   decoration: const InputDecoration(hintText: "First"),
                 ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0),
-                ),
+                SizedBox(height: 20.0),
                 TextFormField(
                     validator: (val) {
                       if (val == null || val.isEmpty) {
@@ -67,31 +66,24 @@ class _NameState extends State<Name> {
                       setState(() => last = val);
                     },
                     decoration: const InputDecoration(hintText: "Last")),
-                Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 16.0),
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                          primary: CustomTheme.lightTheme.primaryColor,
-                          padding: const EdgeInsets.only(
-                              left: 30, top: 10, right: 30, bottom: 10),
-                          shape: new RoundedRectangleBorder(
-                              borderRadius: new BorderRadius.circular(30.0))),
-                      onPressed: () async {
-                        if (_formKey.currentState!.validate()) {
-                          if (user == null) {
-                            print("Error");
-                          } else {
-                            await DatabaseService(uid: user.uid)
-                                .updateName(first, last);
-                          }
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => Birthday()),
-                          );
+                SizedBox(height: 20.0),
+                RoundedButton(
+                    text: 'Continue',
+                    onPressed: () async {
+                      if (_formKey.currentState!.validate()) {
+                        if (user == null) {
+                          print("Error");
+                        } else {
+                          await DatabaseService(uid: user.uid)
+                              .updateName(first, last);
                         }
-                      },
-                      child: Text("Continue"),
-                    )),
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => Birthday()),
+                        );
+                      }
+                    }),
+                SizedBox(height: 20.0),
                 SizedBox(
                   width: double.infinity,
                   height: size.height * 0.3,

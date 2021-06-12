@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:zesti/theme/theme.dart';
 import 'package:zesti/views/auth/signin.dart';
 import 'package:zesti/services/auth.dart';
+import 'package:zesti/widgets/formwidgets.dart';
 
 class SignUp extends StatefulWidget {
   @override
@@ -16,6 +17,7 @@ class _SignUpState extends State<SignUp> {
   // State of text fields
   String email = '';
   String password = '';
+  String passwordConfirm = '';
 
   // Error message when email is not valid
   String error = '';
@@ -23,22 +25,6 @@ class _SignUpState extends State<SignUp> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: CustomTheme.lightTheme.primaryColor,
-        elevation: 0.0,
-        title: Text('Sign up for Zesti'),
-        actions: <Widget>[
-          TextButton.icon(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => SignIn()),
-                );
-              },
-              icon: Icon(Icons.person),
-              label: Text('Sign In')),
-        ],
-      ),
       body: Container(
         padding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 50.0),
         decoration: BoxDecoration(
@@ -60,44 +46,80 @@ class _SignUpState extends State<SignUp> {
         child: Form(
           key: _formKey,
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               SizedBox(height: 20.0),
-              TextFormField(validator: (val) {
-                if (val == null || val.isEmpty) {
-                  return 'Please enter an email';
-                } else if (!val.endsWith('.edu')) {
-                  return 'Email must be .edu';
-                }
-              }, onChanged: (val) {
-                setState(() => email = val);
-              }),
+              Text('Sign Up',
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 32.0,
+                      color: Colors.white)),
               SizedBox(height: 20.0),
-              TextFormField(
-                  validator: (val) => val!.length < 8
-                      ? 'Password must be over 8 characters long'
-                      : null,
-                  obscureText: true,
-                  onChanged: (val) {
-                    setState(() => password = val);
+              TextFieldContainer(
+                validator: (val) {
+                  if (val == null || val.isEmpty) {
+                    return 'Please enter an email';
+                  } else if (!val.endsWith('.edu')) {
+                    return 'Email must be .edu';
+                  }
+                },
+                onChanged: (val) {
+                  setState(() => email = val);
+                },
+                hintText: 'Email',
+                icon: Icon(Icons.person),
+              ),
+              SizedBox(height: 20.0),
+              TextFieldContainer(
+                validator: (val) => val!.length < 8
+                    ? 'Password must be over 8 characters long'
+                    : null,
+                obscureText: true,
+                onChanged: (val) {
+                  setState(() => password = val);
+                },
+                hintText: 'Password',
+                icon: Icon(Icons.lock),
+              ),
+              SizedBox(height: 20.0),
+              TextFieldContainer(
+                validator: (val) =>
+                    val != password ? 'Password do not match' : null,
+                obscureText: true,
+                onChanged: (val) {
+                  setState(() => passwordConfirm = val);
+                },
+                hintText: 'Password',
+                icon: Icon(Icons.lock),
+              ),
+              SizedBox(height: 20.0),
+              RoundedButton(
+                  text: 'Sign Up',
+                  onPressed: () {
+                    if (_formKey.currentState!.validate()) {
+                      AuthService().signUp(email, password);
+                    }
                   }),
-              SizedBox(height: 20.0),
-              Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0),
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                        primary: CustomTheme.lightTheme.primaryColor,
-                        padding: const EdgeInsets.only(
-                            left: 30, top: 10, right: 30, bottom: 10),
-                        shape: new RoundedRectangleBorder(
-                            borderRadius: new BorderRadius.circular(30.0))),
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        AuthService().signUp(email, password);
-                      }
-                    },
-                    child: Text("Sign up"),
-                  )),
               SizedBox(height: 12.0),
+              Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Text(
+                      'Already Zesti enough ? ',
+                      style: TextStyle(fontSize: 16.0),
+                    ),
+                    GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => SignIn()),
+                          );
+                        },
+                        child: Text('Login.',
+                            style: TextStyle(
+                              color: Colors.orange[900],
+                            ))),
+                  ]),
               Text(
                 error,
                 style: TextStyle(color: Colors.red, fontSize: 14.0),

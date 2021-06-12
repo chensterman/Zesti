@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:zesti/theme/theme.dart';
 import 'package:zesti/views/auth/signup.dart';
+import 'package:zesti/widgets/formwidgets.dart';
 
 class Start extends StatelessWidget {
   // This widget is the root of your application.
@@ -38,21 +39,15 @@ class Start extends StatelessWidget {
                 child: SvgPicture.asset("assets/zesti.svg",
                     semanticsLabel: "Zesti"),
               ),
-              Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0),
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                        primary: CustomTheme.lightTheme.primaryColor,
-                        shape: new RoundedRectangleBorder(
-                            borderRadius: new BorderRadius.circular(30.0))),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => SignUp()),
-                      );
-                    },
-                    child: Text("Get started"),
-                  ))
+              RoundedButton(
+                text: 'Get Started',
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => SignUp()),
+                  );
+                },
+              )
             ]),
       ),
     );

@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:zesti/services/database.dart';
 import 'package:zesti/theme/theme.dart';
 import 'package:zesti/views/register/info.dart';
+import 'package:zesti/widgets/formwidgets.dart';
 
 class Interest extends StatelessWidget {
   @override
@@ -33,75 +34,54 @@ class Interest extends StatelessWidget {
                     style: CustomTheme.lightTheme.textTheme.headline1,
                   ),
                 ),
-                Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                          primary: CustomTheme.lightTheme.primaryColor,
-                          padding: const EdgeInsets.only(
-                              left: 30, top: 10, right: 30, bottom: 10),
-                          shape: new RoundedRectangleBorder(
-                              borderRadius: new BorderRadius.circular(30.0))),
-                      onPressed: () async {
-                        if (user == null) {
-                          print("Error");
-                        } else {
-                          await DatabaseService(uid: user.uid)
-                              .updateDatingInterest("men");
-                        }
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => Info()),
-                        );
-                      },
-                      child: Text("Men"),
-                    )),
-                Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                          primary: CustomTheme.lightTheme.primaryColor,
-                          padding: const EdgeInsets.only(
-                              left: 30, top: 10, right: 30, bottom: 10),
-                          shape: new RoundedRectangleBorder(
-                              borderRadius: new BorderRadius.circular(30.0))),
-                      onPressed: () async {
-                        if (user == null) {
-                          print("Error");
-                        } else {
-                          await DatabaseService(uid: user.uid)
-                              .updateDatingInterest("women");
-                        }
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => Info()),
-                        );
-                      },
-                      child: Text("Women"),
-                    )),
-                Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                          primary: CustomTheme.lightTheme.primaryColor,
-                          padding: const EdgeInsets.only(
-                              left: 30, top: 10, right: 30, bottom: 10),
-                          shape: new RoundedRectangleBorder(
-                              borderRadius: new BorderRadius.circular(30.0))),
-                      onPressed: () async {
-                        if (user == null) {
-                          print("Error");
-                        } else {
-                          await DatabaseService(uid: user.uid)
-                              .updateDatingInterest("everyone");
-                        }
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => Info()),
-                        );
-                      },
-                      child: Text("Everyone"),
-                    )),
+                SizedBox(height: 20.0),
+                RoundedButton(
+                  text: 'Men',
+                  onPressed: () async {
+                    if (user == null) {
+                      print("Error");
+                    } else {
+                      await DatabaseService(uid: user.uid)
+                          .updateDatingInterest("men");
+                    }
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => Info()),
+                    );
+                  },
+                ),
+                SizedBox(height: 20.0),
+                RoundedButton(
+                  text: 'Women',
+                  onPressed: () async {
+                    if (user == null) {
+                      print("Error");
+                    } else {
+                      await DatabaseService(uid: user.uid)
+                          .updateDatingInterest("women");
+                    }
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => Info()),
+                    );
+                  },
+                ),
+                SizedBox(height: 20.0),
+                RoundedButton(
+                  text: 'Everyone',
+                  onPressed: () async {
+                    if (user == null) {
+                      print("Error");
+                    } else {
+                      await DatabaseService(uid: user.uid)
+                          .updateDatingInterest("everyone");
+                    }
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => Info()),
+                    );
+                  },
+                ),
                 SizedBox(
                   width: double.infinity,
                   height: size.height * 0.3,

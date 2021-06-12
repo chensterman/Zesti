@@ -1,5 +1,7 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 // import 'package:firebase_auth/firebase_auth.dart';
+import 'package:http/http.dart' as http;
 import 'package:zesti/services/auth.dart';
 import 'package:zesti/theme/theme.dart';
 import 'package:provider/provider.dart';
@@ -9,6 +11,8 @@ import 'package:zesti/widgets/usercard.dart';
 import 'package:zesti/providers/cardposition.dart';
 
 class Home extends StatefulWidget {
+  Home({Key? key}) : super(key: key);
+
   @override
   _HomeState createState() => _HomeState();
 }
@@ -19,6 +23,15 @@ class _HomeState extends State<Home> {
 
   // Dummy users (for testing purposes - no database interaction)
   final List<User> users = dummyUsers;
+
+  @override
+  initState() {
+    super.initState();
+    if (users.isEmpty) {
+      print(users.toString());
+    }
+    print('Test');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -119,14 +132,33 @@ class _HomeState extends State<Home> {
     );
   }
 
+  Future<User> repopulate() async {
+    final response = await http.get(Uri.parse(''));
+    final decoded = json.decode(response.body) as Map<String, dynamic>;
+    User test = User(
+        name: decoded['first-name'],
+        designation: 'Test',
+        mutualFriends: 69,
+        bio: decoded['bio'],
+        age: 24,
+        imgUrl: 'assets/profile.jpg',
+        location: 'Test');
+    return test;
+  }
+
   void onDragEnd(DraggableDetails details, User user) {
     final minimumDrag = 100;
     if (details.offset.dx > minimumDrag) {
       user.isSwipedOff = true;
-      setState(() => users.remove(user));
     } else if (details.offset.dx < -minimumDrag) {
       user.isLiked = true;
-      setState(() => users.remove(user));
+    }
+    setState(() => users.remove(user));
+    if (users.isEmpty) {
+      setState(() async {
+        User test = await repopulate();
+        users.add(test);
+      });
     }
   }
 }
