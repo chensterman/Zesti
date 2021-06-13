@@ -43,7 +43,7 @@ class AuthWrapper extends StatelessWidget {
           }
           // Otherwise, return a loading screen
           else {
-            return Text("loading");
+            return Center(child: CircularProgressIndicator());
           }
         },
       );

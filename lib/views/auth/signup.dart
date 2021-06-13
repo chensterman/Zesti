@@ -89,7 +89,7 @@ class _SignUpState extends State<SignUp> {
                 onChanged: (val) {
                   setState(() => passwordConfirm = val);
                 },
-                hintText: 'Password',
+                hintText: 'Confirm Password',
                 icon: Icon(Icons.lock),
               ),
               SizedBox(height: 20.0),

@@ -5,7 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:zesti/services/auth.dart';
 import 'package:zesti/theme/theme.dart';
 import 'package:provider/provider.dart';
-import 'package:zesti/test/dummyusers.dart';
+// import 'package:zesti/test/dummyusers.dart';
 import 'package:zesti/test/user.dart';
 import 'package:zesti/widgets/usercard.dart';
 import 'package:zesti/providers/cardposition.dart';
@@ -18,19 +18,44 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  // Iniital widget to display
+  // Inital widget to display
   int _selectedIndex = 1;
 
-  // Dummy users (for testing purposes - no database interaction)
-  final List<User> users = dummyUsers;
+  // List of users to display in swipe cards
+  List<User> _userList = []; // Actual loaded data (from _future)
+  Future<List<User>>? _future; // Future to store http request data
 
+  // When the state is re-initialized (should only happen when _userList is empty),
+  // request new data into _future, which will in turn repopulate _userList.
   @override
-  initState() {
+  void initState() {
     super.initState();
-    if (users.isEmpty) {
-      print(users.toString());
+    _future = _getUserData();
+  }
+
+  // Receives user data from http request
+  Future<List<User>> _getUserData() async {
+    try {
+      // http request
+      final response =
+          await http.get(Uri.parse('http://192.168.100.135:8080/list'));
+      // Decode JSON to hash map
+      final decoded = json.decode(response.body) as Map<String, dynamic>;
+      // Load hash map into User class
+      User testUser = User(
+          name: decoded['first-name'],
+          designation: 'Test',
+          mutualFriends: 69,
+          bio: decoded['bio'],
+          age: 24,
+          imgUrl: 'assets/profile.jpg',
+          location: 'Test');
+      // Add user to _userList
+      _userList.add(testUser);
+    } on Error catch (e) {
+      print('Error: $e');
     }
-    print('Test');
+    return _userList;
   }
 
   @override
@@ -42,6 +67,7 @@ class _HomeState extends State<Home> {
       Text("Matches")
     ];
 
+    // Main page widget (contains nav bar pages as well)
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -85,13 +111,22 @@ class _HomeState extends State<Home> {
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.all(8),
-        child: Column(
-          children: [
-            users.isEmpty
-                ? Text('No more users')
-                : Stack(children: users.map(buildCard).toList()),
-            Expanded(child: Container()),
-          ],
+        // FutureBuilder for http request payload
+        child: FutureBuilder(
+          future: _future,
+          builder: (context, snapshot) {
+            if (snapshot.hasError) {
+              return Text("Error");
+            }
+            // On success, build swipe cards out of _userList
+            else if (snapshot.connectionState == ConnectionState.done) {
+              return Stack(children: _userList.map(buildCard).toList());
+            }
+            // Otherwise, return a loading screen
+            else {
+              return Center(child: CircularProgressIndicator());
+            }
+          },
         ),
       ),
     );
@@ -99,8 +134,8 @@ class _HomeState extends State<Home> {
 
   // User card swipe widget
   Widget buildCard(User user) {
-    final userIndex = users.indexOf(user);
-    final isUserInFocus = userIndex == users.length - 1;
+    final userIndex = _userList.indexOf(user);
+    final isUserInFocus = userIndex == _userList.length - 1;
 
     // Mouse point listener (drag/move events).
     return Listener(
@@ -119,6 +154,7 @@ class _HomeState extends State<Home> {
             Provider.of<CardPositionProvider>(context, listen: false);
         provider.resetPosition();
       },
+
       // The Draggable user card.
       child: Draggable(
         child: UserCard(user: user, isUserInFocus: isUserInFocus),
@@ -132,32 +168,21 @@ class _HomeState extends State<Home> {
     );
   }
 
-  Future<User> repopulate() async {
-    final response = await http.get(Uri.parse(''));
-    final decoded = json.decode(response.body) as Map<String, dynamic>;
-    User test = User(
-        name: decoded['first-name'],
-        designation: 'Test',
-        mutualFriends: 69,
-        bio: decoded['bio'],
-        age: 24,
-        imgUrl: 'assets/profile.jpg',
-        location: 'Test');
-    return test;
-  }
-
+  // If card is dragged past a threshold, perform operations
   void onDragEnd(DraggableDetails details, User user) {
+    // Minimum offset for swipe
     final minimumDrag = 100;
+    // Swipe logic
     if (details.offset.dx > minimumDrag) {
       user.isSwipedOff = true;
     } else if (details.offset.dx < -minimumDrag) {
       user.isLiked = true;
     }
-    setState(() => users.remove(user));
-    if (users.isEmpty) {
-      setState(() async {
-        User test = await repopulate();
-        users.add(test);
+    _userList.remove(user);
+    // Call to repopulate if _userList is empty
+    if (_userList.isEmpty) {
+      setState(() {
+        _future = _getUserData();
       });
     }
   }

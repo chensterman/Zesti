@@ -21,7 +21,9 @@ def read():
     """
     try:
         # Check if ID was passed to URL query
+        print('run')
         user = users_coll.document('ikWfhZK3heO4vM6OGkdRzcoaqWA2').get()
+        print(user.to_dict())
         return jsonify(user.to_dict()), 200
     except Exception as e:
         return f"An Error Occured: {e}"
