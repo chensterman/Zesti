@@ -30,7 +30,7 @@ class Interest extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8.0),
                   child: Text(
-                    "Who do you want to see?",
+                    "Who would you see?",
                     style: CustomTheme.lightTheme.textTheme.headline1,
                   ),
                 ),

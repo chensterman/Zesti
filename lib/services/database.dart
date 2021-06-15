@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:zesti/models/zestiuser.dart';
 
 // DatabaseService class:
 //  Contains all methods and data pertaining to the user database.
@@ -20,6 +21,7 @@ class DatabaseService {
           'first-name': null,
           'last-name': null,
           'birthday': null,
+          'house': null,
           'dating-identity': null,
           'dating-interest': null,
           'photo-ref': null,
@@ -27,6 +29,30 @@ class DatabaseService {
         })
         .then((value) => print("User added"))
         .catchError((error) => print("Failed"));
+  }
+
+  // Stream to show list of matched users
+  Stream<List<ZestiUser>> get matches {
+    return userCollection
+        .doc(uid)
+        .collection('matches')
+        .snapshots()
+        .map(_zestiUserFromSnapshot);
+  }
+
+  // Helper function for matched users stream - convert QuerySnapshot to
+  // list of ZestiUser models. SOMETHING HERE IS WRONG.
+  List<ZestiUser> _zestiUserFromSnapshot(QuerySnapshot snapshot) {
+    List<dynamic> refList = snapshot.docs.map((doc) {
+      return doc.get('user-ref');
+    }).toList();
+
+    List<ZestiUser> zestiUserList = [];
+    for (dynamic ref in refList) {
+      dynamic data = ref.get().data();
+      zestiUserList.add(data);
+    }
+    return zestiUserList;
   }
 
   // Update the account setup:
@@ -58,6 +84,15 @@ class DatabaseService {
         .doc(uid)
         .update({'birthday': birthday})
         .then((value) => print("Birthday Updated"))
+        .catchError((error) => print("Failed to update user: $error"));
+  }
+
+  // Update user house.
+  Future<void> updateHouse(String house) async {
+    await userCollection
+        .doc(uid)
+        .update({'house': house})
+        .then((value) => print("House Updated"))
         .catchError((error) => print("Failed to update user: $error"));
   }
 

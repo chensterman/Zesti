@@ -6,9 +6,11 @@ import 'package:zesti/services/auth.dart';
 import 'package:zesti/theme/theme.dart';
 import 'package:provider/provider.dart';
 // import 'package:zesti/test/dummyusers.dart';
-import 'package:zesti/test/user.dart';
+import 'package:zesti/models/zestiuser.dart';
 import 'package:zesti/widgets/usercard.dart';
 import 'package:zesti/providers/cardposition.dart';
+import 'package:zesti/views/home/editprofile.dart';
+import 'package:zesti/views/home/matches.dart';
 
 class Home extends StatefulWidget {
   Home({Key? key}) : super(key: key);
@@ -22,8 +24,8 @@ class _HomeState extends State<Home> {
   int _selectedIndex = 1;
 
   // List of users to display in swipe cards
-  List<User> _userList = []; // Actual loaded data (from _future)
-  Future<List<User>>? _future; // Future to store http request data
+  List<ZestiUser> _userList = []; // Actual loaded data (from _future)
+  Future<List<ZestiUser>>? _future; // Future to store http request data
 
   // When the state is re-initialized (should only happen when _userList is empty),
   // request new data into _future, which will in turn repopulate _userList.
@@ -34,15 +36,14 @@ class _HomeState extends State<Home> {
   }
 
   // Receives user data from http request
-  Future<List<User>> _getUserData() async {
+  Future<List<ZestiUser>> _getUserData() async {
     try {
       // http request
-      final response =
-          await http.get(Uri.parse('http://192.168.100.135:8080/list'));
+      final response = await http.get(Uri.parse(''));
       // Decode JSON to hash map
       final decoded = json.decode(response.body) as Map<String, dynamic>;
       // Load hash map into User class
-      User testUser = User(
+      ZestiUser testUser = ZestiUser(
           name: decoded['first-name'],
           designation: 'Test',
           mutualFriends: 69,
@@ -62,9 +63,9 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     // Widget list for bottom nav bar
     final List<Widget> _widgetSet = <Widget>[
-      Text("Profile"),
+      EditProfile(),
       buildSwipe(),
-      Text("Matches")
+      Matches(),
     ];
 
     // Main page widget (contains nav bar pages as well)
@@ -133,7 +134,7 @@ class _HomeState extends State<Home> {
   }
 
   // User card swipe widget
-  Widget buildCard(User user) {
+  Widget buildCard(ZestiUser user) {
     final userIndex = _userList.indexOf(user);
     final isUserInFocus = userIndex == _userList.length - 1;
 
@@ -169,7 +170,7 @@ class _HomeState extends State<Home> {
   }
 
   // If card is dragged past a threshold, perform operations
-  void onDragEnd(DraggableDetails details, User user) {
+  void onDragEnd(DraggableDetails details, ZestiUser user) {
     // Minimum offset for swipe
     final minimumDrag = 100;
     // Swipe logic

@@ -1,8 +1,8 @@
-import 'package:zesti/test/user.dart';
+import 'package:zesti/models/zestiuser.dart';
 
 // Dummy user data for the user cards
-final List<User> dummyUsers = [
-  User(
+final List<ZestiUser> dummyUsers = [
+  ZestiUser(
       name: 'Lauren Turner',
       designation: 'Content Writer',
       mutualFriends: 4,
@@ -11,7 +11,7 @@ final List<User> dummyUsers = [
       age: 24,
       imgUrl: 'assets/profile.jpg',
       location: 'North London'),
-  User(
+  ZestiUser(
     name: 'Lori Perez',
     designation: 'UI Designer ',
     mutualFriends: 8,
@@ -21,7 +21,7 @@ final List<User> dummyUsers = [
     age: 26,
     imgUrl: 'assets/profile.jpg',
   ),
-  User(
+  ZestiUser(
     name: 'Christine Wallace',
     designation: 'News Reporter',
     mutualFriends: 2,
@@ -31,7 +31,7 @@ final List<User> dummyUsers = [
     age: 23,
     imgUrl: 'assets/profile.jpg',
   ),
-  User(
+  ZestiUser(
     name: 'Rachel Green',
     designation: 'Architect',
     mutualFriends: 8,
@@ -41,7 +41,7 @@ final List<User> dummyUsers = [
     age: 22,
     imgUrl: 'assets/profile.jpg',
   ),
-  User(
+  ZestiUser(
     name: 'Emma',
     designation: 'Software Developer',
     mutualFriends: 3,
@@ -51,7 +51,7 @@ final List<User> dummyUsers = [
     age: 25,
     imgUrl: 'assets/profile.jpg',
   ),
-  User(
+  ZestiUser(
     name: 'Kim Wexler',
     designation: 'Accountant',
     mutualFriends: 5,

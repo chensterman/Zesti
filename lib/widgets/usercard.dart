@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:zesti/test/user.dart';
+import 'package:zesti/models/zestiuser.dart';
 // import 'package:zesti/services/database.dart';
 import 'package:zesti/providers/cardposition.dart';
 
 class UserCard extends StatelessWidget {
-  final User user;
+  final ZestiUser user;
   final bool? isUserInFocus;
 
   UserCard({

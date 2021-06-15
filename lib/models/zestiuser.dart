@@ -1,5 +1,5 @@
 // Dummy user class for the user cards
-class User {
+class ZestiUser {
   final String name;
   final String designation;
   final int mutualFriends;
@@ -10,7 +10,7 @@ class User {
   bool isLiked;
   bool isSwipedOff;
 
-  User({
+  ZestiUser({
     required this.designation,
     required this.mutualFriends,
     required this.name,

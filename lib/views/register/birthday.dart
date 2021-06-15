@@ -6,6 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 import 'package:zesti/theme/theme.dart';
 import 'package:zesti/services/database.dart';
+import 'package:zesti/views/register/house.dart';
 import 'package:zesti/views/register/identity.dart';
 
 class NumberLine extends StatelessWidget {
@@ -131,7 +132,7 @@ class _BirthdayState extends State<Birthday> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) => Identity()),
+                                    builder: (context) => House()),
                               );
                             },
                             child: Text("Confirm"),
