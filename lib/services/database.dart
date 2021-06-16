@@ -32,7 +32,7 @@ class DatabaseService {
   }
 
   // Stream to show list of matched users
-  Stream<List<ZestiUser>> get matches {
+  Stream<Future<List<ZestiUser>>> get matches {
     return userCollection
         .doc(uid)
         .collection('matches')
@@ -42,17 +42,23 @@ class DatabaseService {
 
   // Helper function for matched users stream - convert QuerySnapshot to
   // list of ZestiUser models. SOMETHING HERE IS WRONG.
-  List<ZestiUser> _zestiUserFromSnapshot(QuerySnapshot snapshot) {
+  Future<List<ZestiUser>> _zestiUserFromSnapshot(QuerySnapshot snapshot) async {
     List<dynamic> refList = snapshot.docs.map((doc) {
       return doc.get('user-ref');
     }).toList();
-
-    List<ZestiUser> zestiUserList = [];
-    for (dynamic ref in refList) {
-      dynamic data = ref.get().data();
-      zestiUserList.add(data);
+    List<ZestiUser> matchedList = [];
+    for (DocumentReference ref in refList) {
+      DocumentSnapshot data = await ref.get();
+      matchedList.add(ZestiUser(
+          designation: 'Test',
+          mutualFriends: 69,
+          name: data.get('first-name'),
+          age: 69,
+          imgUrl: 'assets/profile.jpg',
+          location: 'Test',
+          bio: data.get('bio')));
     }
-    return zestiUserList;
+    return matchedList;
   }
 
   // Update the account setup:

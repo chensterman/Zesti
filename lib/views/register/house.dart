@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import 'package:zesti/services/database.dart';
 import 'package:zesti/theme/theme.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:zesti/views/register/birthday.dart';
 import 'package:zesti/views/register/identity.dart';
 import 'package:zesti/widgets/formwidgets.dart';
 
