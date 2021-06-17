@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 // import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
 import 'package:zesti/services/auth.dart';
@@ -61,9 +62,13 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
+    final user = Provider.of<User?>(context);
+    if (user == null) {
+      return Text('User Error');
+    }
     // Widget list for bottom nav bar
     final List<Widget> _widgetSet = <Widget>[
-      EditProfile(),
+      EditProfile(uid: user.uid),
       buildSwipe(),
       Matches(),
     ];
@@ -91,7 +96,8 @@ class _HomeState extends State<Home> {
         items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
           BottomNavigationBarItem(icon: Icon(Icons.home), label: "Zesti"),
-          BottomNavigationBarItem(icon: Icon(Icons.chat), label: "Matches"),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.chat_bubble), label: "Matches"),
         ],
         currentIndex: _selectedIndex,
         selectedItemColor: CustomTheme.lightTheme.primaryColor,

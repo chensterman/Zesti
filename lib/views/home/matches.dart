@@ -1,5 +1,5 @@
 import 'dart:async';
-
+import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -8,7 +8,8 @@ import 'package:zesti/models/zestiuser.dart';
 import 'package:zesti/services/database.dart';
 import 'package:zesti/services/auth.dart';
 import 'package:zesti/theme/theme.dart';
-import 'package:provider/provider.dart';
+import 'package:zesti/views/home/matchsheet.dart';
+
 // import 'package:zesti/models/user.dart';
 
 class Matches extends StatelessWidget {
@@ -45,17 +46,27 @@ class _MatchListState extends State<MatchList> {
       builder: (context, AsyncSnapshot<List<dynamic>> snapshot) {
         if (snapshot.hasError) {
           return Text("Error");
-        }
-        // On success, build swipe cards out of _userList
-        else if (snapshot.connectionState == ConnectionState.done) {
+        } else if (snapshot.connectionState == ConnectionState.done) {
           List<Widget> widgetList = [];
           List<dynamic>? data = snapshot.data;
           if (data != null) {
             for (ZestiUser matchedUser in data) {
-              widgetList.add(Text(matchedUser.name));
+              widgetList.add(MatchSheet(
+                name: matchedUser.name,
+                imgUrl: matchedUser.imgUrl,
+              ));
             }
           }
-          return ListView(children: widgetList);
+          return Column(
+            children: [
+              Padding(
+                padding: EdgeInsets.only(top: 16.0),
+                child: Text('MATCHES',
+                    style: TextStyle(color: Colors.orange[900])),
+              ),
+              Expanded(child: ListView(children: widgetList)),
+            ],
+          );
         }
         // Otherwise, return a loading screen
         else {

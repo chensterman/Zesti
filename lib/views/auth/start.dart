@@ -29,26 +29,28 @@ class Start extends StatelessWidget {
             ],
           ),
         ),
-        child: Column(
-            //crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              SizedBox(
-                width: double.infinity,
-                height: size.height * 0.4,
-                child: SvgPicture.asset("assets/zesti.svg",
-                    semanticsLabel: "Zesti"),
-              ),
-              RoundedButton(
-                text: 'Get Started',
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => SignUp()),
-                  );
-                },
-              )
-            ]),
+        child: Center(
+          child: Column(
+              //crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SizedBox(
+                  width: double.infinity,
+                  height: size.height * 0.4,
+                  child: SvgPicture.asset("assets/zesti.svg",
+                      semanticsLabel: "Zesti"),
+                ),
+                RoundedButton(
+                  text: 'Get Started',
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => SignUp()),
+                    );
+                  },
+                )
+              ]),
+        ),
       ),
     );
   }

@@ -9,6 +9,11 @@ import 'package:zesti/services/database.dart';
 import 'package:zesti/theme/theme.dart';
 
 class EditProfile extends StatefulWidget {
+  final String? uid;
+  EditProfile({
+    Key? key,
+    @required this.uid,
+  }) : super(key: key);
   @override
   _EditProfileState createState() => _EditProfileState();
 }
@@ -17,13 +22,25 @@ class _EditProfileState extends State<EditProfile> {
   // Form widget key.
   final _formKey = GlobalKey<FormState>();
 
-  // Image and storage variables.
-  dynamic imageFile;
   final ImagePicker _picker = ImagePicker();
   final FirebaseStorage _storage = FirebaseStorage.instance;
 
-  // Mutable bio.
+  // User data to retrieve and display.
   String bio = '';
+  dynamic imageFile;
+
+  // Uploads image:
+  //  Creates unique storage reference (currently using DateTime) and
+  //  stores the image file onto it. Returns the storage reference as
+  //  a string in order to update the user document later.
+  Future<void> _getInfo(String uid) async {
+    Object? data = await DatabaseService(uid: uid).getInfo();
+    print(data);
+    setState(() {
+      bio = 'Test';
+      imageFile = AssetImage('assets/profile.jpg');
+    });
+  }
 
   // Image Picker:
   //  Sets dynamic Imagefile to an image file if possible.
@@ -44,16 +61,6 @@ class _EditProfileState extends State<EditProfile> {
   //  Reverts the dynamic ImageFile back to null.
   void clearImage() {
     setState(() => imageFile = null);
-  }
-
-  // Uploads image:
-  //  Creates unique storage reference (currently using DateTime) and
-  //  stores the image file onto it. Returns the storage reference as
-  //  a string in order to update the user document later.
-  Future<String> uploadImage(File image) async {
-    String storageRef = "profpics/" + DateTime.now().toString() + ".jpg";
-    await _storage.ref(storageRef).putFile(image);
-    return storageRef;
   }
 
   @override
@@ -88,7 +95,7 @@ class _EditProfileState extends State<EditProfile> {
                         setState(() => bio = val);
                       },
                       decoration: const InputDecoration(labelText: 'Bio'),
-                      initialValue: 'Testing',
+                      initialValue: bio,
                       maxLines: 3,
                     ),
                   ),
@@ -104,7 +111,7 @@ class _EditProfileState extends State<EditProfile> {
                         setState(() => bio = val);
                       },
                       decoration: const InputDecoration(labelText: 'Bio'),
-                      initialValue: 'Testing',
+                      initialValue: bio,
                       maxLines: 3,
                     ),
                   ),
@@ -138,7 +145,7 @@ class _EditProfileState extends State<EditProfile> {
     if (imageFile == null) {
       bgImage = AssetImage("assets/profile.jpg");
     } else {
-      bgImage = FileImage(File(imageFile.path));
+      bgImage = imageFile;
     }
 
     return Stack(

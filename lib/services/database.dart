@@ -54,7 +54,7 @@ class DatabaseService {
           mutualFriends: 69,
           name: data.get('first-name'),
           age: 69,
-          imgUrl: 'assets/profile.jpg',
+          imgUrl: data.get('photo-ref'),
           location: 'Test',
           bio: data.get('bio')));
     }
@@ -78,10 +78,10 @@ class DatabaseService {
         .catchError((error) => print("Failed to update user: $error"));
   }
 
-  // Get user first name.
-  Future<String> getFirstName() async {
-    DocumentSnapshot<Object?> doc = await userCollection.doc(uid).get();
-    return doc.get('first-name');
+  // Get user info from document fields.
+  Future<Object?> getInfo() async {
+    DocumentSnapshot doc = await userCollection.doc(uid).get();
+    return doc.data();
   }
 
   // Update user birthday.
