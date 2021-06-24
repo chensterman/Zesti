@@ -26,37 +26,6 @@ class _InfoState extends State<Info> {
   // Mutable bio.
   String bio = '';
 
-  // Image Picker:
-  //  Sets dynamic Imagefile to an image file if possible.
-  Future<void> pickImage(ImageSource source) async {
-    final selected = await _picker.getImage(source: source);
-
-    setState(() {
-      if (selected == null) {
-        print("Error");
-      } else {
-        File file = File(selected.path);
-        imageFile = file;
-      }
-    });
-  }
-
-  // Clears the image:
-  //  Reverts the dynamic ImageFile back to null.
-  void clearImage() {
-    setState(() => imageFile = null);
-  }
-
-  // Uploads image:
-  //  Creates unique storage reference (currently using DateTime) and
-  //  stores the image file onto it. Returns the storage reference as
-  //  a string in order to update the user document later.
-  Future<String> uploadImage(File image) async {
-    String storageRef = "profpics/" + DateTime.now().toString() + ".jpg";
-    await _storage.ref(storageRef).putFile(image);
-    return storageRef;
-  }
-
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
@@ -123,7 +92,8 @@ class _InfoState extends State<Info> {
                             // Do not upload if dynamic imageFile is null.
                             if (imageFile != null) {
                               // Upload image and store the reference.
-                              String storageRef = await uploadImage(imageFile);
+                              String storageRef =
+                                  await uploadImage(imageFile, user.uid);
                               // Update user document with the reference.
                               await DatabaseService(uid: user.uid)
                                   .updatePhoto(storageRef);
@@ -147,6 +117,37 @@ class _InfoState extends State<Info> {
         ),
       ),
     );
+  }
+
+  // Uploads image:
+  //  Creates unique storage reference (currently using DateTime) and
+  //  stores the image file onto it. Returns the storage reference as
+  //  a string in order to update the user document later.
+  Future<String> uploadImage(File image, String uid) async {
+    String storageRefPut = "profpics/" + DateTime.now().toString() + ".jpg";
+    await _storage.ref(storageRefPut).putFile(image);
+    return storageRefPut;
+  }
+
+  // Image Picker:
+  //  Sets dynamic Imagefile to an image file if possible.
+  Future<void> pickImage(ImageSource source) async {
+    final selected = await _picker.getImage(source: source);
+
+    setState(() {
+      if (selected == null) {
+        print("Error");
+      } else {
+        File file = File(selected.path);
+        imageFile = file;
+      }
+    });
+  }
+
+  // Clears the image:
+  //  Reverts the dynamic ImageFile back to null.
+  void clearImage() {
+    setState(() => imageFile = null);
   }
 
   // Widget for profile image chooser.

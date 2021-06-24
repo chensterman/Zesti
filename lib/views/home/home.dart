@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 // import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
 import 'package:zesti/services/auth.dart';
+import 'package:zesti/services/database.dart';
 import 'package:zesti/theme/theme.dart';
 import 'package:provider/provider.dart';
 // import 'package:zesti/test/dummyusers.dart';
@@ -66,9 +67,12 @@ class _HomeState extends State<Home> {
     if (user == null) {
       return Text('User Error');
     }
+
     // Widget list for bottom nav bar
     final List<Widget> _widgetSet = <Widget>[
-      EditProfile(uid: user.uid),
+      EditProfile(
+        uid: user.uid,
+      ),
       buildSwipe(),
       Matches(),
     ];

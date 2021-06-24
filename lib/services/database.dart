@@ -61,6 +61,12 @@ class DatabaseService {
     return matchedList;
   }
 
+  // Get user info from document fields.
+  Future<Map<String, dynamic>> getInfo() async {
+    DocumentSnapshot doc = await userCollection.doc(uid).get();
+    return doc.data() as Map<String, dynamic>;
+  }
+
   // Update the account setup:
   //  Determines whether or not user should be should be shown the beginning
   //  of registration or the home page. Basically should set to true after user
@@ -76,12 +82,6 @@ class DatabaseService {
         .update({'first-name': first, 'last-name': last})
         .then((value) => print("Name Updated"))
         .catchError((error) => print("Failed to update user: $error"));
-  }
-
-  // Get user info from document fields.
-  Future<Object?> getInfo() async {
-    DocumentSnapshot doc = await userCollection.doc(uid).get();
-    return doc.data();
   }
 
   // Update user birthday.

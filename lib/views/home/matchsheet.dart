@@ -1,5 +1,4 @@
 import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:zesti/views/home/chat.dart';
@@ -75,9 +74,12 @@ class MatchSheet extends StatelessWidget {
                 }
                 // Otherwise, return a loading screen
                 else {
-                  return Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Center(child: CircularProgressIndicator()));
+                  return InkWell(
+                    child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Container(
+                            child: Center(child: CircularProgressIndicator()))),
+                  );
                 }
               }),
         ),

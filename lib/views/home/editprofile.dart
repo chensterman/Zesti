@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -7,18 +8,82 @@ import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:zesti/services/database.dart';
 import 'package:zesti/theme/theme.dart';
+import 'package:zesti/views/home/home.dart';
 
-class EditProfile extends StatefulWidget {
-  final String? uid;
+class EditProfile extends StatelessWidget {
+  final FirebaseStorage _storage = FirebaseStorage.instance;
+  final String uid;
   EditProfile({
     Key? key,
-    @required this.uid,
+    required this.uid,
   }) : super(key: key);
+
+  // Uploads image:
+  //  Creates unique storage reference (currently using DateTime) and
+  //  stores the image file onto it. Returns the storage reference as
+  //  a string in order to update the user document later.
+  Future<Map<String, dynamic>> _getInfo(String uid) async {
+    Map<String, dynamic> data = await DatabaseService(uid: uid).getInfo();
+    Uint8List? profpic =
+        await _storage.ref().child(data['photo-ref']).getData();
+    if (profpic == null) {
+      data['prof-pic'] = null;
+    } else {
+      data['prof-pic'] = MemoryImage(profpic);
+    }
+    return data;
+  }
+
   @override
-  _EditProfileState createState() => _EditProfileState();
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Padding(
+        padding: const EdgeInsets.all(8),
+        // FutureBuilder for http request payload
+        child: FutureBuilder(
+          future: _getInfo(uid),
+          builder: (context, AsyncSnapshot<Map<String, dynamic>> snapshot) {
+            // On error
+            if (snapshot.hasError) {
+              return Text("Error");
+            }
+            // On success
+            else if (snapshot.connectionState == ConnectionState.done) {
+              Map<String, dynamic>? data = snapshot.data;
+              if (data == null) {
+                return Text('Error');
+              } else {
+                return ProfileForm(
+                  bio: data['bio'],
+                  profpic: data['prof-pic'],
+                );
+              }
+            }
+            // Otherwise, return a loading screen
+            else {
+              return Center(child: CircularProgressIndicator());
+            }
+          },
+        ),
+      ),
+    );
+  }
 }
 
-class _EditProfileState extends State<EditProfile> {
+class ProfileForm extends StatefulWidget {
+  final String bio;
+  final MemoryImage? profpic;
+  ProfileForm({
+    Key? key,
+    required this.bio,
+    required this.profpic,
+  }) : super(key: key);
+
+  @override
+  _ProfileFormState createState() => _ProfileFormState();
+}
+
+class _ProfileFormState extends State<ProfileForm> {
   // Form widget key.
   final _formKey = GlobalKey<FormState>();
 
@@ -27,40 +92,13 @@ class _EditProfileState extends State<EditProfile> {
 
   // User data to retrieve and display.
   String bio = '';
-  dynamic imageFile;
+  dynamic profpic;
 
-  // Uploads image:
-  //  Creates unique storage reference (currently using DateTime) and
-  //  stores the image file onto it. Returns the storage reference as
-  //  a string in order to update the user document later.
-  Future<void> _getInfo(String uid) async {
-    Object? data = await DatabaseService(uid: uid).getInfo();
-    print(data);
-    setState(() {
-      bio = 'Test';
-      imageFile = AssetImage('assets/profile.jpg');
-    });
-  }
-
-  // Image Picker:
-  //  Sets dynamic Imagefile to an image file if possible.
-  Future<void> pickImage(ImageSource source) async {
-    final selected = await _picker.getImage(source: source);
-
-    setState(() {
-      if (selected == null) {
-        print("Error");
-      } else {
-        File file = File(selected.path);
-        imageFile = file;
-      }
-    });
-  }
-
-  // Clears the image:
-  //  Reverts the dynamic ImageFile back to null.
-  void clearImage() {
-    setState(() => imageFile = null);
+  @override
+  void initState() {
+    super.initState();
+    bio = widget.bio;
+    profpic = widget.profpic;
   }
 
   @override
@@ -116,6 +154,22 @@ class _EditProfileState extends State<EditProfile> {
                     ),
                   ),
                   Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 16.0),
+                    child: TextFormField(
+                      validator: (val) {
+                        if (val == null || val.isEmpty) {
+                          return "Please say something at least mildly entertaining.";
+                        }
+                      },
+                      onChanged: (val) {
+                        setState(() => bio = val);
+                      },
+                      decoration: const InputDecoration(labelText: 'Bio'),
+                      initialValue: bio,
+                      maxLines: 3,
+                    ),
+                  ),
+                  Padding(
                       padding: const EdgeInsets.symmetric(vertical: 16.0),
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
@@ -124,7 +178,18 @@ class _EditProfileState extends State<EditProfile> {
                                 left: 30, top: 10, right: 30, bottom: 10),
                             shape: new RoundedRectangleBorder(
                                 borderRadius: new BorderRadius.circular(30.0))),
-                        onPressed: () {},
+                        onPressed: () async {
+                          if (_formKey.currentState!.validate()) {
+                            if (user != null) {
+                              await DatabaseService(uid: user.uid)
+                                  .updateBio(bio);
+                            }
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => Home()),
+                            );
+                          }
+                        },
                         child: Text("I'm Ready!"),
                       )),
                 ],
@@ -136,16 +201,37 @@ class _EditProfileState extends State<EditProfile> {
     );
   }
 
+  // Image Picker:
+  //  Sets dynamic Imagefile to an image file if possible.
+  Future<void> pickImage(ImageSource source) async {
+    final selected = await _picker.getImage(source: source);
+
+    setState(() {
+      if (selected == null) {
+        print("Error");
+      } else {
+        File file = File(selected.path);
+        profpic = file;
+      }
+    });
+  }
+
+  // Clears the image:
+  //  Reverts the dynamic ImageFile back to null.
+  void clearImage() {
+    setState(() => profpic = null);
+  }
+
   // Widget for profile image chooser.
   Widget profileImage() {
     // Instantiate the background image.
     ImageProvider<Object>? bgImage;
 
     // Update the background image according to the dynamic imageFile.
-    if (imageFile == null) {
+    if (profpic == null) {
       bgImage = AssetImage("assets/profile.jpg");
     } else {
-      bgImage = imageFile;
+      bgImage = profpic;
     }
 
     return Stack(
