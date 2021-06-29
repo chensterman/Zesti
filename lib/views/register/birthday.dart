@@ -7,7 +7,6 @@ import 'package:provider/provider.dart';
 import 'package:zesti/theme/theme.dart';
 import 'package:zesti/services/database.dart';
 import 'package:zesti/views/register/house.dart';
-import 'package:zesti/views/register/identity.dart';
 
 class NumberLine extends StatelessWidget {
   NumberLine({@required this.width, @required this.text});

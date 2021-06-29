@@ -1,10 +1,12 @@
+import 'package:flutter/material.dart';
+
 // Dummy user class for the user cards
 class ZestiUser {
   final String name;
   final String designation;
   final int mutualFriends;
   final int age;
-  final String imgUrl;
+  final ImageProvider<Object> profpic;
   final String location;
   final String bio;
   bool isLiked;
@@ -15,7 +17,7 @@ class ZestiUser {
     required this.mutualFriends,
     required this.name,
     required this.age,
-    required this.imgUrl,
+    required this.profpic,
     required this.location,
     required this.bio,
     this.isLiked = false,

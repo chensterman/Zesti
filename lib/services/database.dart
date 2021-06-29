@@ -1,3 +1,6 @@
+import 'dart:typed_data';
+import 'package:flutter/material.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:zesti/models/zestiuser.dart';
 
@@ -6,6 +9,8 @@ import 'package:zesti/models/zestiuser.dart';
 class DatabaseService {
   final String uid;
   DatabaseService({required this.uid});
+
+  final FirebaseStorage _storage = FirebaseStorage.instance;
 
   // Access to 'users' collection.
   final CollectionReference userCollection =
@@ -49,12 +54,20 @@ class DatabaseService {
     List<ZestiUser> matchedList = [];
     for (DocumentReference ref in refList) {
       DocumentSnapshot data = await ref.get();
+      Uint8List? profpicref =
+          await _storage.ref().child(data['photo-ref']).getData();
+      ImageProvider<Object> profpic;
+      if (profpicref == null) {
+        profpic = AssetImage('assets/profile.jpg');
+      } else {
+        profpic = MemoryImage(profpicref);
+      }
       matchedList.add(ZestiUser(
           designation: 'Test',
           mutualFriends: 69,
           name: data.get('first-name'),
           age: 69,
-          imgUrl: data.get('photo-ref'),
+          profpic: profpic,
           location: 'Test',
           bio: data.get('bio')));
     }

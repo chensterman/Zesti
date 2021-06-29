@@ -20,6 +20,8 @@ def read():
         all_todos : Return all documents.
     """
     try:
+        users_ref = users_coll.where('bio', '==', 'asdf').get()
+        print(users_ref[0].to_dict())
         # Check if ID was passed to URL query
         print('run')
         user = users_coll.document('ikWfhZK3heO4vM6OGkdRzcoaqWA2').get()

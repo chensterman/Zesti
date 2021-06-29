@@ -3,6 +3,7 @@ import 'package:zesti/theme/theme.dart';
 import 'package:zesti/views/auth/signin.dart';
 import 'package:zesti/services/auth.dart';
 import 'package:zesti/widgets/formwidgets.dart';
+import 'package:zesti/wrappers/authwrapper.dart';
 
 class SignUp extends StatefulWidget {
   @override
@@ -95,9 +96,13 @@ class _SignUpState extends State<SignUp> {
               SizedBox(height: 20.0),
               RoundedButton(
                   text: 'Sign Up',
-                  onPressed: () {
+                  onPressed: () async {
                     if (_formKey.currentState!.validate()) {
-                      AuthService().signUp(email, password);
+                      await AuthService().signUp(email, password);
+                      Navigator.pushReplacementNamed(
+                        context,
+                        '/auth',
+                      );
                     }
                   }),
               SizedBox(height: 12.0),

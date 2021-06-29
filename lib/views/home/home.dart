@@ -1,5 +1,7 @@
+import 'dart:typed_data';
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 // import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
@@ -9,6 +11,7 @@ import 'package:zesti/theme/theme.dart';
 import 'package:provider/provider.dart';
 // import 'package:zesti/test/dummyusers.dart';
 import 'package:zesti/models/zestiuser.dart';
+import 'package:zesti/views/auth/start.dart';
 import 'package:zesti/widgets/usercard.dart';
 import 'package:zesti/providers/cardposition.dart';
 import 'package:zesti/views/home/editprofile.dart';
@@ -24,6 +27,7 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   // Inital widget to display
   int _selectedIndex = 1;
+  final FirebaseStorage _storage = FirebaseStorage.instance;
 
   // List of users to display in swipe cards
   List<ZestiUser> _userList = []; // Actual loaded data (from _future)
@@ -41,17 +45,26 @@ class _HomeState extends State<Home> {
   Future<List<ZestiUser>> _getUserData() async {
     try {
       // http request
-      final response = await http.get(Uri.parse(''));
+      final response =
+          await http.get(Uri.parse('http://10.250.125.170:8080/list'));
       // Decode JSON to hash map
       final decoded = json.decode(response.body) as Map<String, dynamic>;
       // Load hash map into User class
+      Uint8List? profpicref =
+          await _storage.ref().child(decoded['photo-ref']).getData();
+      ImageProvider<Object> profpic;
+      if (profpicref == null) {
+        profpic = AssetImage('assets/profile.jpg');
+      } else {
+        profpic = MemoryImage(profpicref);
+      }
       ZestiUser testUser = ZestiUser(
           name: decoded['first-name'],
           designation: 'Test',
           mutualFriends: 69,
           bio: decoded['bio'],
           age: 24,
-          imgUrl: 'assets/profile.jpg',
+          profpic: profpic,
           location: 'Test');
       // Add user to _userList
       _userList.add(testUser);
@@ -64,14 +77,11 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     final user = Provider.of<User?>(context);
-    if (user == null) {
-      return Text('User Error');
-    }
 
     // Widget list for bottom nav bar
     final List<Widget> _widgetSet = <Widget>[
       EditProfile(
-        uid: user.uid,
+        uid: user == null ? null : user.uid,
       ),
       buildSwipe(),
       Matches(),
@@ -86,8 +96,12 @@ class _HomeState extends State<Home> {
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.logout),
-            onPressed: () {
-              AuthService().signOut();
+            onPressed: () async {
+              await AuthService().signOut();
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => Start()),
+              );
             },
             color: Colors.white,
           ),
@@ -186,10 +200,11 @@ class _HomeState extends State<Home> {
     // Swipe logic
     if (details.offset.dx > minimumDrag) {
       user.isSwipedOff = true;
+      _userList.remove(user);
     } else if (details.offset.dx < -minimumDrag) {
       user.isLiked = true;
+      _userList.remove(user);
     }
-    _userList.remove(user);
     // Call to repopulate if _userList is empty
     if (_userList.isEmpty) {
       setState(() {

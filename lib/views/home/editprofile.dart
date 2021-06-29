@@ -12,7 +12,7 @@ import 'package:zesti/views/home/home.dart';
 
 class EditProfile extends StatelessWidget {
   final FirebaseStorage _storage = FirebaseStorage.instance;
-  final String uid;
+  final String? uid;
   EditProfile({
     Key? key,
     required this.uid,
@@ -22,7 +22,10 @@ class EditProfile extends StatelessWidget {
   //  Creates unique storage reference (currently using DateTime) and
   //  stores the image file onto it. Returns the storage reference as
   //  a string in order to update the user document later.
-  Future<Map<String, dynamic>> _getInfo(String uid) async {
+  Future<Map<String, dynamic>> _getInfo(String? uid) async {
+    if (uid == null) {
+      return {};
+    }
     Map<String, dynamic> data = await DatabaseService(uid: uid).getInfo();
     Uint8List? profpic =
         await _storage.ref().child(data['photo-ref']).getData();
@@ -106,11 +109,11 @@ class _ProfileFormState extends State<ProfileForm> {
     Size size = MediaQuery.of(context).size;
     final user = Provider.of<User?>(context);
     return Scaffold(
-      body: Center(
-        child: Container(
-          width: size.width * CustomTheme.containerWidth,
-          padding: const EdgeInsets.all(20),
-          child: SingleChildScrollView(
+      body: SingleChildScrollView(
+        child: Center(
+          child: Container(
+            width: size.width * CustomTheme.containerWidth,
+            padding: const EdgeInsets.all(20),
             child: Form(
               key: _formKey,
               child: Column(

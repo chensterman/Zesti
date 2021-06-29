@@ -35,12 +35,12 @@ class AuthService {
   }
 
   // Method for singing in.
-  Future<void> signIn(email, password) async {
+  Future<int> signIn(email, password) async {
     try {
       await _auth.signInWithEmailAndPassword(email: email, password: password);
-      print("Signed In");
+      return 0;
     } catch (e) {
-      print(e.toString());
+      return 1;
     }
   }
 

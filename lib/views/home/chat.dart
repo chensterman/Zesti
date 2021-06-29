@@ -3,11 +3,11 @@ import 'package:zesti/theme/theme.dart';
 
 class Chat extends StatefulWidget {
   final String name;
-  final MemoryImage? imgNull;
+  final ImageProvider<Object> profpic;
   Chat({
     Key? key,
-    this.name = 'NULL',
-    this.imgNull,
+    required this.name,
+    required this.profpic,
   }) : super(key: key);
 
   @override
@@ -15,15 +15,6 @@ class Chat extends StatefulWidget {
 }
 
 class _ChatState extends State<Chat> {
-  dynamic imageFile = AssetImage('assets/profile.jpg');
-  @override
-  void initState() {
-    super.initState();
-    if (widget.imgNull != null) {
-      imageFile = widget.imgNull;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
@@ -51,7 +42,7 @@ class _ChatState extends State<Chat> {
           children: [
             CircleAvatar(
               radius: 20.0,
-              backgroundImage: imageFile,
+              backgroundImage: widget.profpic,
               backgroundColor: Colors.white,
             ),
             SizedBox(width: 10.0),

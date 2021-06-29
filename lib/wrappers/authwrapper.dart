@@ -6,6 +6,7 @@ import 'package:zesti/services/database.dart';
 import 'package:zesti/views/auth/start.dart';
 import 'package:zesti/views/home/home.dart';
 import 'package:zesti/views/register/name.dart';
+import 'package:zesti/wrappers/swipewrapper.dart';
 
 // AuthWrapper class:
 //  Listens to authentication stream.
@@ -36,7 +37,7 @@ class AuthWrapper extends StatelessWidget {
           else if (snapshot.connectionState == ConnectionState.done) {
             dynamic test = snapshot.data?.data();
             if (test['account-setup']) {
-              return Home();
+              return SwipeWrapper();
             } else {
               return Name();
             }
