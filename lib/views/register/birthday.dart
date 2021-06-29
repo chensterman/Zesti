@@ -27,6 +27,7 @@ class NumberLine extends StatelessWidget {
   }
 }
 
+// Widget for the birthday form
 class Birthday extends StatefulWidget {
   @override
   _BirthdayState createState() => _BirthdayState();
@@ -121,13 +122,16 @@ class _BirthdayState extends State<Birthday> {
                                     borderRadius:
                                         new BorderRadius.circular(30.0))),
                             onPressed: () async {
+                              // Check for non-user
                               if (user == null) {
                                 print("Error");
+                                // Update user birthday
                               } else {
                                 await DatabaseService(uid: user.uid)
                                     .updateBirthday(
                                         Timestamp.fromDate(birthday));
                               }
+                              // Push to House form
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(

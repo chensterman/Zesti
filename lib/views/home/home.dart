@@ -3,13 +3,10 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-// import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
 import 'package:zesti/services/auth.dart';
-import 'package:zesti/services/database.dart';
 import 'package:zesti/theme/theme.dart';
 import 'package:provider/provider.dart';
-// import 'package:zesti/test/dummyusers.dart';
 import 'package:zesti/models/zestiuser.dart';
 import 'package:zesti/views/auth/start.dart';
 import 'package:zesti/widgets/usercard.dart';
@@ -17,6 +14,7 @@ import 'package:zesti/providers/cardposition.dart';
 import 'package:zesti/views/home/editprofile.dart';
 import 'package:zesti/views/home/matches.dart';
 
+// Widget containing swiping, profile management, and matches
 class Home extends StatefulWidget {
   Home({Key? key}) : super(key: key);
 
@@ -25,9 +23,11 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  // Firebase storage instance
+  final FirebaseStorage _storage = FirebaseStorage.instance;
+
   // Inital widget to display
   int _selectedIndex = 1;
-  final FirebaseStorage _storage = FirebaseStorage.instance;
 
   // List of users to display in swipe cards
   List<ZestiUser> _userList = []; // Actual loaded data (from _future)
@@ -49,7 +49,7 @@ class _HomeState extends State<Home> {
           await http.get(Uri.parse('http://10.250.125.170:8080/list'));
       // Decode JSON to hash map
       final decoded = json.decode(response.body) as Map<String, dynamic>;
-      // Load hash map into User class
+      // Obtain image from photo-ref field
       Uint8List? profpicref =
           await _storage.ref().child(decoded['photo-ref']).getData();
       ImageProvider<Object> profpic;
@@ -58,6 +58,7 @@ class _HomeState extends State<Home> {
       } else {
         profpic = MemoryImage(profpicref);
       }
+      // Load data into User class
       ZestiUser testUser = ZestiUser(
           name: decoded['first-name'],
           designation: 'Test',

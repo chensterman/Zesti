@@ -1,26 +1,26 @@
 import 'dart:async';
 import 'package:provider/provider.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-// import 'package:firebase_auth/firebase_auth.dart';
 import 'package:zesti/models/zestiuser.dart';
 import 'package:zesti/services/database.dart';
-import 'package:zesti/services/auth.dart';
-import 'package:zesti/theme/theme.dart';
 import 'package:zesti/views/home/matchsheet.dart';
 
-// import 'package:zesti/models/user.dart';
-
+// Widget for listening to matchlist changes
 class Matches extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    // Listen to authentication stream
     final user = Provider.of<User?>(context);
+
+    // Check for non-user
     if (user == null) {
       return Text('Error');
     } else {
+      // var for initialData (honestly just a dummy variable)
       var completer = new Completer<List<dynamic>>();
       completer.complete([]);
+      // StreamProvider to listen to matchlist from DatabaseService
       return StreamProvider<Future<List<dynamic>>>.value(
         initialData: completer.future,
         value: DatabaseService(uid: user.uid).matches,
@@ -32,6 +32,7 @@ class Matches extends StatelessWidget {
   }
 }
 
+// Widget for loading matchlist data when changes are notified
 class MatchList extends StatefulWidget {
   @override
   _MatchListState createState() => _MatchListState();
@@ -40,15 +41,20 @@ class MatchList extends StatefulWidget {
 class _MatchListState extends State<MatchList> {
   @override
   Widget build(BuildContext context) {
+    // StreamProvider from Matches widget above
     final _matchList = Provider.of<Future<List<dynamic>>>(context);
     return FutureBuilder(
       future: _matchList,
       builder: (context, AsyncSnapshot<List<dynamic>> snapshot) {
+        // On error
         if (snapshot.hasError) {
           return Text("Error");
+          // On success
         } else if (snapshot.connectionState == ConnectionState.done) {
           List<Widget> widgetList = [];
           List<dynamic>? data = snapshot.data;
+          // Unpack list of ZestiUsers and load into list of
+          // MatchSheet widgets
           if (data != null) {
             for (ZestiUser matchedUser in data) {
               widgetList.add(MatchSheet(
@@ -57,6 +63,7 @@ class _MatchListState extends State<MatchList> {
               ));
             }
           }
+          // Generate listview of loaded MatchSheet widgets
           return Column(
             children: [
               Padding(

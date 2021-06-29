@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:zesti/models/zestiuser.dart';
-// import 'package:zesti/services/database.dart';
 import 'package:zesti/providers/cardposition.dart';
 
+// Widget displaying the cards to swipe on
 class UserCard extends StatelessWidget {
   final ZestiUser user;
   final bool? isUserInFocus;
@@ -25,6 +25,7 @@ class UserCard extends StatelessWidget {
       width: size.width * 0.95,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
+        // User profile pic on card.
         image: DecorationImage(
           image: user.profpic,
           fit: BoxFit.cover,
@@ -104,6 +105,7 @@ class UserCard extends StatelessWidget {
   Widget buildUserInfo({@required final user}) {
     return Padding(
       padding: const EdgeInsets.all(8),
+      // Column displaying user info
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,

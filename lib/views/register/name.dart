@@ -7,6 +7,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:zesti/views/register/birthday.dart';
 import 'package:zesti/widgets/formwidgets.dart';
 
+// Widget for name form
 class Name extends StatefulWidget {
   @override
   _NameState createState() => _NameState();

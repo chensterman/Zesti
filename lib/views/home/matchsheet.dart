@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:zesti/views/home/chat.dart';
 
+// Widget for individual match to display in listview
 class MatchSheet extends StatelessWidget {
   final String name;
   final ImageProvider<Object> profpic;
@@ -13,6 +13,7 @@ class MatchSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // When sheet is tapped, navigates to chat with the match
     return InkWell(
       onTap: () {
         Navigator.push(
@@ -21,6 +22,7 @@ class MatchSheet extends StatelessWidget {
               builder: (context) => Chat(name: name, profpic: profpic)),
         );
       },
+      // Display match info (user data) on the sheet
       child: Container(
         child: Row(
           children: [

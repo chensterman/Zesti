@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+// Class containing app themes (colors, fonts, etc.)
 class CustomTheme {
   static var containerWidth = 0.85;
   static double containerPadding = 20;

@@ -44,6 +44,7 @@ class Dropdown extends State<DropdownState> {
   }
 }
 
+// Unused widget for phone form
 class Phone extends StatelessWidget {
   @override
   Widget build(BuildContext context) {

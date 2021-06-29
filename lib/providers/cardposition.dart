@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 // Enum of swipe directions.
 enum SwipingDirection { left, right, none }
 
+// Provider class for notifying listeners of the card position.
 class CardPositionProvider extends ChangeNotifier {
   // X-axis deviation and swiping direction.
   double _dx = 0.0;

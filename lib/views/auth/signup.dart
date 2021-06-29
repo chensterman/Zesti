@@ -5,6 +5,7 @@ import 'package:zesti/services/auth.dart';
 import 'package:zesti/widgets/formwidgets.dart';
 import 'package:zesti/wrappers/authwrapper.dart';
 
+// Widget for handling account creation
 class SignUp extends StatefulWidget {
   @override
   _SignUpState createState() => _SignUpState();
@@ -27,7 +28,6 @@ class _SignUpState extends State<SignUp> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        padding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 50.0),
         decoration: BoxDecoration(
           // Box decoration takes a gradient
           gradient: LinearGradient(
@@ -97,7 +97,10 @@ class _SignUpState extends State<SignUp> {
               RoundedButton(
                   text: 'Sign Up',
                   onPressed: () async {
+                    // Validate form fields
                     if (_formKey.currentState!.validate()) {
+                      // Once validated, auth service creates account
+                      // Then push authentication route
                       await AuthService().signUp(email, password);
                       Navigator.pushReplacementNamed(
                         context,

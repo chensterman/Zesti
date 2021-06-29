@@ -3,19 +3,14 @@ import 'package:zesti/theme/theme.dart';
 import 'package:zesti/views/auth/signup.dart';
 import 'package:zesti/services/auth.dart';
 import 'package:zesti/widgets/formwidgets.dart';
-import 'package:zesti/wrappers/authwrapper.dart';
 
+// Widget for handling login
 class SignIn extends StatefulWidget {
-  //final Function toggleView;
-  //SignIn({this.toggleView});
-
   @override
   _SignInState createState() => _SignInState();
 }
 
 class _SignInState extends State<SignIn> {
-  // final AuthService _auth = AuthService();
-
   // Validation of entered values
   final _formKey = GlobalKey<FormState>();
 
@@ -84,13 +79,17 @@ class _SignInState extends State<SignIn> {
               RoundedButton(
                   text: 'Sign In',
                   onPressed: () async {
+                    // Validate all form fields
                     if (_formKey.currentState!.validate()) {
+                      // Get login status
                       int status = await AuthService().signIn(email, password);
+                      // On success, push the authentication route
                       if (status == 0) {
                         Navigator.pushReplacementNamed(
                           context,
                           '/auth',
                         );
+                        // On failure, send the error message
                       } else {
                         print('Incorrect Login');
                       }

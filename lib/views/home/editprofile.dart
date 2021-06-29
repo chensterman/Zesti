@@ -10,6 +10,7 @@ import 'package:zesti/services/database.dart';
 import 'package:zesti/theme/theme.dart';
 import 'package:zesti/views/home/home.dart';
 
+// Widget for the profile manager
 class EditProfile extends StatelessWidget {
   final FirebaseStorage _storage = FirebaseStorage.instance;
   final String? uid;
@@ -18,15 +19,14 @@ class EditProfile extends StatelessWidget {
     required this.uid,
   }) : super(key: key);
 
-  // Uploads image:
-  //  Creates unique storage reference (currently using DateTime) and
-  //  stores the image file onto it. Returns the storage reference as
-  //  a string in order to update the user document later.
+  // Retrieves user info in map form
   Future<Map<String, dynamic>> _getInfo(String? uid) async {
     if (uid == null) {
       return {};
     }
+    // Database grab
     Map<String, dynamic> data = await DatabaseService(uid: uid).getInfo();
+    // Convert photo-ref field to image
     Uint8List? profpic =
         await _storage.ref().child(data['photo-ref']).getData();
     if (profpic == null) {
@@ -42,7 +42,7 @@ class EditProfile extends StatelessWidget {
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.all(8),
-        // FutureBuilder for http request payload
+        // FutureBuilder for data request payload
         child: FutureBuilder(
           future: _getInfo(uid),
           builder: (context, AsyncSnapshot<Map<String, dynamic>> snapshot) {
@@ -53,6 +53,7 @@ class EditProfile extends StatelessWidget {
             // On success
             else if (snapshot.connectionState == ConnectionState.done) {
               Map<String, dynamic>? data = snapshot.data;
+              // Null check
               if (data == null) {
                 return Text('Error');
               } else {
@@ -73,6 +74,7 @@ class EditProfile extends StatelessWidget {
   }
 }
 
+// Widget to display editing form with user data loaded onto it
 class ProfileForm extends StatefulWidget {
   final String bio;
   final MemoryImage? profpic;
@@ -183,6 +185,9 @@ class _ProfileFormState extends State<ProfileForm> {
                                 borderRadius: new BorderRadius.circular(30.0))),
                         onPressed: () async {
                           if (_formKey.currentState!.validate()) {
+                            // On form validation, the newly entered field should be updated
+                            // in the database. STILL NEED IMPLEMENTING - when a using uploads
+                            // a new profile picture, go delete the old one in Firebase Storage.
                             if (user != null) {
                               await DatabaseService(uid: user.uid)
                                   .updateBio(bio);
@@ -227,10 +232,10 @@ class _ProfileFormState extends State<ProfileForm> {
 
   // Widget for profile image chooser.
   Widget profileImage() {
-    // Instantiate the background image.
+    // Instantiate the image.
     ImageProvider<Object>? bgImage;
 
-    // Update the background image according to the dynamic imageFile.
+    // Update the image according to the dynamic imageFile.
     if (profpic == null) {
       bgImage = AssetImage("assets/profile.jpg");
     } else {

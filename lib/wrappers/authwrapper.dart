@@ -12,7 +12,7 @@ import 'package:zesti/wrappers/swipewrapper.dart';
 //  Listens to authentication stream.
 //  Not logged in - Start class.
 //  Logged in - Swipe class.
-//  Registration counts as login.
+//  Successful registration counts as being logged in.
 class AuthWrapper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -22,7 +22,7 @@ class AuthWrapper extends StatelessWidget {
     if (user == null) {
       return Start();
     } else {
-      // FutureBuilder required due to async DB function .get()
+      // FutureBuilder required due to receive user data
       return FutureBuilder(
         future:
             DatabaseService(uid: user.uid).userCollection.doc(user.uid).get(),
@@ -36,6 +36,7 @@ class AuthWrapper extends StatelessWidget {
           // homepage or beginning of registration.
           else if (snapshot.connectionState == ConnectionState.done) {
             dynamic test = snapshot.data?.data();
+            // Check if user already setup account (finished all registration forms)
             if (test['account-setup']) {
               return SwipeWrapper();
             } else {

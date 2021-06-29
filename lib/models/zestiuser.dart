@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
-// Dummy user class for the user cards
+// User class for the app
+// Useful to hold unpackaged requests from the database
 class ZestiUser {
   final String name;
   final String designation;

@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:zesti/services/database.dart';
 
-// AuthService class:
+// Authentication class:
 //  Contains all methods and data pertaining to user authentication.
 class AuthService {
   // Instantiate FirebaseAuth.
@@ -34,7 +34,7 @@ class AuthService {
     }
   }
 
-  // Method for singing in.
+  // Method for singing in (returns status as int).
   Future<int> signIn(email, password) async {
     try {
       await _auth.signInWithEmailAndPassword(email: email, password: password);

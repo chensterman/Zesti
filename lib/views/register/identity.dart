@@ -7,6 +7,7 @@ import 'package:zesti/theme/theme.dart';
 import 'package:zesti/views/register/interest.dart';
 import 'package:zesti/widgets/formwidgets.dart';
 
+// Widget for the identity form
 class Identity extends StatelessWidget {
   @override
   Widget build(BuildContext context) {

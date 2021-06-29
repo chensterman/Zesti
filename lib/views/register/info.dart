@@ -9,6 +9,7 @@ import 'package:zesti/services/database.dart';
 import 'package:zesti/theme/theme.dart';
 import 'package:zesti/wrappers/swipewrapper.dart';
 
+// Widget for profile picture upload and bio
 class Info extends StatefulWidget {
   @override
   _InfoState createState() => _InfoState();
@@ -92,6 +93,9 @@ class _InfoState extends State<Info> {
                             // Do not upload if dynamic imageFile is null.
                             if (imageFile != null) {
                               // Upload image and store the reference.
+                              // Side note: no need to delete previous image from storage,
+                              // as we assume this will always be the first (and only) time
+                              // a user sees this page.
                               String storageRef =
                                   await uploadImage(imageFile, user.uid);
                               // Update user document with the reference.

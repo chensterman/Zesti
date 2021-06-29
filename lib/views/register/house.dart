@@ -7,6 +7,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:zesti/views/register/identity.dart';
 import 'package:zesti/widgets/formwidgets.dart';
 
+// Widget for the housing form
 class House extends StatefulWidget {
   @override
   _HouseState createState() => _HouseState();
@@ -15,6 +16,8 @@ class House extends StatefulWidget {
 class _HouseState extends State<House> {
   final _formKey = GlobalKey<FormState>();
   String _house = '';
+
+  // List of Harvard houses
   List<String> _houseList = [
     'Apley Court',
     'Canaday',

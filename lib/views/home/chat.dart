@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:zesti/theme/theme.dart';
 
+// Widget displaying the chat page for a specific match
 class Chat extends StatefulWidget {
   final String name;
   final ImageProvider<Object> profpic;
@@ -19,6 +20,7 @@ class _ChatState extends State<Chat> {
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
     return Scaffold(
+      // endDrawer is the restaurant display for discounts
       endDrawer: Drawer(),
       appBar: AppBar(
         leading: IconButton(

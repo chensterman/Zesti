@@ -46,7 +46,7 @@ class DatabaseService {
   }
 
   // Helper function for matched users stream - convert QuerySnapshot to
-  // list of ZestiUser models. SOMETHING HERE IS WRONG.
+  // list of ZestiUser models.
   Future<List<ZestiUser>> _zestiUserFromSnapshot(QuerySnapshot snapshot) async {
     List<dynamic> refList = snapshot.docs.map((doc) {
       return doc.get('user-ref');
@@ -75,6 +75,7 @@ class DatabaseService {
   }
 
   // Get user info from document fields.
+  // SECURITY RISK - MIGHT NEED TO IMPLEMENT THIS WITH API CALL INSTEAD.
   Future<Map<String, dynamic>> getInfo() async {
     DocumentSnapshot doc = await userCollection.doc(uid).get();
     return doc.data() as Map<String, dynamic>;

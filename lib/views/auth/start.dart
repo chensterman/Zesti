@@ -4,6 +4,7 @@ import 'package:zesti/theme/theme.dart';
 import 'package:zesti/views/auth/signup.dart';
 import 'package:zesti/widgets/formwidgets.dart';
 
+// Starting page widget
 class Start extends StatelessWidget {
   // This widget is the root of your application.
   @override
@@ -30,26 +31,23 @@ class Start extends StatelessWidget {
           ),
         ),
         child: Center(
-          child: Column(
-              //crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                SizedBox(
-                  width: double.infinity,
-                  height: size.height * 0.4,
-                  child: SvgPicture.asset("assets/zesti.svg",
-                      semanticsLabel: "Zesti"),
-                ),
-                RoundedButton(
-                  text: 'Get Started',
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => SignUp()),
-                    );
-                  },
-                )
-              ]),
+          child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+            SizedBox(
+              width: double.infinity,
+              height: size.height * 0.4,
+              child:
+                  SvgPicture.asset("assets/zesti.svg", semanticsLabel: "Zesti"),
+            ),
+            RoundedButton(
+              text: 'Get Started',
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => SignUp()),
+                );
+              },
+            )
+          ]),
         ),
       ),
     );
