@@ -5,6 +5,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
 import 'package:zesti/services/auth.dart';
+import 'package:zesti/services/database.dart';
 import 'package:zesti/theme/theme.dart';
 import 'package:provider/provider.dart';
 import 'package:zesti/models/zestiuser.dart';
@@ -60,6 +61,7 @@ class _HomeState extends State<Home> {
       }
       // Load data into User class
       ZestiUser testUser = ZestiUser(
+          uid: decoded['uid'],
           name: decoded['first-name'],
           designation: 'Test',
           mutualFriends: 69,
@@ -195,15 +197,14 @@ class _HomeState extends State<Home> {
   }
 
   // If card is dragged past a threshold, perform operations
-  void onDragEnd(DraggableDetails details, ZestiUser user) {
+  void onDragEnd(DraggableDetails details, ZestiUser user) async {
     // Minimum offset for swipe
     final minimumDrag = 100;
     // Swipe logic
     if (details.offset.dx > minimumDrag) {
-      user.isSwipedOff = true;
       _userList.remove(user);
+      await DatabaseService(uid: user.uid).updateLiked(user.uid);
     } else if (details.offset.dx < -minimumDrag) {
-      user.isLiked = true;
       _userList.remove(user);
     }
     // Call to repopulate if _userList is empty

@@ -25,7 +25,7 @@ class Matches extends StatelessWidget {
         initialData: completer.future,
         value: DatabaseService(uid: user.uid).matches,
         child: Scaffold(
-          body: MatchList(),
+          body: MatchList(uid: user.uid),
         ),
       );
     }
@@ -34,6 +34,11 @@ class Matches extends StatelessWidget {
 
 // Widget for loading matchlist data when changes are notified
 class MatchList extends StatefulWidget {
+  final String uid;
+  MatchList({
+    Key? key,
+    required this.uid,
+  }) : super(key: key);
   @override
   _MatchListState createState() => _MatchListState();
 }
@@ -48,7 +53,7 @@ class _MatchListState extends State<MatchList> {
       builder: (context, AsyncSnapshot<List<dynamic>> snapshot) {
         // On error
         if (snapshot.hasError) {
-          return Text("Error");
+          return Text(snapshot.error.toString());
           // On success
         } else if (snapshot.connectionState == ConnectionState.done) {
           List<Widget> widgetList = [];
@@ -58,6 +63,8 @@ class _MatchListState extends State<MatchList> {
           if (data != null) {
             for (ZestiUser matchedUser in data) {
               widgetList.add(MatchSheet(
+                meid: widget.uid,
+                youid: matchedUser.uid,
                 name: matchedUser.name,
                 profpic: matchedUser.profpic,
               ));

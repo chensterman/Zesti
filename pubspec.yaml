@@ -31,9 +31,11 @@ dependencies:
   # API Requests
   http: ^0.13.3
 
+  # Random id generator
+  uuid: ^3.0.4
+
   # Image uploading
   image_picker: 0.7.5+2
-  #image_cropper: 
 
   # Provider package (auth streams)
   provider: ^5.0.0

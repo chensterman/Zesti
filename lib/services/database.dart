@@ -1,4 +1,7 @@
 import 'dart:typed_data';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:uuid/uuid.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -16,12 +19,20 @@ class DatabaseService {
   final CollectionReference userCollection =
       FirebaseFirestore.instance.collection('users');
 
+  // Access to 'chats' collection.
+  final CollectionReference chatCollection =
+      FirebaseFirestore.instance.collection('chats');
+
+  // Random id generator.
+  final uuid = Uuid();
+
   // Creater user:
   //  Add user document to 'users' and initialize fields.
   Future<void> createUser() async {
     await userCollection
         .doc(uid)
         .set({
+          'uid': uid,
           'account-setup': false,
           'first-name': null,
           'last-name': null,
@@ -34,6 +45,14 @@ class DatabaseService {
         })
         .then((value) => print("User added"))
         .catchError((error) => print("Failed"));
+  }
+
+  Future<Stream<QuerySnapshot>> messages(String chatid) async {
+    return chatCollection
+        .doc(chatid)
+        .collection('messages')
+        .orderBy('timestamp', descending: true)
+        .snapshots();
   }
 
   // Stream to show list of matched users
@@ -63,6 +82,7 @@ class DatabaseService {
         profpic = MemoryImage(profpicref);
       }
       matchedList.add(ZestiUser(
+          uid: data.get('uid'),
           designation: 'Test',
           mutualFriends: 69,
           name: data.get('first-name'),
@@ -150,5 +170,55 @@ class DatabaseService {
         .update({'bio': bio})
         .then((value) => print("Bio Updated"))
         .catchError((error) => print("Failed to update user: $error"));
+  }
+
+  Future<void> updateLiked(String youid) async {
+    await userCollection
+        .doc(uid)
+        .collection('liked')
+        .doc(uuid.v4())
+        .set({'timestamp': DateTime.now(), 'user': youid})
+        .then((value) => print("Liked"))
+        .catchError((error) => print("Failed to like: $error"));
+
+    // http request
+    String urlBase = 'http://10.250.125.170:8080/match-check?';
+    String arg1 = 'meid=' + uid;
+    String arg2 = 'youid=' + youid;
+    final response = await http.get(Uri.parse(urlBase + arg1 + '&' + arg2));
+    final decoded = json.decode(response.body) as Map<String, dynamic>;
+    if (decoded['result']) {
+      String gen = uuid.v4();
+      DateTime ts = DateTime.now();
+      await userCollection
+          .doc(uid)
+          .collection('matched')
+          .doc(gen)
+          .set({'timestamp': ts, 'user': youid})
+          .then((value) => print("New Match"))
+          .catchError((error) => print("Failed to match: $error"));
+      await userCollection
+          .doc(youid)
+          .collection('matched')
+          .doc(gen)
+          .set({'timestamp': ts, 'user': uid})
+          .then((value) => print("New Match"))
+          .catchError((error) => print("Failed to match: $error"));
+    }
+  }
+
+  Future<void> sendMessage(String chatid, String type, String content) async {
+    await chatCollection
+        .doc(chatid)
+        .collection('messages')
+        .doc(uuid.v4())
+        .set({
+          'timestamp': DateTime.now(),
+          'sender': uid,
+          'type': type,
+          'content': content,
+        })
+        .then((value) => print("Message Sent"))
+        .catchError((error) => print("Failed to send message: $error"));
   }
 }

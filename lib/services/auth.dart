@@ -40,6 +40,7 @@ class AuthService {
       await _auth.signInWithEmailAndPassword(email: email, password: password);
       return 0;
     } catch (e) {
+      print(e.toString());
       return 1;
     }
   }

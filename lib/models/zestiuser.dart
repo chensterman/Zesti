@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 // User class for the app
 // Useful to hold unpackaged requests from the database
 class ZestiUser {
+  final String uid;
   final String name;
   final String designation;
   final int mutualFriends;
@@ -14,6 +15,7 @@ class ZestiUser {
   bool isSwipedOff;
 
   ZestiUser({
+    required this.uid,
     required this.designation,
     required this.mutualFriends,
     required this.name,
