@@ -57,7 +57,7 @@ class RoundedButton extends StatelessWidget {
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
     return Container(
-      width: size.width * 0.8,
+      width: size.width * 0.6,
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
             primary: CustomTheme.lightTheme.primaryColor,

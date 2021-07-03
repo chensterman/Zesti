@@ -13,7 +13,8 @@ class Start extends StatelessWidget {
 
     return Scaffold(
       body: Container(
-        padding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 50.0),
+        padding: EdgeInsets.symmetric(
+            vertical: size.height * 0.1, horizontal: size.width * 0.1),
         decoration: BoxDecoration(
           // Box decoration takes a gradient
           gradient: LinearGradient(

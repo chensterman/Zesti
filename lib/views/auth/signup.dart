@@ -26,6 +26,7 @@ class _SignUpState extends State<SignUp> {
 
   @override
   Widget build(BuildContext context) {
+    Size size = MediaQuery.of(context).size;
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
@@ -46,93 +47,101 @@ class _SignUpState extends State<SignUp> {
         ),
         child: Form(
           key: _formKey,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              SizedBox(height: 20.0),
-              Text('Sign Up',
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 32.0,
-                      color: Colors.white)),
-              SizedBox(height: 20.0),
-              TextFieldContainer(
-                validator: (val) {
-                  if (val == null || val.isEmpty) {
-                    return 'Please enter an email';
-                  } else if (!val.endsWith('.edu')) {
-                    return 'Email must be .edu';
-                  }
-                },
-                onChanged: (val) {
-                  setState(() => email = val);
-                },
-                hintText: 'Email',
-                icon: Icon(Icons.person),
-              ),
-              SizedBox(height: 20.0),
-              TextFieldContainer(
-                validator: (val) => val!.length < 8
-                    ? 'Password must be over 8 characters long'
-                    : null,
-                obscureText: true,
-                onChanged: (val) {
-                  setState(() => password = val);
-                },
-                hintText: 'Password',
-                icon: Icon(Icons.lock),
-              ),
-              SizedBox(height: 20.0),
-              TextFieldContainer(
-                validator: (val) =>
-                    val != password ? 'Password do not match' : null,
-                obscureText: true,
-                onChanged: (val) {
-                  setState(() => passwordConfirm = val);
-                },
-                hintText: 'Confirm Password',
-                icon: Icon(Icons.lock),
-              ),
-              SizedBox(height: 20.0),
-              RoundedButton(
-                  text: 'Sign Up',
-                  onPressed: () async {
-                    // Validate form fields
-                    if (_formKey.currentState!.validate()) {
-                      // Once validated, auth service creates account
-                      // Then push authentication route
-                      await AuthService().signUp(email, password);
-                      Navigator.pushReplacementNamed(
-                        context,
-                        '/auth',
-                      );
-                    }
-                  }),
-              SizedBox(height: 12.0),
-              Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Text(
-                      'Already Zesti enough ? ',
-                      style: TextStyle(fontSize: 16.0),
-                    ),
-                    GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => SignIn()),
-                          );
+          child: Center(
+            child: ListView(
+              shrinkWrap: true,
+              children: <Widget>[
+                Center(
+                  child: Column(
+                    children: <Widget>[
+                      Text('Sign Up',
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 32.0,
+                              color: Colors.white)),
+                      SizedBox(height: size.height * 0.05),
+                      TextFieldContainer(
+                        validator: (val) {
+                          if (val == null || val.isEmpty) {
+                            return 'Please enter an email';
+                          } else if (!val.endsWith('.edu')) {
+                            return 'Email must be .edu';
+                          }
                         },
-                        child: Text('Login.',
-                            style: TextStyle(
-                              color: Colors.orange[900],
-                            ))),
-                  ]),
-              Text(
-                error,
-                style: TextStyle(color: Colors.red, fontSize: 14.0),
-              ),
-            ],
+                        onChanged: (val) {
+                          setState(() => email = val);
+                        },
+                        hintText: 'Email',
+                        icon: Icon(Icons.person),
+                      ),
+                      SizedBox(height: size.height * 0.03),
+                      TextFieldContainer(
+                        validator: (val) => val!.length < 8
+                            ? 'Password must be over 8 characters long'
+                            : null,
+                        obscureText: true,
+                        onChanged: (val) {
+                          setState(() => password = val);
+                        },
+                        hintText: 'Password',
+                        icon: Icon(Icons.lock),
+                      ),
+                      SizedBox(height: size.height * 0.03),
+                      TextFieldContainer(
+                        validator: (val) =>
+                            val != password ? 'Password do not match' : null,
+                        obscureText: true,
+                        onChanged: (val) {
+                          setState(() => passwordConfirm = val);
+                        },
+                        hintText: 'Confirm Password',
+                        icon: Icon(Icons.lock),
+                      ),
+                      SizedBox(height: size.height * 0.03),
+                      RoundedButton(
+                          text: 'Sign Up',
+                          onPressed: () async {
+                            // Validate form fields
+                            if (_formKey.currentState!.validate()) {
+                              // Once validated, auth service creates account
+                              // Then push authentication route
+                              await AuthService().signUp(email, password);
+                              Navigator.pushReplacementNamed(
+                                context,
+                                '/auth',
+                              );
+                            }
+                          }),
+                      SizedBox(height: size.height * 0.01),
+                      Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            Text(
+                              'Already Zesti enough ? ',
+                              style: TextStyle(fontSize: 16.0),
+                            ),
+                            GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => SignIn()),
+                                  );
+                                },
+                                child: Text('Login.',
+                                    style: TextStyle(
+                                      color: Colors.orange[900],
+                                    ))),
+                          ]),
+                      Text(
+                        error,
+                        style: TextStyle(color: Colors.red, fontSize: 14.0),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

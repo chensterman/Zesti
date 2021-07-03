@@ -26,7 +26,6 @@ class _NameState extends State<Name> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: CustomTheme.lightTheme.primaryColor,
-        elevation: 0.0,
       ),
       body: Center(
         child: Container(

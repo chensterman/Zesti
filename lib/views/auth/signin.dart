@@ -23,9 +23,12 @@ class _SignInState extends State<SignIn> {
 
   @override
   Widget build(BuildContext context) {
+    Size size = MediaQuery.of(context).size;
+
     return Scaffold(
       body: Container(
-        padding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 50.0),
+        padding: EdgeInsets.symmetric(
+            vertical: size.height * 0.1, horizontal: size.width * 0.1),
         decoration: BoxDecoration(
           // Box decoration takes a gradient
           gradient: LinearGradient(
@@ -44,82 +47,91 @@ class _SignInState extends State<SignIn> {
         ),
         child: Form(
           key: _formKey,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              SizedBox(height: 20.0),
-              Text('Login',
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 32.0,
-                      color: Colors.white)),
-              SizedBox(height: 20.0),
-              TextFieldContainer(
-                validator: (val) =>
-                    val!.isEmpty ? 'Please enter an email' : null,
-                onChanged: (val) {
-                  setState(() => email = val);
-                },
-                hintText: 'Email',
-                icon: Icon(Icons.person),
-              ),
-              SizedBox(height: 20.0),
-              TextFieldContainer(
-                obscureText: true,
-                validator: (val) => val!.length < 8
-                    ? 'Password must be over 8 characters long'
-                    : null,
-                onChanged: (val) {
-                  setState(() => password = val);
-                },
-                hintText: 'Password',
-                icon: Icon(Icons.lock),
-              ),
-              SizedBox(height: 20.0),
-              RoundedButton(
-                  text: 'Sign In',
-                  onPressed: () async {
-                    // Validate all form fields
-                    if (_formKey.currentState!.validate()) {
-                      // Get login status
-                      int status = await AuthService().signIn(email, password);
-                      // On success, push the authentication route
-                      if (status == 0) {
-                        Navigator.pushReplacementNamed(
-                          context,
-                          '/auth',
-                        );
-                        // On failure, send the error message
-                      } else {
-                        print('Incorrect Login');
-                      }
-                    }
-                  }),
-              SizedBox(height: 12.0),
-              Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Text(
-                      'Need an account ? ',
-                      style: TextStyle(fontSize: 16.0),
-                    ),
-                    GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => SignUp()),
-                          );
+          child: Center(
+            child: ListView(
+              shrinkWrap: true,
+              children: <Widget>[
+                Center(
+                  child: Column(
+                    children: <Widget>[
+                      Text('Login',
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 32.0,
+                              color: Colors.white)),
+                      SizedBox(height: size.height * 0.05),
+                      TextFieldContainer(
+                        validator: (val) =>
+                            val!.isEmpty ? 'Please enter an email' : null,
+                        onChanged: (val) {
+                          setState(() => email = val);
                         },
-                        child: Text('Sign Up.',
-                            style: TextStyle(
-                              color: Colors.orange[900],
-                            ))),
-                  ]),
-              Text(
-                error,
-                style: TextStyle(color: Colors.red, fontSize: 14.0),
-              ),
-            ],
+                        hintText: 'Email',
+                        icon: Icon(Icons.person),
+                      ),
+                      SizedBox(height: size.height * 0.03),
+                      TextFieldContainer(
+                        obscureText: true,
+                        validator: (val) => val!.length < 8
+                            ? 'Password must be over 8 characters long'
+                            : null,
+                        onChanged: (val) {
+                          setState(() => password = val);
+                        },
+                        hintText: 'Password',
+                        icon: Icon(Icons.lock),
+                      ),
+                      SizedBox(height: size.height * 0.03),
+                      RoundedButton(
+                          text: 'Sign In',
+                          onPressed: () async {
+                            // Validate all form fields
+                            if (_formKey.currentState!.validate()) {
+                              // Get login status
+                              int status =
+                                  await AuthService().signIn(email, password);
+                              // On success, push the authentication route
+                              if (status == 0) {
+                                Navigator.pushReplacementNamed(
+                                  context,
+                                  '/auth',
+                                );
+                                // On failure, send the error message
+                              } else {
+                                print('Incorrect Login');
+                              }
+                            }
+                          }),
+                      SizedBox(height: size.height * 0.01),
+                      Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            Text(
+                              'Need an account ? ',
+                              style: TextStyle(fontSize: 16.0),
+                            ),
+                            GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => SignUp()),
+                                  );
+                                },
+                                child: Text('Sign Up.',
+                                    style: TextStyle(
+                                      color: Colors.orange[900],
+                                    ))),
+                          ]),
+                      Text(
+                        error,
+                        style: TextStyle(color: Colors.red, fontSize: 14.0),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
