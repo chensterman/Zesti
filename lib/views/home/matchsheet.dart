@@ -3,14 +3,14 @@ import 'package:zesti/views/home/chat.dart';
 
 // Widget for individual match to display in listview
 class MatchSheet extends StatelessWidget {
-  final String meid;
-  final String youid;
+  final String uid;
+  final String chatid;
   final String name;
   final ImageProvider<Object> profpic;
   MatchSheet({
     Key? key,
-    required this.meid,
-    required this.youid,
+    required this.uid,
+    required this.chatid,
     required this.name,
     required this.profpic,
   }) : super(key: key);
@@ -23,11 +23,8 @@ class MatchSheet extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-              builder: (context) => Chat(
-                  uid: meid,
-                  chatid: meid.substring(0, 6) + youid.substring(0, 6),
-                  name: name,
-                  profpic: profpic)),
+              builder: (context) =>
+                  Chat(uid: uid, chatid: chatid, name: name, profpic: profpic)),
         );
       },
       // Display match info (user data) on the sheet

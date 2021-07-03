@@ -8,7 +8,7 @@ class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   // Stream that listens for authentication changes.
-  Stream<User?> get user {
+  Stream<User?> user() {
     return _auth.authStateChanges();
   }
 

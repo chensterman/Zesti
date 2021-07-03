@@ -22,7 +22,7 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     return StreamProvider<User?>.value(
         initialData: null,
-        value: AuthService().user, // Authentication state from AuthService
+        value: AuthService().user(), // Authentication state from AuthService
         child: MaterialApp(
           home: AuthWrapper(),
           // Route called in signin.dart and signup.dart to successfully navigate

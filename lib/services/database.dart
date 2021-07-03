@@ -47,7 +47,7 @@ class DatabaseService {
         .catchError((error) => print("Failed"));
   }
 
-  Future<Stream<QuerySnapshot>> messages(String chatid) async {
+  Stream<QuerySnapshot> messages(String chatid) {
     return chatCollection
         .doc(chatid)
         .collection('messages')
@@ -59,7 +59,7 @@ class DatabaseService {
   Stream<Future<List<ZestiUser>>> get matches {
     return userCollection
         .doc(uid)
-        .collection('matches')
+        .collection('matched')
         .snapshots()
         .map(_zestiUserFromSnapshot);
   }
@@ -67,14 +67,14 @@ class DatabaseService {
   // Helper function for matched users stream - convert QuerySnapshot to
   // list of ZestiUser models.
   Future<List<ZestiUser>> _zestiUserFromSnapshot(QuerySnapshot snapshot) async {
-    List<dynamic> refList = snapshot.docs.map((doc) {
-      return doc.get('user-ref');
+    List<dynamic> dataList = snapshot.docs.map((doc) {
+      return doc.data();
     }).toList();
     List<ZestiUser> matchedList = [];
-    for (DocumentReference ref in refList) {
-      DocumentSnapshot data = await ref.get();
+    for (Map<String, dynamic> data in dataList) {
+      DocumentSnapshot doc = await data['user-ref'].get();
       Uint8List? profpicref =
-          await _storage.ref().child(data['photo-ref']).getData();
+          await _storage.ref().child(doc['photo-ref']).getData();
       ImageProvider<Object> profpic;
       if (profpicref == null) {
         profpic = AssetImage('assets/profile.jpg');
@@ -82,23 +82,55 @@ class DatabaseService {
         profpic = MemoryImage(profpicref);
       }
       matchedList.add(ZestiUser(
-          uid: data.get('uid'),
+          uid: doc['uid'],
+          chatid: data['chatid'],
           designation: 'Test',
           mutualFriends: 69,
-          name: data.get('first-name'),
+          name: doc['first-name'],
           age: 69,
           profpic: profpic,
           location: 'Test',
-          bio: data.get('bio')));
+          bio: data['bio']));
     }
     return matchedList;
   }
 
+  /*
+    // http request
+    String urlBase = 'http://10.250.125.170:8080/matches?';
+    String arg1 = 'uid=' + uid;
+    final response = await http.get(Uri.parse(urlBase + arg1));
+    Map decoded = json.decode(response.body) as Map<String, List<Map<String, dynamic>>>;
+    List<Map<String, dynamic>> data = decoded['matches'];
+    List<ZestiUser> matchedList = [];
+    for (Map<String, dynamic> user in data){
+      Uint8List? profpicref =
+          await _storage.ref().child(user['photo-ref']).getData();
+      ImageProvider<Object> profpic;
+      if (profpicref == null) {
+        profpic = AssetImage('assets/profile.jpg');
+      } else {
+        profpic = MemoryImage(profpicref);
+      }
+      matchedList.add(ZestiUser(
+          uid: user['uid'],
+          designation: 'Test',
+          mutualFriends: 69,
+          name: user['first-name'],
+          age: 69,
+          profpic: profpic,
+          location: 'Test',
+          bio: user['bio']));
+    }
+    */
+
   // Get user info from document fields.
-  // SECURITY RISK - MIGHT NEED TO IMPLEMENT THIS WITH API CALL INSTEAD.
   Future<Map<String, dynamic>> getInfo() async {
-    DocumentSnapshot doc = await userCollection.doc(uid).get();
-    return doc.data() as Map<String, dynamic>;
+    // http request
+    String urlBase = 'http://10.250.125.170:8080/user-info?';
+    String arg1 = 'uid=' + uid;
+    final response = await http.get(Uri.parse(urlBase + arg1));
+    return json.decode(response.body) as Map<String, dynamic>;
   }
 
   // Update the account setup:
@@ -204,6 +236,7 @@ class DatabaseService {
           .set({'timestamp': ts, 'user': uid})
           .then((value) => print("New Match"))
           .catchError((error) => print("Failed to match: $error"));
+      await chatCollection.doc(gen).set({'user1': uid, 'user2': youid});
     }
   }
 

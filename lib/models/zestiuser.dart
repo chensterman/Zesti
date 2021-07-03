@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 // Useful to hold unpackaged requests from the database
 class ZestiUser {
   final String uid;
+  final String chatid;
   final String name;
   final String designation;
   final int mutualFriends;
@@ -11,11 +12,10 @@ class ZestiUser {
   final ImageProvider<Object> profpic;
   final String location;
   final String bio;
-  bool isLiked;
-  bool isSwipedOff;
 
   ZestiUser({
     required this.uid,
+    required this.chatid,
     required this.designation,
     required this.mutualFriends,
     required this.name,
@@ -23,7 +23,5 @@ class ZestiUser {
     required this.profpic,
     required this.location,
     required this.bio,
-    this.isLiked = false,
-    this.isSwipedOff = false,
   });
 }

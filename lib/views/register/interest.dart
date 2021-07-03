@@ -43,7 +43,7 @@ class Interest extends StatelessWidget {
                       print("Error");
                     } else {
                       await DatabaseService(uid: user.uid)
-                          .updateDatingInterest("men");
+                          .updateDatingInterest("man");
                     }
                     Navigator.push(
                       context,
@@ -59,7 +59,7 @@ class Interest extends StatelessWidget {
                       print("Error");
                     } else {
                       await DatabaseService(uid: user.uid)
-                          .updateDatingInterest("women");
+                          .updateDatingInterest("woman");
                     }
                     Navigator.push(
                       context,

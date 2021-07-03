@@ -28,14 +28,9 @@ class _ChatState extends State<Chat> {
   TextEditingController messageText = TextEditingController();
   Stream<QuerySnapshot>? messages;
 
-  setMessageStream() async {
-    messages = await DatabaseService(uid: widget.uid).messages(widget.chatid);
-    setState(() {});
-  }
-
   @override
   void initState() {
-    setMessageStream();
+    messages = DatabaseService(uid: widget.uid).messages(widget.chatid);
     super.initState();
   }
 
@@ -176,7 +171,7 @@ class _ChatState extends State<Chat> {
                   bottomLeft:
                       sendByMe ? Radius.circular(24) : Radius.circular(0),
                 ),
-                color: sendByMe ? Colors.orange : Color(0xfff1f0f0),
+                color: sendByMe ? Colors.orange : Colors.grey[350],
               ),
               padding: EdgeInsets.all(16),
               child: Text(

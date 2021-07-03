@@ -32,22 +32,16 @@ class _HomeState extends State<Home> {
 
   // List of users to display in swipe cards
   List<ZestiUser> _userList = []; // Actual loaded data (from _future)
-  Future<List<ZestiUser>>? _future; // Future to store http request data
-
-  // When the state is re-initialized (should only happen when _userList is empty),
-  // request new data into _future, which will in turn repopulate _userList.
-  @override
-  void initState() {
-    super.initState();
-    _future = _getUserData();
-  }
 
   // Receives user data from http request
-  Future<List<ZestiUser>> _getUserData() async {
+  Future<List<ZestiUser>> _getUserData(String? uid) async {
     try {
+      if (uid == null) {
+        throw Exception();
+      }
       // http request
-      final response =
-          await http.get(Uri.parse('http://10.250.125.170:8080/list'));
+      final response = await http
+          .get(Uri.parse('http://10.250.125.170:8080/swipe-list?uid=' + uid));
       // Decode JSON to hash map
       final decoded = json.decode(response.body) as Map<String, dynamic>;
       // Obtain image from photo-ref field
@@ -62,6 +56,7 @@ class _HomeState extends State<Home> {
       // Load data into User class
       ZestiUser testUser = ZestiUser(
           uid: decoded['uid'],
+          chatid: '',
           name: decoded['first-name'],
           designation: 'Test',
           mutualFriends: 69,
@@ -86,7 +81,9 @@ class _HomeState extends State<Home> {
       EditProfile(
         uid: user == null ? null : user.uid,
       ),
-      buildSwipe(),
+      buildSwipe(
+        user == null ? null : user.uid,
+      ),
       Matches(),
     ];
 
@@ -135,16 +132,16 @@ class _HomeState extends State<Home> {
   }
 
   // Stack of user swipe cards
-  Widget buildSwipe() {
+  Widget buildSwipe(String? uid) {
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.all(8),
         // FutureBuilder for http request payload
         child: FutureBuilder(
-          future: _future,
+          future: _getUserData(uid),
           builder: (context, snapshot) {
             if (snapshot.hasError) {
-              return Text("Error");
+              return Text(snapshot.error.toString());
             }
             // On success, build swipe cards out of _userList
             else if (snapshot.connectionState == ConnectionState.done) {
@@ -209,9 +206,7 @@ class _HomeState extends State<Home> {
     }
     // Call to repopulate if _userList is empty
     if (_userList.isEmpty) {
-      setState(() {
-        _future = _getUserData();
-      });
+      setState(() {});
     }
   }
 }
