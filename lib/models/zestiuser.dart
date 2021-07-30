@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 // Useful to hold unpackaged requests from the database
 class ZestiUser {
   final String uid;
-  final String chatid;
+  String? chatid;
   final String name;
   final String designation;
   final int mutualFriends;
@@ -15,7 +15,7 @@ class ZestiUser {
 
   ZestiUser({
     required this.uid,
-    required this.chatid,
+    this.chatid,
     required this.designation,
     required this.mutualFriends,
     required this.name,

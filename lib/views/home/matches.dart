@@ -64,7 +64,7 @@ class _MatchListState extends State<MatchList> {
             for (ZestiUser matchedUser in data) {
               widgetList.add(MatchSheet(
                 uid: widget.uid,
-                chatid: matchedUser.chatid,
+                chatid: '',
                 name: matchedUser.name,
                 profpic: matchedUser.profpic,
               ));

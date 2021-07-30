@@ -34,6 +34,7 @@ class _HomeState extends State<Home> {
   List<ZestiUser> _userList = []; // Actual loaded data (from _future)
 
   // Receives user data from http request
+  // Obsolete (move to databaseService and disregard API call)
   Future<List<ZestiUser>> _getUserData(String? uid) async {
     try {
       if (uid == null) {
@@ -75,14 +76,18 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     final user = Provider.of<User?>(context);
+    if (user == null) {
+      return Text('User Error');
+    }
 
+    Size size = MediaQuery.of(context).size;
     // Widget list for bottom nav bar
     final List<Widget> _widgetSet = <Widget>[
       EditProfile(
-        uid: user == null ? null : user.uid,
+        uid: user.uid,
       ),
       buildSwipe(
-        user == null ? null : user.uid,
+        user.uid,
       ),
       Matches(),
     ];
@@ -92,7 +97,6 @@ class _HomeState extends State<Home> {
       appBar: AppBar(
         automaticallyImplyLeading: false,
         backgroundColor: CustomTheme.lightTheme.primaryColor,
-        elevation: 0.0,
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.logout),
@@ -111,6 +115,9 @@ class _HomeState extends State<Home> {
         child: _widgetSet.elementAt(_selectedIndex),
       ),
       bottomNavigationBar: BottomNavigationBar(
+        showSelectedLabels: false,
+        showUnselectedLabels: false,
+        iconSize: size.width * 0.08,
         items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
           BottomNavigationBarItem(icon: Icon(Icons.home), label: "Zesti"),
@@ -132,19 +139,21 @@ class _HomeState extends State<Home> {
   }
 
   // Stack of user swipe cards
-  Widget buildSwipe(String? uid) {
+  Widget buildSwipe(String uid) {
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.all(8),
         // FutureBuilder for http request payload
         child: FutureBuilder(
-          future: _getUserData(uid),
+          future: DatabaseService(uid: uid).getSwiping(),
           builder: (context, snapshot) {
             if (snapshot.hasError) {
               return Text(snapshot.error.toString());
             }
             // On success, build swipe cards out of _userList
             else if (snapshot.connectionState == ConnectionState.done) {
+              _userList = snapshot.data as List<ZestiUser>;
+              print(_userList.length);
               return Stack(children: _userList.map(buildCard).toList());
             }
             // Otherwise, return a loading screen
@@ -199,11 +208,12 @@ class _HomeState extends State<Home> {
     final minimumDrag = 100;
     // Swipe logic
     if (details.offset.dx > minimumDrag) {
-      _userList.remove(user);
+      _userList.removeAt(0);
       await DatabaseService(uid: user.uid).updateLiked(user.uid);
     } else if (details.offset.dx < -minimumDrag) {
-      _userList.remove(user);
+      _userList.removeAt(0);
     }
+    print(_userList.length);
     // Call to repopulate if _userList is empty
     if (_userList.isEmpty) {
       setState(() {});

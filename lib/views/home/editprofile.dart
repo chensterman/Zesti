@@ -13,17 +13,14 @@ import 'package:zesti/views/home/home.dart';
 // Widget for the profile manager
 class EditProfile extends StatelessWidget {
   final FirebaseStorage _storage = FirebaseStorage.instance;
-  final String? uid;
+  final String uid;
   EditProfile({
     Key? key,
     required this.uid,
   }) : super(key: key);
 
   // Retrieves user info in map form
-  Future<Map<String, dynamic>> _getInfo(String? uid) async {
-    if (uid == null) {
-      return {};
-    }
+  Future<Map<String, dynamic>> _getInfo(String uid) async {
     // Database grab
     Map<String, dynamic> data = await DatabaseService(uid: uid).getInfo();
     // Convert photo-ref field to image
@@ -52,16 +49,11 @@ class EditProfile extends StatelessWidget {
             }
             // On success
             else if (snapshot.connectionState == ConnectionState.done) {
-              Map<String, dynamic>? data = snapshot.data;
-              // Null check
-              if (data == null) {
-                return Text('Error');
-              } else {
-                return ProfileForm(
-                  bio: data['bio'],
-                  profpic: data['prof-pic'],
-                );
-              }
+              Map<String, dynamic> data = snapshot.data!;
+              return ProfileForm(
+                bio: data['bio'],
+                profpic: data['prof-pic'],
+              );
             }
             // Otherwise, return a loading screen
             else {

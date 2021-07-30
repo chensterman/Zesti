@@ -32,7 +32,6 @@ class DatabaseService {
     await userCollection
         .doc(uid)
         .set({
-          'uid': uid,
           'account-setup': false,
           'first-name': null,
           'last-name': null,
@@ -47,12 +46,53 @@ class DatabaseService {
         .catchError((error) => print("Failed"));
   }
 
+  Future<ZestiUser> _userFirebaseToZesti(DocumentReference data) async {
+    DocumentSnapshot snapshot = await data.get();
+    Map<String, dynamic> mapdata = snapshot.data() as Map<String, dynamic>;
+    Uint8List? profpicref =
+        await _storage.ref().child(mapdata['photo-ref']).getData();
+    ImageProvider<Object> profpic;
+    if (profpicref == null) {
+      profpic = AssetImage('assets/profile.jpg');
+    } else {
+      profpic = MemoryImage(profpicref);
+    }
+    return ZestiUser(
+        uid: data.id,
+        designation: 'Test',
+        mutualFriends: 69,
+        name: mapdata['first-name'],
+        age: 69,
+        profpic: profpic,
+        location: 'Test',
+        bio: mapdata['bio']);
+  }
+
   Stream<QuerySnapshot> messages(String chatid) {
     return chatCollection
         .doc(chatid)
         .collection('messages')
         .orderBy('timestamp', descending: true)
         .snapshots();
+  }
+
+  Stream<Future<Map<String, dynamic>>> profileInfo() {
+    return userCollection.doc(uid).snapshots().map(_userDocFromSnapshot);
+  }
+
+  Future<Map<String, dynamic>> _userDocFromSnapshot(
+      DocumentSnapshot snapshot) async {
+    Map<String, dynamic> data = snapshot.data() as Map<String, dynamic>;
+    Uint8List? profpicref =
+        await _storage.ref().child(data['photo-ref']).getData();
+    ImageProvider<Object> profpic;
+    if (profpicref == null) {
+      profpic = AssetImage('assets/profile.jpg');
+    } else {
+      profpic = MemoryImage(profpicref);
+    }
+    data['photo-ref'] = profpic;
+    return data;
   }
 
   // Stream to show list of matched users
@@ -71,66 +111,145 @@ class DatabaseService {
       return doc.data();
     }).toList();
     List<ZestiUser> matchedList = [];
-    for (Map<String, dynamic> data in dataList) {
-      DocumentSnapshot doc = await data['user-ref'].get();
-      Uint8List? profpicref =
-          await _storage.ref().child(doc['photo-ref']).getData();
-      ImageProvider<Object> profpic;
-      if (profpicref == null) {
-        profpic = AssetImage('assets/profile.jpg');
-      } else {
-        profpic = MemoryImage(profpicref);
-      }
-      matchedList.add(ZestiUser(
-          uid: doc['uid'],
-          chatid: data['chatid'],
-          designation: 'Test',
-          mutualFriends: 69,
-          name: doc['first-name'],
-          age: 69,
-          profpic: profpic,
-          location: 'Test',
-          bio: data['bio']));
+    for (DocumentReference data in dataList) {
+      ZestiUser match = await _userFirebaseToZesti(data);
+      matchedList.add(match);
     }
     return matchedList;
   }
 
-  /*
-    // http request
-    String urlBase = 'http://10.250.125.170:8080/matches?';
-    String arg1 = 'uid=' + uid;
-    final response = await http.get(Uri.parse(urlBase + arg1));
-    Map decoded = json.decode(response.body) as Map<String, List<Map<String, dynamic>>>;
-    List<Map<String, dynamic>> data = decoded['matches'];
-    List<ZestiUser> matchedList = [];
-    for (Map<String, dynamic> user in data){
-      Uint8List? profpicref =
-          await _storage.ref().child(user['photo-ref']).getData();
-      ImageProvider<Object> profpic;
-      if (profpicref == null) {
-        profpic = AssetImage('assets/profile.jpg');
-      } else {
-        profpic = MemoryImage(profpicref);
-      }
-      matchedList.add(ZestiUser(
-          uid: user['uid'],
-          designation: 'Test',
-          mutualFriends: 69,
-          name: user['first-name'],
-          age: 69,
-          profpic: profpic,
-          location: 'Test',
-          bio: user['bio']));
-    }
-    */
-
   // Get user info from document fields.
   Future<Map<String, dynamic>> getInfo() async {
-    // http request
-    String urlBase = 'http://10.250.125.170:8080/user-info?';
-    String arg1 = 'uid=' + uid;
-    final response = await http.get(Uri.parse(urlBase + arg1));
-    return json.decode(response.body) as Map<String, dynamic>;
+    DocumentSnapshot doc = await userCollection.doc(uid).get();
+    return doc.data() as Map<String, dynamic>;
+  }
+
+  Future<List<ZestiUser>> getSwiping() async {
+    Map<String, dynamic> data = await getInfo();
+    List<String> queryIdentity = [];
+    List<String> queryInterest = [];
+    switch (data['dating-identity']) {
+      case 'non-binary':
+        {
+          switch (data['dating-interest']) {
+            case 'everyone':
+              {
+                queryIdentity = ['man', 'woman', 'non-binary'];
+                queryInterest = ['everyone'];
+              }
+              break;
+
+            case 'man':
+              {
+                queryIdentity = ['man'];
+                queryInterest = ['everyone'];
+              }
+              break;
+
+            case 'woman':
+              {
+                queryIdentity = ['woman'];
+                queryInterest = ['everyone'];
+              }
+              break;
+          }
+        }
+        break;
+
+      case 'man':
+        {
+          switch (data['dating-interest']) {
+            case 'everyone':
+              {
+                queryIdentity = ['man', 'woman', 'non-binary'];
+                queryInterest = ['man', 'everyone'];
+              }
+              break;
+
+            case 'man':
+              {
+                queryIdentity = ['man'];
+                queryInterest = ['man', 'everyone'];
+              }
+              break;
+
+            case 'woman':
+              {
+                queryIdentity = ['woman'];
+                queryInterest = ['man', 'everyone'];
+              }
+              break;
+          }
+        }
+        break;
+
+      case 'woman':
+        {
+          switch (data['dating-interest']) {
+            case 'everyone':
+              {
+                queryIdentity = ['man', 'woman', 'non-binary'];
+                queryInterest = ['woman', 'everyone'];
+              }
+              break;
+
+            case 'man':
+              {
+                queryIdentity = ['man'];
+                queryInterest = ['woman', 'everyone'];
+              }
+              break;
+
+            case 'woman':
+              {
+                queryIdentity = ['woman'];
+                queryInterest = ['woman', 'everyone'];
+              }
+              break;
+            default:
+              {
+                queryIdentity = ['man'];
+                queryInterest = ['woman'];
+              }
+              break;
+          }
+        }
+        break;
+    }
+    print(queryIdentity);
+    print(queryInterest);
+    List<ZestiUser> userList = [];
+    while (userList.length < 3) {
+      QuerySnapshot snapshot;
+      if (queryIdentity.length == 3) {
+        snapshot = await userCollection
+            .where('dating-interest', whereIn: queryInterest)
+            .limit(1)
+            .get();
+      } else {
+        snapshot = await userCollection
+            .where('dating-identity', isEqualTo: queryIdentity[0])
+            .where('dating-interest', whereIn: queryInterest)
+            .limit(1)
+            .get();
+      }
+      if (snapshot.size == 0) {
+        break;
+      } else {
+        String uidPotential = snapshot.docs[0].id;
+        DocumentReference potentialDoc = userCollection.doc(uidPotential);
+        ZestiUser potentialUser = await _userFirebaseToZesti(potentialDoc);
+        userCollection
+            .doc(uid)
+            .collection('liked')
+            .doc(uidPotential)
+            .get()
+            .then((docSnapshot) => {
+                  if (!docSnapshot.exists) {userList.add(potentialUser)}
+                });
+      }
+    }
+    return userList;
   }
 
   // Update the account setup:
@@ -213,7 +332,7 @@ class DatabaseService {
         .then((value) => print("Liked"))
         .catchError((error) => print("Failed to like: $error"));
 
-    // http request
+    // http request Update this part in the API (no more api calls)
     String urlBase = 'http://10.250.125.170:8080/match-check?';
     String arg1 = 'meid=' + uid;
     String arg2 = 'youid=' + youid;
