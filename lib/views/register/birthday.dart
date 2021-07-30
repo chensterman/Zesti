@@ -35,6 +35,9 @@ class Birthday extends StatefulWidget {
 
 class _BirthdayState extends State<Birthday> {
   DateTime birthday = DateTime.now();
+  dynamic month = "--";
+  dynamic day = "--";
+  dynamic year = "--";
 
   @override
   Widget build(BuildContext context) {
@@ -67,11 +70,11 @@ class _BirthdayState extends State<Birthday> {
                       child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      NumberLine(width: size.width * .15, text: "10"),
+                      NumberLine(width: size.width * .15, text: "$month"),
                       Text("/", style: TextStyle(fontSize: 25)),
-                      NumberLine(width: size.width * .15, text: "25"),
+                      NumberLine(width: size.width * .15, text: "$day"),
                       Text("/", style: TextStyle(fontSize: 25)),
-                      NumberLine(width: size.width * .2, text: "2000"),
+                      NumberLine(width: size.width * .2, text: "$year"),
                     ],
                   )),
                 ),
@@ -94,10 +97,15 @@ class _BirthdayState extends State<Birthday> {
                               DatePicker.showDatePicker(context,
                                   showTitleActions: true,
                                   minTime: DateTime(1900, 3, 5),
-                                  maxTime: DateTime(2021, 6, 7),
+                                  maxTime: DateTime.now(),
                                   onChanged: (date) {
                                 print('change $date in time zone ' +
                                     date.timeZoneOffset.inHours.toString());
+                                setState(() {
+                                  month = date.month;
+                                  day = date.day;
+                                  year = date.year;
+                                });
                               }, onConfirm: (date) {
                                 print('confirm $date');
                                 birthday = date;

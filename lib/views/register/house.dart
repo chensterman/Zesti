@@ -15,7 +15,7 @@ class House extends StatefulWidget {
 
 class _HouseState extends State<House> {
   final _formKey = GlobalKey<FormState>();
-  String _house = '';
+  dynamic _house;
 
   // List of Harvard houses
   List<String> _houseList = [
@@ -86,19 +86,19 @@ class _HouseState extends State<House> {
                 ),
                 SizedBox(height: 20.0),
                 DropdownButton<String>(
-                  value: null,
+                  value: _house,
                   hint: Text('Select'),
                   style: TextStyle(color: Colors.black),
                   isExpanded: true,
                   items: _houseList.map((val) {
                     return DropdownMenuItem(value: val, child: Text(val));
                   }).toList(),
-                  onChanged: (val) {
+                  onChanged: (String? val) {
                     if (val == null) {
                       print('Error');
                     } else {
                       setState(() {
-                        _house = val.toLowerCase();
+                        _house = val;
                       });
                     }
                   },
@@ -111,7 +111,7 @@ class _HouseState extends State<House> {
                         print("Error");
                       } else {
                         await DatabaseService(uid: user.uid)
-                            .updateHouse(_house);
+                            .updateHouse(_house.toLowerCase());
                       }
                       Navigator.push(
                         context,
