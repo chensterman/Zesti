@@ -97,8 +97,7 @@ class _BirthdayState extends State<Birthday> {
                               DatePicker.showDatePicker(context,
                                   showTitleActions: true,
                                   minTime: DateTime(1900, 3, 5),
-                                  maxTime: DateTime.now(),
-                                  onChanged: (date) {
+                                  maxTime: DateTime.now(), onChanged: (date) {
                                 print('change $date in time zone ' +
                                     date.timeZoneOffset.inHours.toString());
                                 setState(() {
