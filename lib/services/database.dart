@@ -13,6 +13,7 @@ class DatabaseService {
   final String uid;
   DatabaseService({required this.uid});
 
+  // Firebase Storage instance.
   final FirebaseStorage _storage = FirebaseStorage.instance;
 
   // Access to 'users' collection.
@@ -47,16 +48,28 @@ class DatabaseService {
   }
 
   Future<ZestiUser> _userFirebaseToZesti(DocumentReference data) async {
+    // Get snapshot from reference
     DocumentSnapshot snapshot = await data.get();
+    // Convert snapshot to data in hash map form
     Map<String, dynamic> mapdata = snapshot.data() as Map<String, dynamic>;
-    Uint8List? profpicref =
-        await _storage.ref().child(mapdata['photo-ref']).getData();
+    // Initialize profile picture variable
     ImageProvider<Object> profpic;
-    if (profpicref == null) {
+
+    // Check if user has an uploaded profile picture.
+    // Set profile picture variable to the corresponding case.
+    if (mapdata['photo-ref'] == null) {
       profpic = AssetImage('assets/profile.jpg');
     } else {
-      profpic = MemoryImage(profpicref);
+      Uint8List? profpicref =
+          await _storage.ref().child(mapdata['photo-ref']).getData();
+      if (profpicref == null) {
+        profpic = AssetImage('assets/profile.jpg');
+      } else {
+        profpic = MemoryImage(profpicref);
+      }
     }
+
+    // Return the ZestiUser object.
     return ZestiUser(
         uid: data.id,
         designation: 'Test',
@@ -82,17 +95,24 @@ class DatabaseService {
 
   Future<Map<String, dynamic>> _userDocFromSnapshot(
       DocumentSnapshot snapshot) async {
-    Map<String, dynamic> data = snapshot.data() as Map<String, dynamic>;
-    Uint8List? profpicref =
-        await _storage.ref().child(data['photo-ref']).getData();
+    Map<String, dynamic> mapdata = snapshot.data() as Map<String, dynamic>;
+    // Initialize profile picture variable
     ImageProvider<Object> profpic;
-    if (profpicref == null) {
+    // Check if user has an uploaded profile picture.
+    // Set profile picture variable to the corresponding case.
+    if (mapdata['photo-ref'] == null) {
       profpic = AssetImage('assets/profile.jpg');
     } else {
-      profpic = MemoryImage(profpicref);
+      Uint8List? profpicref =
+          await _storage.ref().child(mapdata['photo-ref']).getData();
+      if (profpicref == null) {
+        profpic = AssetImage('assets/profile.jpg');
+      } else {
+        profpic = MemoryImage(profpicref);
+      }
     }
-    data['photo-ref'] = profpic;
-    return data;
+    mapdata['photo-ref'] = profpic;
+    return mapdata;
   }
 
   // Stream to show list of matched users
