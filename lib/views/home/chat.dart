@@ -9,7 +9,7 @@ import 'package:zesti/theme/theme.dart';
 // Widget displaying the chat page for a specific match
 class Chat extends StatefulWidget {
   final String uid;
-  final String chatid;
+  final String? chatid;
   final String name;
   final ImageProvider<Object> profpic;
   Chat({
@@ -183,7 +183,7 @@ class _ChatState extends State<Chat> {
     );
   }
 
-  sendMessage(String uid, String chatid, String type, String content) {
+  sendMessage(String uid, String? chatid, String type, String content) {
     DatabaseService(uid: uid).sendMessage(chatid, type, content);
     messageText.text = '';
   }

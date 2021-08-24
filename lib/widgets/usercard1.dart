@@ -6,11 +6,11 @@ import 'package:zesti/providers/cardposition.dart';
 // Widget displaying the cards to swipe on
 class UserCard1 extends StatelessWidget {
   final ZestiUser user;
-  final bool? isUserInFocus;
+  final bool rec;
 
   UserCard1({
     required this.user,
-    required this.isUserInFocus,
+    required this.rec,
     Key? key,
   }) : super(key: key);
 
@@ -54,9 +54,15 @@ class UserCard1 extends StatelessWidget {
                 children: [
                   buildUserInfo(user: user),
                   Padding(
-                    padding: EdgeInsets.only(bottom: 16, right: 8),
-                    child: Icon(Icons.info, color: Colors.white),
-                  )
+                    padding: EdgeInsets.all(16.0),
+                    child: Icon(Icons.cancel_rounded,
+                        color: Colors.red, size: 64.0),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: Icon(rec ? Icons.send : Icons.check_circle,
+                        color: rec ? Colors.blue : Colors.green, size: 64.0),
+                  ),
                 ],
               ),
             ),
@@ -68,14 +74,14 @@ class UserCard1 extends StatelessWidget {
 
   Widget buildUserInfo({@required final user}) {
     return Padding(
-      padding: const EdgeInsets.all(8),
+      padding: const EdgeInsets.all(8.0),
       // Column displaying user info
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            '${user.name}, ${user.age}',
+            '${user.first}, ${user.age}',
             style: TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.bold,
@@ -84,12 +90,12 @@ class UserCard1 extends StatelessWidget {
           ),
           SizedBox(height: 8),
           Text(
-            user.designation,
+            user.bio,
             style: TextStyle(color: Colors.white),
           ),
           SizedBox(height: 4),
           Text(
-            '${user.mutualFriends} Mutual Friends',
+            '${user.house} House',
             style: TextStyle(color: Colors.white),
           )
         ],

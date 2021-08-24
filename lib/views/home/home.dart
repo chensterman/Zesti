@@ -34,7 +34,7 @@ class _HomeState extends State<Home> {
   List<ZestiUser> _userList = []; // Actual loaded data (from _future)
 
   // Receives user data from http request
-  // Obsolete (move to databaseService and disregard API call)
+  /* Obsolete (move to databaseService and disregard API call)
   Future<List<ZestiUser>> _getUserData(String? uid) async {
     try {
       if (uid == null) {
@@ -72,6 +72,7 @@ class _HomeState extends State<Home> {
     }
     return _userList;
   }
+  */
 
   @override
   Widget build(BuildContext context) {

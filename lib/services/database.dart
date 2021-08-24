@@ -47,41 +47,7 @@ class DatabaseService {
         .catchError((error) => print("Failed"));
   }
 
-  Future<ZestiUser> _userFirebaseToZesti(DocumentReference data) async {
-    // Get snapshot from reference
-    DocumentSnapshot snapshot = await data.get();
-    // Convert snapshot to data in hash map form
-    Map<String, dynamic> mapdata = snapshot.data() as Map<String, dynamic>;
-    // Initialize profile picture variable
-    ImageProvider<Object> profpic;
-
-    // Check if user has an uploaded profile picture.
-    // Set profile picture variable to the corresponding case.
-    if (mapdata['photo-ref'] == null) {
-      profpic = AssetImage('assets/profile.jpg');
-    } else {
-      Uint8List? profpicref =
-          await _storage.ref().child(mapdata['photo-ref']).getData();
-      if (profpicref == null) {
-        profpic = AssetImage('assets/profile.jpg');
-      } else {
-        profpic = MemoryImage(profpicref);
-      }
-    }
-
-    // Return the ZestiUser object.
-    return ZestiUser(
-        uid: data.id,
-        designation: 'Test',
-        mutualFriends: 69,
-        name: mapdata['first-name'],
-        age: 69,
-        profpic: profpic,
-        location: 'Test',
-        bio: mapdata['bio']);
-  }
-
-  Stream<QuerySnapshot> messages(String chatid) {
+  Stream<QuerySnapshot> messages(String? chatid) {
     return chatCollection
         .doc(chatid)
         .collection('messages')
@@ -127,15 +93,53 @@ class DatabaseService {
   // Helper function for matched users stream - convert QuerySnapshot to
   // list of ZestiUser models.
   Future<List<ZestiUser>> _zestiUserFromSnapshot(QuerySnapshot snapshot) async {
-    List<dynamic> dataList = snapshot.docs.map((doc) {
-      return doc.data();
-    }).toList();
+    List<QueryDocumentSnapshot> dataList = snapshot.docs;
     List<ZestiUser> matchedList = [];
-    for (DocumentReference data in dataList) {
-      ZestiUser match = await _userFirebaseToZesti(data);
+    for (QueryDocumentSnapshot data in dataList) {
+      Map<String, dynamic> userData = data.data() as Map<String, dynamic>;
+      ZestiUser match =
+          await _userFirebaseToZesti(userData['user-ref'], userData['chatid']);
       matchedList.add(match);
     }
     return matchedList;
+  }
+
+  Future<ZestiUser> _userFirebaseToZesti(DocumentReference data,
+      [String? chatid]) async {
+    // Get snapshot from reference
+    DocumentSnapshot snapshot = await data.get();
+    // Convert snapshot to data in hash map form
+    Map<String, dynamic> mapdata = snapshot.data() as Map<String, dynamic>;
+    // Initialize profile picture variable
+    ImageProvider<Object> profpic;
+
+    // Check if user has an uploaded profile picture.
+    // Set profile picture variable to the corresponding case.
+    if (mapdata['photo-ref'] == null) {
+      profpic = AssetImage('assets/profile.jpg');
+    } else {
+      Uint8List? profpicref =
+          await _storage.ref().child(mapdata['photo-ref']).getData();
+      if (profpicref == null) {
+        profpic = AssetImage('assets/profile.jpg');
+      } else {
+        profpic = MemoryImage(profpicref);
+      }
+    }
+
+    // Return the ZestiUser object.
+    return ZestiUser(
+      uid: data.id,
+      chatid: chatid,
+      first: mapdata['first-name'],
+      last: mapdata['first-name'],
+      bio: mapdata['bio'],
+      dIdentity: mapdata['dating-identity'],
+      dInterest: mapdata['dating-interest'],
+      house: mapdata['house'],
+      age: 69,
+      profpic: profpic,
+    );
   }
 
   // Get user info from document fields.
@@ -379,7 +383,7 @@ class DatabaseService {
     }
   }
 
-  Future<void> sendMessage(String chatid, String type, String content) async {
+  Future<void> sendMessage(String? chatid, String type, String content) async {
     await chatCollection
         .doc(chatid)
         .collection('messages')
