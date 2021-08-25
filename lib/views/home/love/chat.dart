@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:zesti/services/auth.dart';
 import 'package:zesti/services/database.dart';
 import 'package:zesti/theme/theme.dart';
 
@@ -11,7 +10,7 @@ class Chat extends StatefulWidget {
   final String uid;
   final String? chatid;
   final String name;
-  final ImageProvider<Object> profpic;
+  final ImageProvider<Object>? profpic;
   Chat({
     Key? key,
     required this.uid,
@@ -30,7 +29,7 @@ class _ChatState extends State<Chat> {
 
   @override
   void initState() {
-    messages = DatabaseService(uid: widget.uid).messages(widget.chatid);
+    messages = DatabaseService(uid: widget.uid).getMessages(widget.chatid);
     super.initState();
   }
 

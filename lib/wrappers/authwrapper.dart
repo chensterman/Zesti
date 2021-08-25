@@ -4,9 +4,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:zesti/services/database.dart';
 import 'package:zesti/views/auth/start.dart';
-import 'package:zesti/views/home/temp1.dart';
+import 'package:zesti/views/home/home.dart';
 import 'package:zesti/views/register/name.dart';
-import 'package:zesti/wrappers/swipewrapper.dart';
 
 // AuthWrapper class:
 //  Listens to authentication stream.
@@ -38,7 +37,7 @@ class AuthWrapper extends StatelessWidget {
             dynamic test = snapshot.data?.data();
             // Check if user already setup account (finished all registration forms)
             if (test['account-setup']) {
-              return Temp1();
+              return Home();
             } else {
               return Name();
             }

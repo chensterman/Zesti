@@ -1,29 +1,18 @@
-import 'dart:typed_data';
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:http/http.dart' as http;
-import 'package:zesti/services/auth.dart';
-import 'package:zesti/services/database.dart';
 import 'package:zesti/theme/theme.dart';
 import 'package:provider/provider.dart';
-import 'package:zesti/models/zestiuser.dart';
-import 'package:zesti/views/auth/start.dart';
-import 'package:zesti/widgets/usercard.dart';
-import 'package:zesti/providers/cardposition.dart';
-import 'package:zesti/views/home/editprofile.dart';
-import 'package:zesti/views/home/matches.dart';
 
 // Widget containing swiping, profile management, and matches
-class Temp3 extends StatefulWidget {
-  Temp3({Key? key}) : super(key: key);
+class Social extends StatefulWidget {
+  Social({Key? key}) : super(key: key);
 
   @override
-  _Temp3State createState() => _Temp3State();
+  _SocialState createState() => _SocialState();
 }
 
-class _Temp3State extends State<Temp3> {
+class _SocialState extends State<Social> {
   // Firebase storage instance
   final FirebaseStorage _storage = FirebaseStorage.instance;
 

@@ -1,107 +1,93 @@
 import 'dart:io';
-import 'dart:typed_data';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:provider/provider.dart';
+import 'package:zesti/models/zestiuser.dart';
 import 'package:zesti/services/database.dart';
 import 'package:zesti/theme/theme.dart';
 import 'package:zesti/views/home/home.dart';
+import 'package:zesti/widgets/usercard.dart';
 
 // Widget for the profile manager
-class EditProfile extends StatelessWidget {
-  final FirebaseStorage _storage = FirebaseStorage.instance;
+class Profile extends StatefulWidget {
   final String uid;
-  EditProfile({
+  Profile({
     Key? key,
     required this.uid,
   }) : super(key: key);
 
-  // Retrieves user info in map form
-  Future<Map<String, dynamic>> _getInfo(String uid) async {
-    // Database grab
-    Map<String, dynamic> data = await DatabaseService(uid: uid).getInfo();
-    // Convert photo-ref field to image
-    Uint8List? profpic =
-        await _storage.ref().child(data['photo-ref']).getData();
-    if (profpic == null) {
-      data['prof-pic'] = null;
-    } else {
-      data['prof-pic'] = MemoryImage(profpic);
-    }
-    return data;
-  }
-
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(8),
-        // FutureBuilder for data request payload
-        child: FutureBuilder(
-          future: _getInfo(uid),
-          builder: (context, AsyncSnapshot<Map<String, dynamic>> snapshot) {
-            // On error
-            if (snapshot.hasError) {
-              return Text("Error");
-            }
-            // On success
-            else if (snapshot.connectionState == ConnectionState.done) {
-              Map<String, dynamic> data = snapshot.data!;
-              return ProfileForm(
-                bio: data['bio'],
-                profpic: data['prof-pic'],
-              );
-            }
-            // Otherwise, return a loading screen
-            else {
-              return Center(child: CircularProgressIndicator());
-            }
-          },
-        ),
-      ),
-    );
-  }
+  _ProfileState createState() => _ProfileState();
 }
 
-// Widget to display editing form with user data loaded onto it
-class ProfileForm extends StatefulWidget {
-  final String bio;
-  final MemoryImage? profpic;
-  ProfileForm({
-    Key? key,
-    required this.bio,
-    required this.profpic,
-  }) : super(key: key);
-
-  @override
-  _ProfileFormState createState() => _ProfileFormState();
-}
-
-class _ProfileFormState extends State<ProfileForm> {
+class _ProfileState extends State<Profile> {
   // Form widget key.
   final _formKey = GlobalKey<FormState>();
 
   final ImagePicker _picker = ImagePicker();
-  final FirebaseStorage _storage = FirebaseStorage.instance;
 
   // User data to retrieve and display.
-  String bio = '';
+  String? name;
+  String? bio;
+  String? house;
+  String? photoref;
   dynamic profpic;
+
+  Stream<DocumentSnapshot>? profileInfo;
 
   @override
   void initState() {
+    profileInfo = DatabaseService(uid: widget.uid).getProfileInfo();
     super.initState();
-    bio = widget.bio;
-    profpic = widget.profpic;
   }
 
   @override
   Widget build(BuildContext context) {
+    return StreamBuilder(
+        stream: profileInfo,
+        builder: (context, AsyncSnapshot<DocumentSnapshot> snapshot) {
+          DocumentSnapshot? tmp = snapshot.data;
+          if (tmp == null) {
+            return Center(child: CircularProgressIndicator());
+          } else {
+            Map<String, dynamic> data = tmp.data() as Map<String, dynamic>;
+            if (name == null) name = data['first-name'];
+            if (bio == null) bio = data['bio'];
+            if (house == null) house = data['house'];
+            if (photoref == null) photoref = data['photo-ref'];
+            return DefaultTabController(
+              initialIndex: 0,
+              length: 2,
+              child: Scaffold(
+                appBar: AppBar(
+                  backgroundColor: CustomTheme.lightTheme.primaryColor,
+                  title: Center(child: Text("Your Profile")),
+                  bottom: TabBar(
+                    tabs: <Widget>[
+                      Tab(
+                        child: Text("Edit"),
+                      ),
+                      Tab(
+                        child: Text("Preview"),
+                      ),
+                    ],
+                  ),
+                ),
+                body: TabBarView(
+                  children: <Widget>[
+                    edit(),
+                    preview(),
+                  ],
+                ),
+              ),
+            );
+          }
+        });
+  }
+
+  Widget edit() {
     Size size = MediaQuery.of(context).size;
-    final user = Provider.of<User?>(context);
     return Scaffold(
       body: SingleChildScrollView(
         child: Center(
@@ -116,7 +102,19 @@ class _ProfileFormState extends State<ProfileForm> {
                 children: [
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 64.0),
-                    child: profileImage(),
+                    child: FutureBuilder(
+                        future: DatabaseService(uid: widget.uid)
+                            .getProfPic(photoref),
+                        builder: (context,
+                            AsyncSnapshot<ImageProvider<Object>> snapshot) {
+                          if (snapshot.hasError) {
+                            return Text(snapshot.error.toString());
+                            // On success
+                          } else {
+                            profpic = snapshot.data;
+                            return profileImage();
+                          }
+                        }),
                   ),
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 16.0),
@@ -180,10 +178,8 @@ class _ProfileFormState extends State<ProfileForm> {
                             // On form validation, the newly entered field should be updated
                             // in the database. STILL NEED IMPLEMENTING - when a using uploads
                             // a new profile picture, go delete the old one in Firebase Storage.
-                            if (user != null) {
-                              await DatabaseService(uid: user.uid)
-                                  .updateBio(bio);
-                            }
+                            await DatabaseService(uid: widget.uid)
+                                .updateBio(bio);
                             Navigator.push(
                               context,
                               MaterialPageRoute(builder: (context) => Home()),
@@ -199,6 +195,35 @@ class _ProfileFormState extends State<ProfileForm> {
         ),
       ),
     );
+  }
+
+  Widget preview() {
+    return Padding(
+        padding: EdgeInsets.all(16.0),
+        child: FutureBuilder(
+            future: DatabaseService(uid: widget.uid).getProfPic(photoref),
+            builder: (context, AsyncSnapshot<ImageProvider<Object>> snapshot) {
+              if (snapshot.hasError) {
+                return Text(snapshot.error.toString());
+                // On success
+              } else if (snapshot.connectionState == ConnectionState.done) {
+                profpic = snapshot.data;
+                ZestiUser previewUser = ZestiUser(
+                    uid: "",
+                    first: name.toString(),
+                    last: "",
+                    bio: bio.toString(),
+                    dIdentity: "",
+                    dInterest: "",
+                    house: house.toString(),
+                    age: 21,
+                    profpic: profpic);
+                return UserCard1(user: previewUser, rec: true);
+                // On Loading
+              } else {
+                return Center(child: CircularProgressIndicator());
+              }
+            }));
   }
 
   // Image Picker:

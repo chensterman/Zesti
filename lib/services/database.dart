@@ -5,7 +5,6 @@ import 'package:uuid/uuid.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:zesti/models/zestiuser.dart';
 
 // DatabaseService class:
 //  Contains all methods and data pertaining to the user database.
@@ -47,7 +46,8 @@ class DatabaseService {
         .catchError((error) => print("Failed"));
   }
 
-  Stream<QuerySnapshot> messages(String? chatid) {
+  // Stream to retrieve messages from a given chatid
+  Stream<QuerySnapshot> getMessages(String? chatid) {
     return chatCollection
         .doc(chatid)
         .collection('messages')
@@ -55,99 +55,36 @@ class DatabaseService {
         .snapshots();
   }
 
-  Stream<Future<Map<String, dynamic>>> profileInfo() {
-    return userCollection.doc(uid).snapshots().map(_userDocFromSnapshot);
+  // Stream to retrieve profile info from the given uid
+  Stream<DocumentSnapshot> getProfileInfo() {
+    return userCollection.doc(uid).snapshots();
   }
 
-  Future<Map<String, dynamic>> _userDocFromSnapshot(
-      DocumentSnapshot snapshot) async {
-    Map<String, dynamic> mapdata = snapshot.data() as Map<String, dynamic>;
-    // Initialize profile picture variable
+  // Stream to retrieve list of matches from the given uid
+  Stream<QuerySnapshot> getMatches() {
+    return userCollection.doc(uid).collection("matched").snapshots();
+  }
+
+  // Retrieves the stored image from a given reference to Firebase Storage
+  Future<ImageProvider<Object>> getProfPic(String? photoref) async {
     ImageProvider<Object> profpic;
+
     // Check if user has an uploaded profile picture.
     // Set profile picture variable to the corresponding case.
-    if (mapdata['photo-ref'] == null) {
+    if (photoref == null) {
       profpic = AssetImage('assets/profile.jpg');
     } else {
-      Uint8List? profpicref =
-          await _storage.ref().child(mapdata['photo-ref']).getData();
+      Uint8List? profpicref = await _storage.ref().child(photoref).getData();
       if (profpicref == null) {
         profpic = AssetImage('assets/profile.jpg');
       } else {
         profpic = MemoryImage(profpicref);
       }
     }
-    mapdata['photo-ref'] = profpic;
-    return mapdata;
+    return profpic;
   }
 
-  // Stream to show list of matched users
-  Stream<Future<List<ZestiUser>>> get matches {
-    return userCollection
-        .doc(uid)
-        .collection('matched')
-        .snapshots()
-        .map(_zestiUserFromSnapshot);
-  }
-
-  // Helper function for matched users stream - convert QuerySnapshot to
-  // list of ZestiUser models.
-  Future<List<ZestiUser>> _zestiUserFromSnapshot(QuerySnapshot snapshot) async {
-    List<QueryDocumentSnapshot> dataList = snapshot.docs;
-    List<ZestiUser> matchedList = [];
-    for (QueryDocumentSnapshot data in dataList) {
-      Map<String, dynamic> userData = data.data() as Map<String, dynamic>;
-      ZestiUser match =
-          await _userFirebaseToZesti(userData['user-ref'], userData['chatid']);
-      matchedList.add(match);
-    }
-    return matchedList;
-  }
-
-  Future<ZestiUser> _userFirebaseToZesti(DocumentReference data,
-      [String? chatid]) async {
-    // Get snapshot from reference
-    DocumentSnapshot snapshot = await data.get();
-    // Convert snapshot to data in hash map form
-    Map<String, dynamic> mapdata = snapshot.data() as Map<String, dynamic>;
-    // Initialize profile picture variable
-    ImageProvider<Object> profpic;
-
-    // Check if user has an uploaded profile picture.
-    // Set profile picture variable to the corresponding case.
-    if (mapdata['photo-ref'] == null) {
-      profpic = AssetImage('assets/profile.jpg');
-    } else {
-      Uint8List? profpicref =
-          await _storage.ref().child(mapdata['photo-ref']).getData();
-      if (profpicref == null) {
-        profpic = AssetImage('assets/profile.jpg');
-      } else {
-        profpic = MemoryImage(profpicref);
-      }
-    }
-
-    // Return the ZestiUser object.
-    return ZestiUser(
-      uid: data.id,
-      chatid: chatid,
-      first: mapdata['first-name'],
-      last: mapdata['first-name'],
-      bio: mapdata['bio'],
-      dIdentity: mapdata['dating-identity'],
-      dInterest: mapdata['dating-interest'],
-      house: mapdata['house'],
-      age: 69,
-      profpic: profpic,
-    );
-  }
-
-  // Get user info from document fields.
-  Future<Map<String, dynamic>> getInfo() async {
-    DocumentSnapshot doc = await userCollection.doc(uid).get();
-    return doc.data() as Map<String, dynamic>;
-  }
-
+  /*
   Future<List<ZestiUser>> getSwiping() async {
     Map<String, dynamic> data = await getInfo();
     List<String> queryIdentity = [];
@@ -275,6 +212,7 @@ class DatabaseService {
     }
     return userList;
   }
+  */
 
   // Update the account setup:
   //  Determines whether or not user should be should be shown the beginning
@@ -339,7 +277,7 @@ class DatabaseService {
   }
 
   // Update user bio.
-  Future<void> updateBio(String bio) async {
+  Future<void> updateBio(String? bio) async {
     await userCollection
         .doc(uid)
         .update({'bio': bio})
