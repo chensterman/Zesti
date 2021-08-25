@@ -49,7 +49,7 @@ class _LoveState extends State<Love> {
           BottomNavigationBarItem(
               icon: Icon(Icons.hourglass_top), label: "Match Recommendations"),
           BottomNavigationBarItem(
-              icon: Icon(Icons.mood), label: "Match Requests"),
+              icon: Icon(Icons.favorite), label: "Match Requests"),
           BottomNavigationBarItem(
               icon: Icon(Icons.chat_bubble), label: "Matches"),
         ],

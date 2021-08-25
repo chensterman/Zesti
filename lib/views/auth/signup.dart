@@ -3,7 +3,6 @@ import 'package:zesti/theme/theme.dart';
 import 'package:zesti/views/auth/signin.dart';
 import 'package:zesti/services/auth.dart';
 import 'package:zesti/widgets/formwidgets.dart';
-import 'package:zesti/wrappers/authwrapper.dart';
 
 // Widget for handling account creation
 class SignUp extends StatefulWidget {

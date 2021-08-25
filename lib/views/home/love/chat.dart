@@ -36,10 +36,53 @@ class _ChatState extends State<Chat> {
   @override
   Widget build(BuildContext context) {
     final user = Provider.of<User?>(context);
-    Size size = MediaQuery.of(context).size;
     return Scaffold(
       // endDrawer is the restaurant display for discounts
-      endDrawer: Drawer(),
+      endDrawer: Drawer(
+        child: Container(
+          decoration: BoxDecoration(
+            // Box decoration takes a gradient
+            gradient: LinearGradient(
+              // Where the linear gradient begins and ends
+              begin: Alignment.topRight,
+              end: Alignment.bottomLeft,
+
+              // Add one stop for each color. Stops should increase from 0 to 1
+              stops: [0.3, 0.9],
+              colors: [
+                // Colors are easy thanks to Flutter's Colors class.
+                CustomTheme.lightTheme.primaryColor,
+                Colors.white,
+              ],
+            ),
+          ),
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: <Widget>[
+              DrawerHeader(
+                decoration: BoxDecoration(
+                  color: Colors.orange.shade900,
+                ),
+                child: Center(
+                  child: Text(
+                    'Deals',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 36,
+                    ),
+                  ),
+                ),
+              ),
+              dealCard("assets/spyce.jpg", "SPYCE",
+                  "20% off of the Spring and Summer menu!"),
+              dealCard("assets/zinnekens.jpg", "ZINNEKEN'S",
+                  "20% off of any purchase!"),
+              dealCard("assets/maharaja.jpg", "THE MAHARAJA",
+                  "Anything off of the dessert menu, on the house!"),
+            ],
+          ),
+        ),
+      ),
       appBar: AppBar(
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
@@ -48,6 +91,11 @@ class _ChatState extends State<Chat> {
         backgroundColor: CustomTheme.lightTheme.primaryColor,
         elevation: 0.0,
         actions: [
+          IconButton(
+            icon: Icon(Icons.cancel),
+            onPressed: () {},
+            color: Colors.red,
+          ),
           Builder(
             builder: (context) => IconButton(
               icon: Icon(Icons.fastfood),
@@ -127,6 +175,34 @@ class _ChatState extends State<Chat> {
               ),
             )
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget dealCard(String imagePath, String vendor, String description) {
+    return Card(
+      margin: EdgeInsets.all(16.0),
+      child: InkWell(
+        splashColor: CustomTheme.lightTheme.primaryColor,
+        onTap: () {},
+        child: Padding(
+          padding: EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              CircleAvatar(
+                  radius: 80.0,
+                  backgroundImage: AssetImage(imagePath),
+                  backgroundColor: Colors.white),
+              SizedBox(height: 16.0),
+              Text(vendor,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.orange[900], fontSize: 24.0)),
+              Text(description,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 24.0)),
+            ],
+          ),
         ),
       ),
     );
