@@ -212,6 +212,7 @@ class _HomeState extends State<Home> {
       await DatabaseService(uid: user.uid).updateLiked(user.uid);
     } else if (details.offset.dx < -minimumDrag) {
       _userList.removeAt(0);
+      await DatabaseService(uid: user.uid).updateDisliked(user.uid);
     }
     print(_userList.length);
     // Call to repopulate if _userList is empty

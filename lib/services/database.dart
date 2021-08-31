@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:zesti/models/zestiuser.dart';
+import "dart:math";
 
 // DatabaseService class:
 //  Contains all methods and data pertaining to the user database.
@@ -219,36 +220,58 @@ class DatabaseService {
     print(queryIdentity);
     print(queryInterest);
     List<ZestiUser> userList = [];
-    while (userList.length < 3) {
-      QuerySnapshot snapshot;
-      if (queryIdentity.length == 3) {
-        snapshot = await userCollection
-            .where('dating-interest', whereIn: queryInterest)
-            .limit(1)
-            .get();
-      } else {
-        snapshot = await userCollection
-            .where('dating-identity', isEqualTo: queryIdentity[0])
-            .where('dating-interest', whereIn: queryInterest)
-            .limit(1)
-            .get();
-      }
-      if (snapshot.size == 0) {
-        break;
-      } else {
-        String uidPotential = snapshot.docs[0].id;
-        DocumentReference potentialDoc = userCollection.doc(uidPotential);
-        ZestiUser potentialUser = await _userFirebaseToZesti(potentialDoc);
-        userCollection
+
+    // Get snapshot of all users the user reacted (liked or disliked) to. Convert
+    // to list and subtract from list of all users
+    QuerySnapshot reactionsSnapshot;
+    reactionsSnapshot = await userCollection
             .doc(uid)
-            .collection('liked')
-            .doc(uidPotential)
-            .get()
-            .then((docSnapshot) => {
-                  if (!docSnapshot.exists) {userList.add(potentialUser)}
-                });
-      }
+            .collection("reaction")
+            .get();
+
+    final allReactions = reactionsSnapshot.docs.map((doc) => doc.get("user").id).toList();
+
+    QuerySnapshot usersSnapshot = await userCollection.get();
+
+    final allUsers = usersSnapshot.docs.map((doc) => doc.id).toList();
+
+    var availableUsers = allUsers.toSet().difference(allReactions.toSet());
+    availableUsers = availableUsers.difference([uid].toSet());
+
+    QuerySnapshot snapshot;
+    if (queryIdentity.length == 3) {
+      snapshot = await userCollection
+          .where('dating-interest', whereIn: queryInterest)
+          .limit(1)
+          .get();
+    } else {
+      snapshot = await userCollection
+          .where('dating-identity', isEqualTo: queryIdentity[0])
+          .where('dating-interest', whereIn: queryInterest)
+          .limit(1)
+          .get();
     }
+
+    List<String> snapshotUIDs = snapshot.docs.map((doc) => doc.id).toList();
+    List<String> potentialUIDs = availableUsers.intersection(snapshotUIDs.toSet()).toList();
+
+    //Randomly pick from potentialUIDs. Max 3 picks, unless there are less than
+    // 3 potenialUIDs
+    int userListMaxLength;
+    if (potentialUIDs.length < 3) {
+      userListMaxLength = potentialUIDs.length;
+    } else{
+      userListMaxLength = 3;
+    }
+    while (userList.length < userListMaxLength) {
+      final random = new Random();
+      var selectedUID = potentialUIDs[random.nextInt(potentialUIDs.length)];
+      potentialUIDs.remove(selectedUID);
+      DocumentReference selectedDoc = userCollection.doc(selectedUID);
+      ZestiUser selectedUser = await _userFirebaseToZesti(selectedDoc);
+      userList.add(selectedUser);
+    }
+
     return userList;
   }
 
@@ -326,9 +349,9 @@ class DatabaseService {
   Future<void> updateLiked(String youid) async {
     await userCollection
         .doc(uid)
-        .collection('liked')
+        .collection('reaction')
         .doc(uuid.v4())
-        .set({'timestamp': DateTime.now(), 'user': youid})
+        .set({'timestamp': DateTime.now(), 'user': youid, 'liked': true})
         .then((value) => print("Liked"))
         .catchError((error) => print("Failed to like: $error"));
 
@@ -357,6 +380,16 @@ class DatabaseService {
           .catchError((error) => print("Failed to match: $error"));
       await chatCollection.doc(gen).set({'user1': uid, 'user2': youid});
     }
+  }
+
+  Future<void> updateDisliked(String youid) async {
+    await userCollection
+        .doc(uid)
+        .collection("reaction")
+        .doc(uuid.v4())
+        .set({'timestamp': DateTime.now(), 'user': youid, 'liked': false})
+        .then((value) => print("disliked"))
+        .catchError((error) => print("Failed to dislike: $error"));
   }
 
   Future<void> sendMessage(String chatid, String type, String content) async {
