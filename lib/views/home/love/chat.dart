@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:zesti/services/database.dart';
 import 'package:zesti/theme/theme.dart';
+import 'package:zesti/views/home/redeem.dart';
 
 // Widget displaying the chat page for a specific match
 class Chat extends StatefulWidget {
@@ -185,7 +186,16 @@ class _ChatState extends State<Chat> {
       margin: EdgeInsets.all(16.0),
       child: InkWell(
         splashColor: CustomTheme.lightTheme.primaryColor,
-        onTap: () {},
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => Redeem(
+                    imagePath: imagePath,
+                    vendor: vendor,
+                    description: description)),
+          );
+        },
         child: Padding(
           padding: EdgeInsets.all(16.0),
           child: Column(

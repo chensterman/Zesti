@@ -6,6 +6,7 @@ import 'package:zesti/theme/theme.dart';
 import 'package:zesti/views/auth/start.dart';
 import 'package:zesti/views/home/profile.dart';
 import 'package:zesti/views/home/love/love.dart';
+import 'package:zesti/views/home/social/choose.dart';
 import 'package:zesti/views/home/social/social.dart';
 
 // Starting page widget
@@ -96,7 +97,7 @@ class Home extends StatelessWidget {
                         onPressed: () async {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => Social()),
+                            MaterialPageRoute(builder: (context) => Choose()),
                           );
                         },
                       ),

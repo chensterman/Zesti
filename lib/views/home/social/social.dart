@@ -39,6 +39,7 @@ class _SocialState extends State<Social> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: CustomTheme.lightTheme.primaryColor,
+        title: Text("Zesti Social"),
       ),
       body: Center(
         child: _widgetSet.elementAt(_selectedIndex),

@@ -62,7 +62,7 @@ class _ProfileState extends State<Profile> {
               child: Scaffold(
                 appBar: AppBar(
                   backgroundColor: CustomTheme.lightTheme.primaryColor,
-                  title: Center(child: Text("Your Profile")),
+                  title: Text("Your Profile"),
                   bottom: TabBar(
                     tabs: <Widget>[
                       Tab(

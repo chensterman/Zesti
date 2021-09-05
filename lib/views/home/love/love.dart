@@ -16,7 +16,7 @@ class Love extends StatefulWidget {
 
 class _LoveState extends State<Love> {
   // Inital widget to display
-  int _selectedIndex = 1;
+  int _selectedIndex = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -37,6 +37,7 @@ class _LoveState extends State<Love> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: CustomTheme.lightTheme.primaryColor,
+        title: Text("Zesti Love"),
       ),
       body: Center(
         child: _widgetSet.elementAt(_selectedIndex),
@@ -89,7 +90,7 @@ class _RecommendationsState extends State<Recommendations> {
     dInterest: 'man',
     house: 'Quincy',
     age: 24,
-    profpic: AssetImage('assets/profile.jpg'),
+    profpic: AssetImage('assets/gabby-thomas.jpg'),
   );
 
   ZestiUser user2 = ZestiUser(
@@ -101,7 +102,7 @@ class _RecommendationsState extends State<Recommendations> {
     dInterest: 'man',
     house: 'Dunster',
     age: 36,
-    profpic: AssetImage('assets/profile.jpg'),
+    profpic: AssetImage('assets/scarlett-johansson.jpeg'),
   );
 
   ZestiUser user3 = ZestiUser(
@@ -113,7 +114,7 @@ class _RecommendationsState extends State<Recommendations> {
     dInterest: 'man',
     house: 'Pfoho',
     age: 22,
-    profpic: AssetImage('assets/profile.jpg'),
+    profpic: AssetImage('assets/legally-blonde.jpg'),
   );
 
   @override
@@ -151,39 +152,39 @@ class _RequestsState extends State<Requests> {
   List<UserCard1> widgetList = [];
 
   ZestiUser user1 = ZestiUser(
-    uid: '1',
-    first: 'Gabby',
-    last: 'Thomas',
-    bio: 'I run fast.',
+    uid: '4',
+    first: 'Taylor',
+    last: 'Reneau',
+    bio: 'Youtube legend here.',
     dIdentity: 'woman',
     dInterest: 'man',
-    house: 'Quincy',
-    age: 24,
-    profpic: AssetImage('assets/profile.jpg'),
+    house: 'Eliot',
+    age: 29,
+    profpic: AssetImage('assets/reneau.jpg'),
   );
 
   ZestiUser user2 = ZestiUser(
-    uid: '2',
-    first: 'Scarlett',
-    last: 'Johansson',
-    bio: 'I played in Black Widow.',
+    uid: '5',
+    first: 'Malia',
+    last: 'Obama',
+    bio: 'I am cooler than you.',
     dIdentity: 'woman',
     dInterest: 'man',
-    house: 'Dunster',
-    age: 36,
-    profpic: AssetImage('assets/profile.jpg'),
+    house: 'Lowell',
+    age: 21,
+    profpic: AssetImage('assets/malia-obama.jpg'),
   );
 
   ZestiUser user3 = ZestiUser(
-    uid: '3',
-    first: 'Elle',
-    last: 'Woods',
-    bio: 'I am very cool.',
+    uid: '6',
+    first: 'Sydney',
+    last: 'McLaughlin',
+    bio: 'I run fast too.',
     dIdentity: 'woman',
     dInterest: 'man',
-    house: 'Pfoho',
-    age: 22,
-    profpic: AssetImage('assets/profile.jpg'),
+    house: 'Leverett',
+    age: 24,
+    profpic: AssetImage('assets/sydney-mclaughlin.jpg'),
   );
 
   @override
