@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:zesti/services/database.dart';
 import 'package:zesti/views/home/love/chat.dart';
 
-// Widget displaying the chat page for a specific match
+// Widget displaying the chat page for a specific match.
 class Matches extends StatefulWidget {
   final String uid;
   Matches({
@@ -16,7 +16,7 @@ class Matches extends StatefulWidget {
 }
 
 class _MatchesState extends State<Matches> {
-  TextEditingController messageText = TextEditingController();
+  // Stream of match information (initialized during initState).
   Stream<QuerySnapshot>? matches;
 
   @override
@@ -28,6 +28,7 @@ class _MatchesState extends State<Matches> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        // StreamBuilder to load match stream.
         body: StreamBuilder(
             stream: matches,
             builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
@@ -36,30 +37,38 @@ class _MatchesState extends State<Matches> {
                   ? ListView.separated(
                       padding: EdgeInsets.all(16.0),
                       itemBuilder: (context, index) {
+                        // First index is reserved for text "MATCHES".
                         if (index == 0) {
                           return Center(
                               child: Text('MATCHES',
                                   style: TextStyle(color: Colors.orange[900])));
                         }
+
+                        // Remaining indeces used for matchsheet widgets.
                         Map<String, dynamic> data =
                             tmp.docs[index - 1].data() as Map<String, dynamic>;
-                        return matchSheet(widget.uid, data['chatid'],
+                        return matchSheet(widget.uid, tmp.docs[index - 1].id,
                             data['first-name'], data['photo-ref']);
                       },
+                      // A divider widgets is placed in between each matchsheet widget.
                       separatorBuilder: (context, index) => Divider(),
                       itemCount: tmp.docs.length + 1)
+                  // StreamBuilder loading indicator.
                   : Center(child: CircularProgressIndicator());
             }));
   }
 
+  // To display info about each match you have.
   Widget matchSheet(String uid, String? chatid, String name, String photoref) {
     print(photoref);
+    // FutureBuilder used to retrieve profile photo of your match.
     return FutureBuilder(
         future: DatabaseService(uid: uid).getProfPic(photoref),
         builder: (context, AsyncSnapshot<ImageProvider<Object>> snapshot) {
+          // On error.
           if (snapshot.hasError) {
             return Text(snapshot.error.toString());
-            // On success
+            // On success.
           } else if (snapshot.connectionState == ConnectionState.done) {
             return InkWell(
               onTap: () {
@@ -73,7 +82,7 @@ class _MatchesState extends State<Matches> {
                           profpic: snapshot.data)),
                 );
               },
-              // Display match info (user data) on the sheet
+              // Display match info (user data) on the sheet.
               child: Container(
                 child: Row(
                   children: [
@@ -101,6 +110,7 @@ class _MatchesState extends State<Matches> {
                 ),
               ),
             );
+            // On loading, return an empty container.
           } else {
             return Container();
           }

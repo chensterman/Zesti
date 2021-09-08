@@ -8,7 +8,7 @@ import 'package:zesti/widgets/usercard.dart';
 import 'package:zesti/models/zestiuser.dart';
 import 'package:zesti/services/database.dart';
 
-// Widget containing swiping, profile management, and matches
+// Widget containing swiping, profile management, and matches.
 class Love extends StatefulWidget {
   Love({Key? key}) : super(key: key);
 
@@ -17,25 +17,22 @@ class Love extends StatefulWidget {
 }
 
 class _LoveState extends State<Love> {
-  // Inital widget to display
+  // Inital widget to display.
   int _selectedIndex = 0;
 
   @override
   Widget build(BuildContext context) {
     final user = Provider.of<User?>(context);
-    if (user == null) {
-      return Text('User Error');
-    }
 
     Size size = MediaQuery.of(context).size;
-    // Widget list for bottom nav bar
+    // Widget list for bottom nav bar.
     final List<Widget> _widgetSet = <Widget>[
-      RecommendationsRandom(uid: user.uid),
+      Recommendations(uid: user!.uid),
       Requests(uid: user.uid),
       Matches(uid: user.uid),
     ];
 
-    // Main page widget (contains nav bar pages as well)
+    // Main page widget (contains nav bar pages as well).
     return Scaffold(
       appBar: AppBar(
         backgroundColor: CustomTheme.lightTheme.primaryColor,
@@ -72,137 +69,106 @@ class _LoveState extends State<Love> {
   }
 }
 
-// Test widget
-class RecommendationsRandom extends StatefulWidget {
+// Displays list of recommended matches.
+class Recommendations extends StatefulWidget {
   final String uid;
-  RecommendationsRandom({
+  Recommendations({
     Key? key,
     required this.uid,
   }) : super(key: key);
-
-  @override
-  _RecommendationsRandomState createState() => _RecommendationsRandomState();
-}
-
-class _RecommendationsRandomState extends State<RecommendationsRandom> {
-  Future<List<ZestiUser>>? recommendations;
-
-  @override
-  void initState() {
-    recommendations = DatabaseService(uid: widget.uid).getLove();
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return FutureBuilder(
-        future: recommendations,
-        builder: (context, AsyncSnapshot<List<ZestiUser>> snapshot) {
-          if (snapshot.hasError) {
-            return Text(snapshot.error.toString());
-            // On success
-          } else if (snapshot.connectionState == ConnectionState.done) {
-            List<Widget> widgetList = [];
-            List<ZestiUser>? userList = snapshot.data;
-            if (userList != null) {
-              for (ZestiUser currUser in userList) {
-                widgetList.add(UserCard1(userOnCard: currUser, rec: true));
-              }
-            } else {
-              return Text("Null recommendations.");
-            }
-            return Container(
-              child: ListView.separated(
-                  padding: EdgeInsets.all(16.0),
-                  itemBuilder: (context, index) {
-                    if (index == 0) {
-                      return Center(
-                          child: Text('RECOMMENDATIONS',
-                              style: TextStyle(color: Colors.orange[900])));
-                    }
-                    return widgetList[index - 1];
-                  },
-                  separatorBuilder: (context, index) => SizedBox(height: 16.0),
-                  itemCount: widgetList.length + 1),
-            );
-          } else {
-            return CircularProgressIndicator();
-          }
-        });
-  }
-}
-/*
-// Widget containing swiping, profile management, and matches
-class Recommendations extends StatefulWidget {
-  Recommendations({Key? key}) : super(key: key);
 
   @override
   _RecommendationsState createState() => _RecommendationsState();
 }
 
 class _RecommendationsState extends State<Recommendations> {
-  List<UserCard1> widgetList = [];
+  // Stream of current recommendations (initialized in initState).
+  Stream<QuerySnapshot>? recommendations;
 
-  ZestiUser user1 = ZestiUser(
-    uid: '1',
-    first: 'Gabby',
-    last: 'Thomas',
-    bio: 'I run fast.',
-    dIdentity: 'woman',
-    dInterest: 'man',
-    house: 'Quincy',
-    age: 24,
-    profpic: AssetImage('assets/gabby-thomas.jpg'),
-  );
-
-  ZestiUser user2 = ZestiUser(
-    uid: '2',
-    first: 'Scarlett',
-    last: 'Johansson',
-    bio: 'I played in Black Widow.',
-    dIdentity: 'woman',
-    dInterest: 'man',
-    house: 'Dunster',
-    age: 36,
-    profpic: AssetImage('assets/scarlett-johansson.jpeg'),
-  );
-
-  ZestiUser user3 = ZestiUser(
-    uid: '3',
-    first: 'Elle',
-    last: 'Woods',
-    bio: 'I am very cool.',
-    dIdentity: 'woman',
-    dInterest: 'man',
-    house: 'Pfoho',
-    age: 22,
-    profpic: AssetImage('assets/legally-blonde.jpg'),
-  );
+  @override
+  void initState() {
+    recommendations = DatabaseService(uid: widget.uid).getRecommendations();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
-    widgetList.add(UserCard1(userOnCard: user1, rec: true));
-    widgetList.add(UserCard1(userOnCard: user2, rec: true));
-    widgetList.add(UserCard1(userOnCard: user3, rec: true));
-
+    final size = MediaQuery.of(context).size;
     return Container(
-      child: ListView.separated(
-          padding: EdgeInsets.all(16.0),
-          itemBuilder: (context, index) {
-            if (index == 0) {
-              return Center(
-                  child: Text('RECOMMENDATIONS',
-                      style: TextStyle(color: Colors.orange[900])));
-            }
-            return widgetList[index - 1];
-          },
-          separatorBuilder: (context, index) => SizedBox(height: 16.0),
-          itemCount: widgetList.length + 1),
+      // Streambuilder for recommendations stream.
+      child: StreamBuilder(
+          stream: recommendations,
+          builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+            QuerySnapshot? tmp = snapshot.data;
+            return tmp != null
+                // ListView to visualize list of recommendations.
+                ? ListView.separated(
+                    // Amount of space to be cached (about 3 user cards in height).
+                    //  This stops the FutureBuilder from being super jumpy.
+                    cacheExtent: size.height * 0.7 * 3,
+                    padding: EdgeInsets.all(16.0),
+                    itemBuilder: (context, index) {
+                      // First index reserved for text "RECOMMENDATIONS".
+                      if (index == 0) {
+                        return Center(
+                          child: Column(children: [
+                            Text('RECOMMENDATIONS',
+                                style: TextStyle(color: Colors.orange[900])),
+                            TextButton(
+                              child: Text('Generate'),
+                              onPressed: () async {
+                                await DatabaseService(uid: widget.uid)
+                                    .generateRecommendations();
+                              },
+                            ),
+                          ]),
+                        );
+                      }
+
+                      // Other indeces used to populate user cards in the ListView.
+                      Map<String, dynamic> data =
+                          tmp.docs[index - 1].data() as Map<String, dynamic>;
+                      // FutureBuilder used to fetch user photo from Firebase storage.
+                      return FutureBuilder(
+                          future: DatabaseService(uid: widget.uid)
+                              .getProfPic(data['photo-ref']),
+                          builder: (context,
+                              AsyncSnapshot<ImageProvider<Object>> snapshot) {
+                            // On error.
+                            if (snapshot.hasError) {
+                              return Text(snapshot.error.toString());
+                              // On success.
+                            } else if (snapshot.connectionState ==
+                                ConnectionState.done) {
+                              ZestiUser incUser = ZestiUser(
+                                  uid: data['user-ref'].id,
+                                  first: data['first-name'],
+                                  last: data['last-name'],
+                                  bio: data['bio'],
+                                  dIdentity: data['dating-identity'],
+                                  dInterest: data['dating-interest'],
+                                  house: data['house'],
+                                  age: data['age'],
+                                  profpic: snapshot.data!);
+                              return UserCard(userOnCard: incUser, rec: true);
+                              // On loading, return an empty container.
+                            } else {
+                              return Container();
+                            }
+                          });
+                    },
+                    // SizedBox used as separated between user cards.
+                    separatorBuilder: (context, index) =>
+                        SizedBox(height: 16.0),
+                    itemCount: tmp.docs.length + 1)
+                // When StreamBuilder hasn't loaded, show progress indicator.
+                : Center(child: CircularProgressIndicator());
+          }),
     );
   }
 }
-*/
 
+// Displays list of incoming match requests.
 class Requests extends StatefulWidget {
   final String uid;
   Requests({
@@ -215,6 +181,7 @@ class Requests extends StatefulWidget {
 }
 
 class _RequestsState extends State<Requests> {
+  // Stream for incoming match requests (initialized during initState).
   Stream<QuerySnapshot>? incoming;
 
   @override
@@ -225,15 +192,21 @@ class _RequestsState extends State<Requests> {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
     return Container(
+      // StreamBuilder to visualize list of incoming match requests.
       child: StreamBuilder(
           stream: incoming,
           builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
             QuerySnapshot? tmp = snapshot.data;
             return tmp != null
                 ? ListView.separated(
+                    // Amount of space to be cached (about 3 user cards in height).
+                    //  This stops the FutureBuilder from being super jumpy.
+                    cacheExtent: size.height * 0.7 * 3,
                     padding: EdgeInsets.all(16.0),
                     itemBuilder: (context, index) {
+                      // First index reserved for text "INCOMING REQUESTS".
                       if (index == 0) {
                         return Center(
                             child: Text('INCOMING REQUESTS',
@@ -241,18 +214,20 @@ class _RequestsState extends State<Requests> {
                       }
                       Map<String, dynamic> data =
                           tmp.docs[index - 1].data() as Map<String, dynamic>;
+                      // FutureBuilder used to load user profile photo from Firebase Storage.
                       return FutureBuilder(
                           future: DatabaseService(uid: widget.uid)
                               .getProfPic(data['photo-ref']),
                           builder: (context,
                               AsyncSnapshot<ImageProvider<Object>> snapshot) {
+                            // On error.
                             if (snapshot.hasError) {
                               return Text(snapshot.error.toString());
-                              // On success
+                              // On success.
                             } else if (snapshot.connectionState ==
                                 ConnectionState.done) {
                               ZestiUser incUser = ZestiUser(
-                                  uid: tmp.docs[index - 1].id,
+                                  uid: data['user-ref'].id,
                                   first: data['first-name'],
                                   last: data['last-name'],
                                   bio: data['bio'],
@@ -261,88 +236,22 @@ class _RequestsState extends State<Requests> {
                                   house: data['house'],
                                   age: data['age'],
                                   profpic: snapshot.data!);
-                              return UserCard1(userOnCard: incUser, rec: false);
+                              return UserCard(
+                                  userOnCard: incUser,
+                                  id: tmp.docs[index - 1].id,
+                                  rec: false);
+                              // On loading, return an empty container.
                             } else {
-                              return Center(child: CircularProgressIndicator());
+                              return Container();
                             }
                           });
                     },
                     separatorBuilder: (context, index) =>
                         SizedBox(height: 16.0),
                     itemCount: tmp.docs.length + 1)
+                // While the StreamBuilder is loading, show a progress indicator.
                 : Center(child: CircularProgressIndicator());
           }),
     );
   }
-
-/*
-// Widget containing swiping, profile management, and matches
-class Requests extends StatefulWidget {
-  Requests({Key? key}) : super(key: key);
-
-  @override
-  _RequestsState createState() => _RequestsState();
-}
-
-class _RequestsState extends State<Requests> {
-  List<UserCard1> widgetList = [];
-
-  ZestiUser user1 = ZestiUser(
-    uid: '4',
-    first: 'Taylor',
-    last: 'Reneau',
-    bio: 'Youtube legend here.',
-    dIdentity: 'woman',
-    dInterest: 'man',
-    house: 'Eliot',
-    age: 29,
-    profpic: AssetImage('assets/reneau.jpg'),
-  );
-
-  ZestiUser user2 = ZestiUser(
-    uid: '5',
-    first: 'Malia',
-    last: 'Obama',
-    bio: 'I am cooler than you.',
-    dIdentity: 'woman',
-    dInterest: 'man',
-    house: 'Lowell',
-    age: 21,
-    profpic: AssetImage('assets/malia-obama.jpg'),
-  );
-
-  ZestiUser user3 = ZestiUser(
-    uid: '6',
-    first: 'Sydney',
-    last: 'McLaughlin',
-    bio: 'I run fast too.',
-    dIdentity: 'woman',
-    dInterest: 'man',
-    house: 'Leverett',
-    age: 24,
-    profpic: AssetImage('assets/sydney-mclaughlin.jpg'),
-  );
-
-  @override
-  Widget build(BuildContext context) {
-    widgetList.add(UserCard1(userOnCard: user1, rec: false));
-    widgetList.add(UserCard1(userOnCard: user2, rec: false));
-    widgetList.add(UserCard1(userOnCard: user3, rec: false));
-
-    return Container(
-      child: ListView.separated(
-          padding: EdgeInsets.all(16.0),
-          itemBuilder: (context, index) {
-            if (index == 0) {
-              return Center(
-                  child: Text('INCOMING REQUESTS',
-                      style: TextStyle(color: Colors.orange[900])));
-            }
-            return widgetList[index - 1];
-          },
-          separatorBuilder: (context, index) => SizedBox(height: 16.0),
-          itemCount: widgetList.length + 1),
-    );
-  }
-  */
 }

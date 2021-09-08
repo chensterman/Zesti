@@ -6,7 +6,7 @@ import 'package:zesti/services/database.dart';
 import 'package:zesti/theme/theme.dart';
 import 'package:zesti/views/home/redeem.dart';
 
-// Widget displaying the chat page for a specific match
+// Widget displaying the chat page for a specific match.
 class Chat extends StatefulWidget {
   final String uid;
   final String? chatid;
@@ -25,7 +25,9 @@ class Chat extends StatefulWidget {
 }
 
 class _ChatState extends State<Chat> {
+  // Controls the text parameters for the chat text editor.
   TextEditingController messageText = TextEditingController();
+  // Stream to retrieve messages from a specific chat (initialied during initState).
   Stream<QuerySnapshot>? messages;
 
   @override
@@ -38,17 +40,17 @@ class _ChatState extends State<Chat> {
   Widget build(BuildContext context) {
     final user = Provider.of<User?>(context);
     return Scaffold(
-      // endDrawer is the restaurant display for discounts
+      // endDrawer is the restaurant display for discounts.
       endDrawer: Drawer(
         child: Container(
           decoration: BoxDecoration(
-            // Box decoration takes a gradient
+            // Box decoration takes a gradient.
             gradient: LinearGradient(
-              // Where the linear gradient begins and ends
+              // Where the linear gradient begins and ends.
               begin: Alignment.topRight,
               end: Alignment.bottomLeft,
 
-              // Add one stop for each color. Stops should increase from 0 to 1
+              // Add one stop for each color. Stops should increase from 0 to 1.
               stops: [0.3, 0.9],
               colors: [
                 // Colors are easy thanks to Flutter's Colors class.
@@ -158,6 +160,7 @@ class _ChatState extends State<Chat> {
                         if (user == null) {
                           print('User Error');
                         } else {
+                          // Check for an empty text editor (don't send empty chats).
                           if (messageText.text != '') {
                             sendMessage(user.uid, widget.chatid, 'text',
                                 messageText.text);
@@ -181,6 +184,7 @@ class _ChatState extends State<Chat> {
     );
   }
 
+  // Card that displays a specific partner deal.
   Widget dealCard(String imagePath, String vendor, String description) {
     return Card(
       margin: EdgeInsets.all(16.0),
@@ -218,7 +222,9 @@ class _ChatState extends State<Chat> {
     );
   }
 
+  // Display all chat messages for the match.
   Widget chatMessages(String uid) {
+    // StreamBuilder to display messages stream.
     return StreamBuilder(
       stream: messages,
       builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
@@ -239,6 +245,8 @@ class _ChatState extends State<Chat> {
     );
   }
 
+  // Widget for a message tile.
+  //  Parameters include message content and a boolean for if it was sent by the current user.
   Widget chatMessageTile(String message, bool sendByMe) {
     return Row(
       mainAxisAlignment:
@@ -268,8 +276,10 @@ class _ChatState extends State<Chat> {
     );
   }
 
+  // Call database service to send message.
   sendMessage(String uid, String? chatid, String type, String content) {
     DatabaseService(uid: uid).sendMessage(chatid, type, content);
+    // Reset the text editor controller after message is sent.
     messageText.text = '';
   }
 }

@@ -1,13 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:provider/provider.dart';
-import 'package:zesti/services/database.dart';
 import 'package:zesti/theme/theme.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:zesti/views/register/birthday.dart';
 import 'package:zesti/widgets/formwidgets.dart';
 
-// Widget for name form
+// Widget to redeem discount codes.
 class Redeem extends StatefulWidget {
   final String imagePath;
   final String vendor;

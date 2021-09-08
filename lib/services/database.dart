@@ -4,7 +4,6 @@ import 'package:uuid/uuid.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:zesti/models/zestiuser.dart';
 
 // DatabaseService class:
 //  Contains all methods and data pertaining to the user database.
@@ -119,17 +118,7 @@ class DatabaseService {
         .catchError((error) => print("Failed to update user: $error"));
   }
 
-  // Stream to retrieve profile info from the given uid
-  Stream<DocumentSnapshot> getProfileInfo() {
-    return userCollection.doc(uid).snapshots();
-  }
-
-  // Stream to retrieve list of matches from the given uid
-  Stream<QuerySnapshot> getMatches() {
-    return userCollection.doc(uid).collection("matched").snapshots();
-  }
-
-  // Retrieves the stored image from a given reference to Firebase Storage
+  // Retrieves the stored image from a given reference to Firebase Storage.
   Future<ImageProvider<Object>> getProfPic(String? photoref) async {
     ImageProvider<Object> profpic;
 
@@ -148,12 +137,49 @@ class DatabaseService {
     return profpic;
   }
 
+  // Stream to retrieve profile info from the given uid.
+  Stream<DocumentSnapshot> getProfileInfo() {
+    return userCollection.doc(uid).snapshots();
+  }
+
+  // Stream to retrieve list of matches from the given uid.
+  Stream<QuerySnapshot> getMatches() {
+    return userCollection.doc(uid).collection("matched").snapshots();
+  }
+
+  // Stream to retrieve match recommendations (generated with function below).
+  Stream<QuerySnapshot> getRecommendations() {
+    return userCollection
+        .doc(uid)
+        .collection('recommendations')
+        .orderBy('timestamp')
+        .snapshots();
+  }
+
+  // Stream to retrieve incoming match requests.
+  Stream<QuerySnapshot> getIncoming() {
+    return userCollection
+        .doc(uid)
+        .collection('incoming')
+        .orderBy('timestamp')
+        .snapshots();
+  }
+
+  // Stream to retrieve messages from a given chatid.
+  Stream<QuerySnapshot> getMessages(String? chatid) {
+    return chatCollection
+        .doc(chatid)
+        .collection('messages')
+        .orderBy('timestamp', descending: true)
+        .snapshots();
+  }
+
   // Send a chat message.
   Future<void> sendMessage(String? chatid, String type, String content) async {
     await chatCollection
         .doc(chatid)
         .collection('messages')
-        .doc(uuid.v4())
+        .doc(uuid.v1())
         .set({
           'timestamp': DateTime.now(),
           'sender': uid,
@@ -164,67 +190,33 @@ class DatabaseService {
         .catchError((error) => print("Failed to send message: $error"));
   }
 
-  // Stream to retrieve messages from a given chatid
-  Stream<QuerySnapshot> getMessages(String? chatid) {
-    return chatCollection
-        .doc(chatid)
-        .collection('messages')
-        .orderBy('timestamp', descending: true)
-        .snapshots();
-  }
-
-  Stream<QuerySnapshot> getIncoming() {
-    return userCollection
-        .doc(uid)
-        .collection('incoming')
-        .orderBy('timestamp')
-        .snapshots();
-  }
-
-  // Helper function for converting a user DocumentReference to a ZestiUser model.
-  Future<ZestiUser> _referenceToZestiUser(DocumentReference userRef) async {
+  // Helper function for converting a user DocumentReference to a dart map.
+  Future<Map<String, dynamic>> _referenceToMap(
+      DocumentReference userRef) async {
+    // Get snapshot of user doc reference.
     DocumentSnapshot snapshot = await userRef.get();
-    Map<String, dynamic> mapdata = snapshot.data() as Map<String, dynamic>;
-    Uint8List? profpicref =
-        await _storage.ref().child(mapdata['photo-ref']).getData();
-    ImageProvider<Object> profpic;
 
-    // Check if user has an uploaded profile picture.
-    // Set profile picture variable to the corresponding case.
-    if (profpicref == null) {
-      profpic = AssetImage('assets/profile.jpg');
-    } else {
-      Uint8List? profpicref =
-          await _storage.ref().child(mapdata['photo-ref']).getData();
-      if (profpicref == null) {
-        profpic = AssetImage('assets/profile.jpg');
-      } else {
-        profpic = MemoryImage(profpicref);
-      }
-    }
-    return ZestiUser(
-        uid: userRef.id,
-        first: mapdata['first-name'],
-        last: mapdata['last-name'],
-        bio: mapdata['bio'],
-        dIdentity: mapdata['dating-identity'],
-        dInterest: mapdata['dating-interest'],
-        house: mapdata['house'],
-        age: mapdata['age'],
-        profpic: profpic);
+    // Convert snapshot data into a dart map.
+    Map<String, dynamic> mapData = snapshot.data() as Map<String, dynamic>;
+
+    // Add user reference to the dart map.
+    mapData['user-ref'] = userRef;
+    return mapData;
   }
 
-  Future<List<ZestiUser>> getLove() async {
+  // Generates random match recommendations based on dating identity and interest.
+  Future<void> generateRecommendations() async {
     // Get current user info
-    ZestiUser currUser = await _referenceToZestiUser(userCollection.doc(uid));
+    Map<String, dynamic> currUser =
+        await _referenceToMap(userCollection.doc(uid));
 
     // Get querying parameters based on user info
     List<String> queryIdentity = [];
     List<String> queryInterest = [];
-    switch (currUser.dIdentity) {
+    switch (currUser["dating-identity"]) {
       case 'non-binary':
         {
-          switch (currUser.dInterest) {
+          switch (currUser["dating-interest"]) {
             case 'everyone':
               {
                 queryIdentity = ['man', 'woman', 'non-binary'];
@@ -251,7 +243,7 @@ class DatabaseService {
 
       case 'man':
         {
-          switch (currUser.dInterest) {
+          switch (currUser["dating-interest"]) {
             case 'everyone':
               {
                 queryIdentity = ['man', 'woman', 'non-binary'];
@@ -278,7 +270,7 @@ class DatabaseService {
 
       case 'woman':
         {
-          switch (currUser.dInterest) {
+          switch (currUser["dating-interest"]) {
             case 'everyone':
               {
                 queryIdentity = ['man', 'woman', 'non-binary'];
@@ -328,13 +320,11 @@ class DatabaseService {
     if (queryIdentity.length == 3) {
       snapshot = await userCollection
           .where('dating-interest', whereIn: queryInterest)
-          .limit(3)
           .get();
     } else {
       snapshot = await userCollection
           .where('dating-identity', isEqualTo: queryIdentity[0])
           .where('dating-interest', whereIn: queryInterest)
-          .limit(3)
           .get();
     }
 
@@ -351,22 +341,47 @@ class DatabaseService {
     } else {
       userListMaxLength = 3;
     }
-    List<ZestiUser> userList = [];
+    List<Map<String, dynamic>> userList = [];
     while (userList.length < userListMaxLength) {
       final random = new Random();
       var selectedUID = potentialUIDs[random.nextInt(potentialUIDs.length)];
       potentialUIDs.remove(selectedUID);
       DocumentReference selectedDoc = userCollection.doc(selectedUID);
-      ZestiUser selectedUser = await _referenceToZestiUser(selectedDoc);
+      Map<String, dynamic> selectedUser = await _referenceToMap(selectedDoc);
       userList.add(selectedUser);
     }
-    return userList;
+
+    // Delete all currently stored recommendations.
+    QuerySnapshot recommendations =
+        await userCollection.doc(uid).collection("recommendations").get();
+    for (QueryDocumentSnapshot recUser in recommendations.docs) {
+      await recUser.reference.delete();
+    }
+
+    // Populate recommendations collection with newly generated users.
+    DateTime ts = DateTime.now();
+    for (Map<String, dynamic> recUser in userList) {
+      await userCollection
+          .doc(uid)
+          .collection("recommendations")
+          .doc(uuid.v4())
+          .set({
+        "timestamp": ts,
+        "user-ref": recUser['user-ref'],
+        "first-name": recUser['first-name'],
+        "bio": recUser['bio'],
+        "age": recUser['age'],
+        "photo-ref": recUser['photo-ref'],
+        "house": recUser['house'],
+      });
+    }
   }
 
+  // Handles the interactions a user conducts on a recommended match.
   Future<void> outgoingInteraction(String youid, bool requested) async {
-    // Define timestamp and unique ID for the interaction (will be used for the chat)
+    // Define timestamp and unique ID for the interaction
     DateTime ts = DateTime.now();
-    String chatid = uuid.v4();
+    String id = uuid.v4();
 
     // Get current user info
     Map<String, dynamic> currUser =
@@ -376,7 +391,7 @@ class DatabaseService {
     await userCollection
         .doc(uid)
         .collection("outgoing")
-        .doc(chatid)
+        .doc(id)
         .set({
           "timestamp": ts,
           "user-ref": userCollection.doc(youid),
@@ -390,7 +405,7 @@ class DatabaseService {
       await userCollection
           .doc(youid)
           .collection("incoming")
-          .doc(chatid)
+          .doc(id)
           .set({
             "timestamp": ts,
             "user-ref": userCollection.doc(uid),
@@ -398,6 +413,7 @@ class DatabaseService {
             "bio": currUser['bio'],
             "age": currUser['age'],
             "photo-ref": currUser['photo-ref'],
+            "house": currUser['house'],
           })
           .then((value) => print("Incoming request received."))
           .catchError(
@@ -405,17 +421,12 @@ class DatabaseService {
     }
   }
 
-  // Helper function for converting a user DocumentReference to a dart map.
-  Future<Map<String, dynamic>> _referenceToMap(
-      DocumentReference userRef) async {
-    DocumentSnapshot snapshot = await userRef.get();
-    return snapshot.data() as Map<String, dynamic>;
-  }
-
+  // Handles the interactions a user conducts on an incoming match request.
   Future<void> incomingInteraction(
-      String youid, String chatid, bool accepted) async {
-    // Define timestamp for the interaction
+      String youid, String? id, bool accepted) async {
+    // Define timestamp and unique ID for the match (used for chat as well)
     DateTime ts = DateTime.now();
+    String chatid = uuid.v4();
 
     // Get both user info.
     Map<String, dynamic> initiator =
@@ -423,7 +434,7 @@ class DatabaseService {
     Map<String, dynamic> receiver =
         await _referenceToMap(userCollection.doc(youid));
 
-    // Update user's "matched" collection on acceptance. On denial, delete the incoming request.
+    // Update user's "matched" collection on acceptance.
     if (accepted) {
       await userCollection
           .doc(uid)
@@ -458,10 +469,12 @@ class DatabaseService {
           .then((value) => print("Chat created."))
           .catchError((error) => print("Failed to create chat: $error"));
     }
+
+    // Delete the incoming request regardless of acceptance.
     await userCollection
         .doc(uid)
         .collection("incoming")
-        .doc(chatid)
+        .doc(id)
         .delete()
         .then((value) => print("Incoming request deleted."))
         .catchError(

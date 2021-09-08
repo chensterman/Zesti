@@ -7,21 +7,14 @@ import 'package:zesti/views/auth/start.dart';
 import 'package:zesti/views/home/profile.dart';
 import 'package:zesti/views/home/love/love.dart';
 import 'package:zesti/views/home/social/choose.dart';
-import 'package:zesti/views/home/social/social.dart';
 
 // Starting page widget
 class Home extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    Size size = MediaQuery.of(context).size;
-    // Listen to authentication stream
     final user = Provider.of<User?>(context);
-    // Check for non-user
-    if (user == null) {
-      return Text('Error');
-    }
-
+    Size size = MediaQuery.of(context).size;
     return Scaffold(
       body: Container(
         padding: EdgeInsets.symmetric(
@@ -60,7 +53,7 @@ class Home extends StatelessWidget {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => Profile(uid: user.uid)),
+                                builder: (context) => Profile(uid: user!.uid)),
                           );
                         },
                       ),

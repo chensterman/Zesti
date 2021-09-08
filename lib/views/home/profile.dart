@@ -9,7 +9,7 @@ import 'package:zesti/theme/theme.dart';
 import 'package:zesti/views/home/home.dart';
 import 'package:zesti/widgets/usercard.dart';
 
-// Widget for the profile manager
+// Widget for the profile edit.
 class Profile extends StatefulWidget {
   final String uid;
   Profile({
@@ -25,6 +25,7 @@ class _ProfileState extends State<Profile> {
   // Form widget key.
   final _formKey = GlobalKey<FormState>();
 
+  // Image picker tool.
   final ImagePicker _picker = ImagePicker();
 
   // User data to retrieve and display.
@@ -34,6 +35,7 @@ class _ProfileState extends State<Profile> {
   String? photoref;
   dynamic profpic;
 
+  // Stream to retrieve user profile information (initialized during initState).
   Stream<DocumentSnapshot>? profileInfo;
 
   @override
@@ -44,18 +46,26 @@ class _ProfileState extends State<Profile> {
 
   @override
   Widget build(BuildContext context) {
+    // StreamBuilder to display profile info stream.
     return StreamBuilder(
         stream: profileInfo,
         builder: (context, AsyncSnapshot<DocumentSnapshot> snapshot) {
           DocumentSnapshot? tmp = snapshot.data;
+          // On loading.
           if (tmp == null) {
             return Center(child: CircularProgressIndicator());
+            // On loaded.
           } else {
+            // Convert snapshot into dart map.
             Map<String, dynamic> data = tmp.data() as Map<String, dynamic>;
+
+            // Check for null input parameters and replace them with the newly loaded data.
             if (name == null) name = data['first-name'];
             if (bio == null) bio = data['bio'];
             if (house == null) house = data['house'];
             if (photoref == null) photoref = data['photo-ref'];
+
+            // Tab controller switches between "edit" and "preview" mode.
             return DefaultTabController(
               initialIndex: 0,
               length: 2,
@@ -86,6 +96,7 @@ class _ProfileState extends State<Profile> {
         });
   }
 
+  // Edit mode widget.
   Widget edit() {
     Size size = MediaQuery.of(context).size;
     return Scaffold(
@@ -102,14 +113,16 @@ class _ProfileState extends State<Profile> {
                 children: [
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 64.0),
+                    // FutureBuilder retrieves profile photo from Firebase Storage.
                     child: FutureBuilder(
                         future: DatabaseService(uid: widget.uid)
                             .getProfPic(photoref),
                         builder: (context,
                             AsyncSnapshot<ImageProvider<Object>> snapshot) {
+                          // On error.
                           if (snapshot.hasError) {
                             return Text(snapshot.error.toString());
-                            // On success
+                            // During loading or success.
                           } else {
                             profpic = snapshot.data;
                             return profileImage();
@@ -197,15 +210,18 @@ class _ProfileState extends State<Profile> {
     );
   }
 
+  // Preview widget.
   Widget preview() {
     return Padding(
         padding: EdgeInsets.all(16.0),
+        // FutureBuilder to retrieve profile photo from Firebase Storage.
         child: FutureBuilder(
             future: DatabaseService(uid: widget.uid).getProfPic(photoref),
             builder: (context, AsyncSnapshot<ImageProvider<Object>> snapshot) {
+              // On error.
               if (snapshot.hasError) {
                 return Text(snapshot.error.toString());
-                // On success
+                // On success.
               } else if (snapshot.connectionState == ConnectionState.done) {
                 profpic = snapshot.data;
                 ZestiUser previewUser = ZestiUser(
@@ -218,8 +234,8 @@ class _ProfileState extends State<Profile> {
                     house: house.toString(),
                     age: 21,
                     profpic: profpic);
-                return UserCard1(userOnCard: previewUser, rec: true);
-                // On Loading
+                return UserCard(userOnCard: previewUser, rec: true);
+                // On loading.
               } else {
                 return Center(child: CircularProgressIndicator());
               }

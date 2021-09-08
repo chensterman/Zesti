@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 // User class for the app
-// Useful to hold unpackaged requests from the database
+//  Useful to hold unpackaged requests from the database
 class ZestiUser {
   final String uid;
   String? chatid;
