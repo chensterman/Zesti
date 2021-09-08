@@ -2,16 +2,16 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:zesti/services/auth.dart';
 import 'package:zesti/services/database.dart';
 import 'package:zesti/theme/theme.dart';
+import 'package:zesti/views/home/redeem.dart';
 
-// Widget displaying the chat page for a specific match
+// Widget displaying the chat page for a specific match.
 class Chat extends StatefulWidget {
   final String uid;
-  final String chatid;
+  final String? chatid;
   final String name;
-  final ImageProvider<Object> profpic;
+  final ImageProvider<Object>? profpic;
   Chat({
     Key? key,
     required this.uid,
@@ -25,22 +25,67 @@ class Chat extends StatefulWidget {
 }
 
 class _ChatState extends State<Chat> {
+  // Controls the text parameters for the chat text editor.
   TextEditingController messageText = TextEditingController();
+  // Stream to retrieve messages from a specific chat (initialied during initState).
   Stream<QuerySnapshot>? messages;
 
   @override
   void initState() {
-    messages = DatabaseService(uid: widget.uid).messages(widget.chatid);
+    messages = DatabaseService(uid: widget.uid).getMessages(widget.chatid);
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     final user = Provider.of<User?>(context);
-    Size size = MediaQuery.of(context).size;
     return Scaffold(
-      // endDrawer is the restaurant display for discounts
-      endDrawer: Drawer(),
+      // endDrawer is the restaurant display for discounts.
+      endDrawer: Drawer(
+        child: Container(
+          decoration: BoxDecoration(
+            // Box decoration takes a gradient.
+            gradient: LinearGradient(
+              // Where the linear gradient begins and ends.
+              begin: Alignment.topRight,
+              end: Alignment.bottomLeft,
+
+              // Add one stop for each color. Stops should increase from 0 to 1.
+              stops: [0.3, 0.9],
+              colors: [
+                // Colors are easy thanks to Flutter's Colors class.
+                CustomTheme.lightTheme.primaryColor,
+                Colors.white,
+              ],
+            ),
+          ),
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: <Widget>[
+              DrawerHeader(
+                decoration: BoxDecoration(
+                  color: Colors.orange.shade900,
+                ),
+                child: Center(
+                  child: Text(
+                    'Deals',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 36,
+                    ),
+                  ),
+                ),
+              ),
+              dealCard("assets/spyce.jpg", "SPYCE",
+                  "20% off of the Spring and Summer menu!"),
+              dealCard("assets/zinnekens.jpg", "ZINNEKEN'S",
+                  "20% off of any purchase!"),
+              dealCard("assets/maharaja.jpg", "THE MAHARAJA",
+                  "Anything off of the dessert menu, on the house!"),
+            ],
+          ),
+        ),
+      ),
       appBar: AppBar(
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
@@ -49,6 +94,11 @@ class _ChatState extends State<Chat> {
         backgroundColor: CustomTheme.lightTheme.primaryColor,
         elevation: 0.0,
         actions: [
+          IconButton(
+            icon: Icon(Icons.cancel),
+            onPressed: () {},
+            color: Colors.red,
+          ),
           Builder(
             builder: (context) => IconButton(
               icon: Icon(Icons.fastfood),
@@ -110,6 +160,7 @@ class _ChatState extends State<Chat> {
                         if (user == null) {
                           print('User Error');
                         } else {
+                          // Check for an empty text editor (don't send empty chats).
                           if (messageText.text != '') {
                             sendMessage(user.uid, widget.chatid, 'text',
                                 messageText.text);
@@ -133,7 +184,47 @@ class _ChatState extends State<Chat> {
     );
   }
 
+  // Card that displays a specific partner deal.
+  Widget dealCard(String imagePath, String vendor, String description) {
+    return Card(
+      margin: EdgeInsets.all(16.0),
+      child: InkWell(
+        splashColor: CustomTheme.lightTheme.primaryColor,
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => Redeem(
+                    imagePath: imagePath,
+                    vendor: vendor,
+                    description: description)),
+          );
+        },
+        child: Padding(
+          padding: EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              CircleAvatar(
+                  radius: 80.0,
+                  backgroundImage: AssetImage(imagePath),
+                  backgroundColor: Colors.white),
+              SizedBox(height: 16.0),
+              Text(vendor,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.orange[900], fontSize: 24.0)),
+              Text(description,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 24.0)),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Display all chat messages for the match.
   Widget chatMessages(String uid) {
+    // StreamBuilder to display messages stream.
     return StreamBuilder(
       stream: messages,
       builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
@@ -154,6 +245,8 @@ class _ChatState extends State<Chat> {
     );
   }
 
+  // Widget for a message tile.
+  //  Parameters include message content and a boolean for if it was sent by the current user.
   Widget chatMessageTile(String message, bool sendByMe) {
     return Row(
       mainAxisAlignment:
@@ -183,8 +276,10 @@ class _ChatState extends State<Chat> {
     );
   }
 
-  sendMessage(String uid, String chatid, String type, String content) {
+  // Call database service to send message.
+  sendMessage(String uid, String? chatid, String type, String content) {
     DatabaseService(uid: uid).sendMessage(chatid, type, content);
+    // Reset the text editor controller after message is sent.
     messageText.text = '';
   }
 }

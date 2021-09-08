@@ -1,27 +1,29 @@
 import 'package:flutter/material.dart';
 
 // User class for the app
-// Useful to hold unpackaged requests from the database
+//  Useful to hold unpackaged requests from the database
 class ZestiUser {
   final String uid;
   String? chatid;
-  final String name;
-  final String designation;
-  final int mutualFriends;
+  final String first;
+  final String last;
+  final String bio;
+  final String dIdentity;
+  final String dInterest;
+  final String house;
   final int age;
   final ImageProvider<Object> profpic;
-  final String location;
-  final String bio;
 
   ZestiUser({
     required this.uid,
     this.chatid,
-    required this.designation,
-    required this.mutualFriends,
-    required this.name,
+    required this.first,
+    required this.last,
+    required this.bio,
+    required this.dIdentity,
+    required this.dInterest,
+    required this.house,
     required this.age,
     required this.profpic,
-    required this.location,
-    required this.bio,
   });
 }

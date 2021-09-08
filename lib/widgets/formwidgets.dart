@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:zesti/theme/theme.dart';
 
-// Text input used across multiple forms
+// Text input used across multiple forms.
 class TextFieldContainer extends StatelessWidget {
   final bool obscureText;
   final FormFieldValidator<String>? validator;
@@ -43,7 +43,7 @@ class TextFieldContainer extends StatelessWidget {
   }
 }
 
-// Rounded looking button used across multiple forms
+// Rounded looking button used across multiple forms.
 class RoundedButton extends StatelessWidget {
   final String text;
   final VoidCallback? onPressed;

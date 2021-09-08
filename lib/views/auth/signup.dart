@@ -3,7 +3,6 @@ import 'package:zesti/theme/theme.dart';
 import 'package:zesti/views/auth/signin.dart';
 import 'package:zesti/services/auth.dart';
 import 'package:zesti/widgets/formwidgets.dart';
-import 'package:zesti/wrappers/authwrapper.dart';
 
 // Widget for handling account creation
 class SignUp extends StatefulWidget {
@@ -29,6 +28,8 @@ class _SignUpState extends State<SignUp> {
     Size size = MediaQuery.of(context).size;
     return Scaffold(
       body: Container(
+        padding: EdgeInsets.symmetric(
+            vertical: size.height * 0.1, horizontal: size.width * 0.1),
         decoration: BoxDecoration(
           // Box decoration takes a gradient
           gradient: LinearGradient(
