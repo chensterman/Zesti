@@ -135,8 +135,7 @@ class _BirthdayState extends State<Birthday> {
                                 // Update user birthday
                               } else {
                                 await DatabaseService(uid: user.uid)
-                                    .updateBirthday(
-                                        Timestamp.fromDate(birthday));
+                                    .updateAge(birthday);
                               }
                               // Push to House form
                               Navigator.push(

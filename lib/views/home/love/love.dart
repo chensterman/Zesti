@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
 import 'package:zesti/theme/theme.dart';
 import 'package:zesti/views/home/love/matches.dart';
 import 'package:zesti/widgets/usercard.dart';
-import 'package:provider/provider.dart';
 import 'package:zesti/models/zestiuser.dart';
+import 'package:zesti/services/database.dart';
 
 // Widget containing swiping, profile management, and matches
 class Love extends StatefulWidget {
@@ -28,8 +30,8 @@ class _LoveState extends State<Love> {
     Size size = MediaQuery.of(context).size;
     // Widget list for bottom nav bar
     final List<Widget> _widgetSet = <Widget>[
-      Recommendations(),
-      Requests(),
+      RecommendationsRandom(uid: user.uid),
+      Requests(uid: user.uid),
       Matches(uid: user.uid),
     ];
 
@@ -70,6 +72,66 @@ class _LoveState extends State<Love> {
   }
 }
 
+// Test widget
+class RecommendationsRandom extends StatefulWidget {
+  final String uid;
+  RecommendationsRandom({
+    Key? key,
+    required this.uid,
+  }) : super(key: key);
+
+  @override
+  _RecommendationsRandomState createState() => _RecommendationsRandomState();
+}
+
+class _RecommendationsRandomState extends State<RecommendationsRandom> {
+  Future<List<ZestiUser>>? recommendations;
+
+  @override
+  void initState() {
+    recommendations = DatabaseService(uid: widget.uid).getLove();
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder(
+        future: recommendations,
+        builder: (context, AsyncSnapshot<List<ZestiUser>> snapshot) {
+          if (snapshot.hasError) {
+            return Text(snapshot.error.toString());
+            // On success
+          } else if (snapshot.connectionState == ConnectionState.done) {
+            List<Widget> widgetList = [];
+            List<ZestiUser>? userList = snapshot.data;
+            if (userList != null) {
+              for (ZestiUser currUser in userList) {
+                widgetList.add(UserCard1(userOnCard: currUser, rec: true));
+              }
+            } else {
+              return Text("Null recommendations.");
+            }
+            return Container(
+              child: ListView.separated(
+                  padding: EdgeInsets.all(16.0),
+                  itemBuilder: (context, index) {
+                    if (index == 0) {
+                      return Center(
+                          child: Text('RECOMMENDATIONS',
+                              style: TextStyle(color: Colors.orange[900])));
+                    }
+                    return widgetList[index - 1];
+                  },
+                  separatorBuilder: (context, index) => SizedBox(height: 16.0),
+                  itemCount: widgetList.length + 1),
+            );
+          } else {
+            return CircularProgressIndicator();
+          }
+        });
+  }
+}
+/*
 // Widget containing swiping, profile management, and matches
 class Recommendations extends StatefulWidget {
   Recommendations({Key? key}) : super(key: key);
@@ -119,9 +181,9 @@ class _RecommendationsState extends State<Recommendations> {
 
   @override
   Widget build(BuildContext context) {
-    widgetList.add(UserCard1(user: user1, rec: true));
-    widgetList.add(UserCard1(user: user2, rec: true));
-    widgetList.add(UserCard1(user: user3, rec: true));
+    widgetList.add(UserCard1(userOnCard: user1, rec: true));
+    widgetList.add(UserCard1(userOnCard: user2, rec: true));
+    widgetList.add(UserCard1(userOnCard: user3, rec: true));
 
     return Container(
       child: ListView.separated(
@@ -139,7 +201,81 @@ class _RecommendationsState extends State<Recommendations> {
     );
   }
 }
+*/
 
+class Requests extends StatefulWidget {
+  final String uid;
+  Requests({
+    Key? key,
+    required this.uid,
+  }) : super(key: key);
+
+  @override
+  _RequestsState createState() => _RequestsState();
+}
+
+class _RequestsState extends State<Requests> {
+  Stream<QuerySnapshot>? incoming;
+
+  @override
+  void initState() {
+    incoming = DatabaseService(uid: widget.uid).getIncoming();
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: StreamBuilder(
+          stream: incoming,
+          builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+            QuerySnapshot? tmp = snapshot.data;
+            return tmp != null
+                ? ListView.separated(
+                    padding: EdgeInsets.all(16.0),
+                    itemBuilder: (context, index) {
+                      if (index == 0) {
+                        return Center(
+                            child: Text('INCOMING REQUESTS',
+                                style: TextStyle(color: Colors.orange[900])));
+                      }
+                      Map<String, dynamic> data =
+                          tmp.docs[index - 1].data() as Map<String, dynamic>;
+                      return FutureBuilder(
+                          future: DatabaseService(uid: widget.uid)
+                              .getProfPic(data['photo-ref']),
+                          builder: (context,
+                              AsyncSnapshot<ImageProvider<Object>> snapshot) {
+                            if (snapshot.hasError) {
+                              return Text(snapshot.error.toString());
+                              // On success
+                            } else if (snapshot.connectionState ==
+                                ConnectionState.done) {
+                              ZestiUser incUser = ZestiUser(
+                                  uid: tmp.docs[index - 1].id,
+                                  first: data['first-name'],
+                                  last: data['last-name'],
+                                  bio: data['bio'],
+                                  dIdentity: data['dating-identity'],
+                                  dInterest: data['dating-interest'],
+                                  house: data['house'],
+                                  age: data['age'],
+                                  profpic: snapshot.data!);
+                              return UserCard1(userOnCard: incUser, rec: false);
+                            } else {
+                              return Center(child: CircularProgressIndicator());
+                            }
+                          });
+                    },
+                    separatorBuilder: (context, index) =>
+                        SizedBox(height: 16.0),
+                    itemCount: tmp.docs.length + 1)
+                : Center(child: CircularProgressIndicator());
+          }),
+    );
+  }
+
+/*
 // Widget containing swiping, profile management, and matches
 class Requests extends StatefulWidget {
   Requests({Key? key}) : super(key: key);
@@ -189,9 +325,9 @@ class _RequestsState extends State<Requests> {
 
   @override
   Widget build(BuildContext context) {
-    widgetList.add(UserCard1(user: user1, rec: false));
-    widgetList.add(UserCard1(user: user2, rec: false));
-    widgetList.add(UserCard1(user: user3, rec: false));
+    widgetList.add(UserCard1(userOnCard: user1, rec: false));
+    widgetList.add(UserCard1(userOnCard: user2, rec: false));
+    widgetList.add(UserCard1(userOnCard: user3, rec: false));
 
     return Container(
       child: ListView.separated(
@@ -208,4 +344,5 @@ class _RequestsState extends State<Requests> {
           itemCount: widgetList.length + 1),
     );
   }
+  */
 }

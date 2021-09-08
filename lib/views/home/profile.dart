@@ -218,7 +218,7 @@ class _ProfileState extends State<Profile> {
                     house: house.toString(),
                     age: 21,
                     profpic: profpic);
-                return UserCard1(user: previewUser, rec: true);
+                return UserCard1(userOnCard: previewUser, rec: true);
                 // On Loading
               } else {
                 return Center(child: CircularProgressIndicator());

@@ -1,20 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
 import 'package:zesti/models/zestiuser.dart';
 import 'package:zesti/services/database.dart';
 
 // Widget displaying the cards to swipe on
 class UserCard1 extends StatelessWidget {
-  final ZestiUser user;
+  final ZestiUser userOnCard;
   final bool rec;
 
   UserCard1({
-    required this.user,
+    required this.userOnCard,
     required this.rec,
     Key? key,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final user = Provider.of<User?>(context);
+    if (user == null) {
+      return Text('User Error');
+    }
+
     final size = MediaQuery.of(context).size;
 
     return Container(
@@ -24,7 +31,7 @@ class UserCard1 extends StatelessWidget {
         borderRadius: BorderRadius.circular(10),
         // User profile pic on card.
         image: DecorationImage(
-          image: user.profpic,
+          image: userOnCard.profpic,
           fit: BoxFit.cover,
         ),
       ),
@@ -51,11 +58,19 @@ class UserCard1 extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  buildUserInfo(user: user),
+                  buildUserInfo(user: userOnCard),
                   Padding(
                     padding: EdgeInsets.all(16.0),
-                    child: Icon(Icons.cancel_rounded,
-                        color: Colors.red, size: 64.0),
+                    child: InkWell(
+                      child: Icon(Icons.cancel_rounded,
+                          color: Colors.red, size: 64.0),
+                      onTap: () async {
+                        if (rec) {
+                          await DatabaseService(uid: user.uid)
+                              .outgoingInteraction(userOnCard.uid, false);
+                        } else {}
+                      },
+                    ),
                   ),
                   Padding(
                     padding: EdgeInsets.all(16.0),
@@ -63,10 +78,10 @@ class UserCard1 extends StatelessWidget {
                       child: Icon(rec ? Icons.send : Icons.check_circle,
                           color: rec ? Colors.blue : Colors.green, size: 64.0),
                       onTap: () async {
-                        List<ZestiUser> test = await DatabaseService(
-                                uid: 'ikWfhZK3heO4vM6OGkdRzcoaqWA2')
-                            .getLove();
-                        print(test);
+                        if (rec) {
+                          await DatabaseService(uid: user.uid)
+                              .outgoingInteraction(userOnCard.uid, true);
+                        } else {}
                       },
                     ),
                   ),

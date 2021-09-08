@@ -1,7 +1,5 @@
 import 'dart:typed_data';
-import 'dart:convert';
 import 'dart:math';
-import 'package:http/http.dart' as http;
 import 'package:uuid/uuid.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -37,7 +35,7 @@ class DatabaseService {
           'account-setup': false,
           'first-name': null,
           'last-name': null,
-          'birthday': null,
+          'age': null,
           'house': null,
           'dating-identity': null,
           'dating-interest': null,
@@ -66,11 +64,13 @@ class DatabaseService {
   }
 
   // Update user birthday.
-  Future<void> updateBirthday(Timestamp birthday) async {
+  Future<void> updateAge(DateTime birthday) async {
+    Duration difference = DateTime.now().difference(birthday);
+    num age = difference.inDays ~/ 365;
     await userCollection
         .doc(uid)
-        .update({'birthday': birthday})
-        .then((value) => print("Birthday Updated"))
+        .update({'age': age})
+        .then((value) => print("Age Updated"))
         .catchError((error) => print("Failed to update user: $error"));
   }
 
@@ -170,6 +170,14 @@ class DatabaseService {
         .doc(chatid)
         .collection('messages')
         .orderBy('timestamp', descending: true)
+        .snapshots();
+  }
+
+  Stream<QuerySnapshot> getIncoming() {
+    return userCollection
+        .doc(uid)
+        .collection('incoming')
+        .orderBy('timestamp')
         .snapshots();
   }
 
@@ -307,7 +315,7 @@ class DatabaseService {
     QuerySnapshot reactionsSnapshot =
         await userCollection.doc(uid).collection("outgoing").get();
     final allReactions =
-        reactionsSnapshot.docs.map((doc) => doc.get("user").id).toList();
+        reactionsSnapshot.docs.map((doc) => doc.get("user-ref").id).toList();
 
     QuerySnapshot usersSnapshot = await userCollection.get();
     final allUsers = usersSnapshot.docs.map((doc) => doc.id).toList();
@@ -320,13 +328,13 @@ class DatabaseService {
     if (queryIdentity.length == 3) {
       snapshot = await userCollection
           .where('dating-interest', whereIn: queryInterest)
-          .limit(1)
+          .limit(3)
           .get();
     } else {
       snapshot = await userCollection
           .where('dating-identity', isEqualTo: queryIdentity[0])
           .where('dating-interest', whereIn: queryInterest)
-          .limit(1)
+          .limit(3)
           .get();
     }
 
@@ -360,6 +368,10 @@ class DatabaseService {
     DateTime ts = DateTime.now();
     String chatid = uuid.v4();
 
+    // Get current user info
+    Map<String, dynamic> currUser =
+        await _referenceToMap(userCollection.doc(uid));
+
     // Update requester's "outgoing" collection
     await userCollection
         .doc(uid)
@@ -379,7 +391,14 @@ class DatabaseService {
           .doc(youid)
           .collection("incoming")
           .doc(chatid)
-          .set({"timestamp": ts, "user-ref": userCollection.doc(uid)})
+          .set({
+            "timestamp": ts,
+            "user-ref": userCollection.doc(uid),
+            "first-name": currUser['first-name'],
+            "bio": currUser['bio'],
+            "age": currUser['age'],
+            "photo-ref": currUser['photo-ref'],
+          })
           .then((value) => print("Incoming request received."))
           .catchError(
               (error) => print("Failed to receive incoming request: $error"));
@@ -438,15 +457,14 @@ class DatabaseService {
           })
           .then((value) => print("Chat created."))
           .catchError((error) => print("Failed to create chat: $error"));
-    } else {
-      await userCollection
-          .doc(uid)
-          .collection("incoming")
-          .doc(chatid)
-          .delete()
-          .then((value) => print("Incoming request deleted."))
-          .catchError(
-              (error) => print("Failed to delete incoming request: $error"));
     }
+    await userCollection
+        .doc(uid)
+        .collection("incoming")
+        .doc(chatid)
+        .delete()
+        .then((value) => print("Incoming request deleted."))
+        .catchError(
+            (error) => print("Failed to delete incoming request: $error"));
   }
 }

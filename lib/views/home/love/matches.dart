@@ -44,7 +44,7 @@ class _MatchesState extends State<Matches> {
                         Map<String, dynamic> data =
                             tmp.docs[index - 1].data() as Map<String, dynamic>;
                         return matchSheet(widget.uid, data['chatid'],
-                            data['name'], data['photo-ref']);
+                            data['first-name'], data['photo-ref']);
                       },
                       separatorBuilder: (context, index) => Divider(),
                       itemCount: tmp.docs.length + 1)
