@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:zesti/models/zestiuser.dart';
+import 'package:zesti/services/database.dart';
 
 // Widget displaying the cards to swipe on
 class UserCard1 extends StatelessWidget {
@@ -58,8 +59,16 @@ class UserCard1 extends StatelessWidget {
                   ),
                   Padding(
                     padding: EdgeInsets.all(16.0),
-                    child: Icon(rec ? Icons.send : Icons.check_circle,
-                        color: rec ? Colors.blue : Colors.green, size: 64.0),
+                    child: InkWell(
+                      child: Icon(rec ? Icons.send : Icons.check_circle,
+                          color: rec ? Colors.blue : Colors.green, size: 64.0),
+                      onTap: () async {
+                        List<ZestiUser> test = await DatabaseService(
+                                uid: 'ikWfhZK3heO4vM6OGkdRzcoaqWA2')
+                            .getLove();
+                        print(test);
+                      },
+                    ),
                   ),
                 ],
               ),

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:zesti/theme/theme.dart';
-import 'package:zesti/views/home//love/matches.dart';
+import 'package:zesti/views/home/love/matches.dart';
 import 'package:zesti/widgets/usercard.dart';
 import 'package:provider/provider.dart';
 import 'package:zesti/models/zestiuser.dart';

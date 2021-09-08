@@ -46,7 +46,7 @@ class Home extends StatelessWidget {
           child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                Text('Looking good, Leon!',
+                Text('Looking good, asdf!',
                     style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 32.0,
@@ -78,7 +78,7 @@ class Home extends StatelessWidget {
                 Text('Select a Mode',
                     style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        fontSize: 24.0,
+                        fontSize: 32.0,
                         color: Colors.white)),
                 Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,

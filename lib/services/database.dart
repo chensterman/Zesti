@@ -1,10 +1,12 @@
 import 'dart:typed_data';
 import 'dart:convert';
+import 'dart:math';
 import 'package:http/http.dart' as http;
 import 'package:uuid/uuid.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:zesti/models/zestiuser.dart';
 
 // DatabaseService class:
 //  Contains all methods and data pertaining to the user database.
@@ -45,174 +47,6 @@ class DatabaseService {
         .then((value) => print("User added"))
         .catchError((error) => print("Failed"));
   }
-
-  // Stream to retrieve messages from a given chatid
-  Stream<QuerySnapshot> getMessages(String? chatid) {
-    return chatCollection
-        .doc(chatid)
-        .collection('messages')
-        .orderBy('timestamp', descending: true)
-        .snapshots();
-  }
-
-  // Stream to retrieve profile info from the given uid
-  Stream<DocumentSnapshot> getProfileInfo() {
-    return userCollection.doc(uid).snapshots();
-  }
-
-  // Stream to retrieve list of matches from the given uid
-  Stream<QuerySnapshot> getMatches() {
-    return userCollection.doc(uid).collection("matched").snapshots();
-  }
-
-  // Retrieves the stored image from a given reference to Firebase Storage
-  Future<ImageProvider<Object>> getProfPic(String? photoref) async {
-    ImageProvider<Object> profpic;
-
-    // Check if user has an uploaded profile picture.
-    // Set profile picture variable to the corresponding case.
-    if (photoref == null) {
-      profpic = AssetImage('assets/profile.jpg');
-    } else {
-      Uint8List? profpicref = await _storage.ref().child(photoref).getData();
-      if (profpicref == null) {
-        profpic = AssetImage('assets/profile.jpg');
-      } else {
-        profpic = MemoryImage(profpicref);
-      }
-    }
-    return profpic;
-  }
-
-  /*
-  Future<List<ZestiUser>> getSwiping() async {
-    Map<String, dynamic> data = await getInfo();
-    List<String> queryIdentity = [];
-    List<String> queryInterest = [];
-    switch (data['dating-identity']) {
-      case 'non-binary':
-        {
-          switch (data['dating-interest']) {
-            case 'everyone':
-              {
-                queryIdentity = ['man', 'woman', 'non-binary'];
-                queryInterest = ['everyone'];
-              }
-              break;
-
-            case 'man':
-              {
-                queryIdentity = ['man'];
-                queryInterest = ['everyone'];
-              }
-              break;
-
-            case 'woman':
-              {
-                queryIdentity = ['woman'];
-                queryInterest = ['everyone'];
-              }
-              break;
-          }
-        }
-        break;
-
-      case 'man':
-        {
-          switch (data['dating-interest']) {
-            case 'everyone':
-              {
-                queryIdentity = ['man', 'woman', 'non-binary'];
-                queryInterest = ['man', 'everyone'];
-              }
-              break;
-
-            case 'man':
-              {
-                queryIdentity = ['man'];
-                queryInterest = ['man', 'everyone'];
-              }
-              break;
-
-            case 'woman':
-              {
-                queryIdentity = ['woman'];
-                queryInterest = ['man', 'everyone'];
-              }
-              break;
-          }
-        }
-        break;
-
-      case 'woman':
-        {
-          switch (data['dating-interest']) {
-            case 'everyone':
-              {
-                queryIdentity = ['man', 'woman', 'non-binary'];
-                queryInterest = ['woman', 'everyone'];
-              }
-              break;
-
-            case 'man':
-              {
-                queryIdentity = ['man'];
-                queryInterest = ['woman', 'everyone'];
-              }
-              break;
-
-            case 'woman':
-              {
-                queryIdentity = ['woman'];
-                queryInterest = ['woman', 'everyone'];
-              }
-              break;
-            default:
-              {
-                queryIdentity = ['man'];
-                queryInterest = ['woman'];
-              }
-              break;
-          }
-        }
-        break;
-    }
-    print(queryIdentity);
-    print(queryInterest);
-    List<ZestiUser> userList = [];
-    while (userList.length < 3) {
-      QuerySnapshot snapshot;
-      if (queryIdentity.length == 3) {
-        snapshot = await userCollection
-            .where('dating-interest', whereIn: queryInterest)
-            .limit(1)
-            .get();
-      } else {
-        snapshot = await userCollection
-            .where('dating-identity', isEqualTo: queryIdentity[0])
-            .where('dating-interest', whereIn: queryInterest)
-            .limit(1)
-            .get();
-      }
-      if (snapshot.size == 0) {
-        break;
-      } else {
-        String uidPotential = snapshot.docs[0].id;
-        DocumentReference potentialDoc = userCollection.doc(uidPotential);
-        ZestiUser potentialUser = await _userFirebaseToZesti(potentialDoc);
-        userCollection
-            .doc(uid)
-            .collection('liked')
-            .doc(uidPotential)
-            .get()
-            .then((docSnapshot) => {
-                  if (!docSnapshot.exists) {userList.add(potentialUser)}
-                });
-      }
-    }
-    return userList;
-  }
-  */
 
   // Update the account setup:
   //  Determines whether or not user should be should be shown the beginning
@@ -285,42 +119,36 @@ class DatabaseService {
         .catchError((error) => print("Failed to update user: $error"));
   }
 
-  Future<void> updateLiked(String youid) async {
-    await userCollection
-        .doc(uid)
-        .collection('liked')
-        .doc(uuid.v4())
-        .set({'timestamp': DateTime.now(), 'user': youid})
-        .then((value) => print("Liked"))
-        .catchError((error) => print("Failed to like: $error"));
-
-    // http request Update this part in the API (no more api calls)
-    String urlBase = 'http://10.250.125.170:8080/match-check?';
-    String arg1 = 'meid=' + uid;
-    String arg2 = 'youid=' + youid;
-    final response = await http.get(Uri.parse(urlBase + arg1 + '&' + arg2));
-    final decoded = json.decode(response.body) as Map<String, dynamic>;
-    if (decoded['result']) {
-      String gen = uuid.v4();
-      DateTime ts = DateTime.now();
-      await userCollection
-          .doc(uid)
-          .collection('matched')
-          .doc(gen)
-          .set({'timestamp': ts, 'user': youid})
-          .then((value) => print("New Match"))
-          .catchError((error) => print("Failed to match: $error"));
-      await userCollection
-          .doc(youid)
-          .collection('matched')
-          .doc(gen)
-          .set({'timestamp': ts, 'user': uid})
-          .then((value) => print("New Match"))
-          .catchError((error) => print("Failed to match: $error"));
-      await chatCollection.doc(gen).set({'user1': uid, 'user2': youid});
-    }
+  // Stream to retrieve profile info from the given uid
+  Stream<DocumentSnapshot> getProfileInfo() {
+    return userCollection.doc(uid).snapshots();
   }
 
+  // Stream to retrieve list of matches from the given uid
+  Stream<QuerySnapshot> getMatches() {
+    return userCollection.doc(uid).collection("matched").snapshots();
+  }
+
+  // Retrieves the stored image from a given reference to Firebase Storage
+  Future<ImageProvider<Object>> getProfPic(String? photoref) async {
+    ImageProvider<Object> profpic;
+
+    // Check if user has an uploaded profile picture.
+    // Set profile picture variable to the corresponding case.
+    if (photoref == null) {
+      profpic = AssetImage('assets/profile.jpg');
+    } else {
+      Uint8List? profpicref = await _storage.ref().child(photoref).getData();
+      if (profpicref == null) {
+        profpic = AssetImage('assets/profile.jpg');
+      } else {
+        profpic = MemoryImage(profpicref);
+      }
+    }
+    return profpic;
+  }
+
+  // Send a chat message.
   Future<void> sendMessage(String? chatid, String type, String content) async {
     await chatCollection
         .doc(chatid)
@@ -334,5 +162,291 @@ class DatabaseService {
         })
         .then((value) => print("Message Sent"))
         .catchError((error) => print("Failed to send message: $error"));
+  }
+
+  // Stream to retrieve messages from a given chatid
+  Stream<QuerySnapshot> getMessages(String? chatid) {
+    return chatCollection
+        .doc(chatid)
+        .collection('messages')
+        .orderBy('timestamp', descending: true)
+        .snapshots();
+  }
+
+  // Helper function for converting a user DocumentReference to a ZestiUser model.
+  Future<ZestiUser> _referenceToZestiUser(DocumentReference userRef) async {
+    DocumentSnapshot snapshot = await userRef.get();
+    Map<String, dynamic> mapdata = snapshot.data() as Map<String, dynamic>;
+    Uint8List? profpicref =
+        await _storage.ref().child(mapdata['photo-ref']).getData();
+    ImageProvider<Object> profpic;
+
+    // Check if user has an uploaded profile picture.
+    // Set profile picture variable to the corresponding case.
+    if (profpicref == null) {
+      profpic = AssetImage('assets/profile.jpg');
+    } else {
+      Uint8List? profpicref =
+          await _storage.ref().child(mapdata['photo-ref']).getData();
+      if (profpicref == null) {
+        profpic = AssetImage('assets/profile.jpg');
+      } else {
+        profpic = MemoryImage(profpicref);
+      }
+    }
+    return ZestiUser(
+        uid: userRef.id,
+        first: mapdata['first-name'],
+        last: mapdata['last-name'],
+        bio: mapdata['bio'],
+        dIdentity: mapdata['dating-identity'],
+        dInterest: mapdata['dating-interest'],
+        house: mapdata['house'],
+        age: mapdata['age'],
+        profpic: profpic);
+  }
+
+  Future<List<ZestiUser>> getLove() async {
+    // Get current user info
+    ZestiUser currUser = await _referenceToZestiUser(userCollection.doc(uid));
+
+    // Get querying parameters based on user info
+    List<String> queryIdentity = [];
+    List<String> queryInterest = [];
+    switch (currUser.dIdentity) {
+      case 'non-binary':
+        {
+          switch (currUser.dInterest) {
+            case 'everyone':
+              {
+                queryIdentity = ['man', 'woman', 'non-binary'];
+                queryInterest = ['everyone'];
+              }
+              break;
+
+            case 'man':
+              {
+                queryIdentity = ['man'];
+                queryInterest = ['everyone'];
+              }
+              break;
+
+            case 'woman':
+              {
+                queryIdentity = ['woman'];
+                queryInterest = ['everyone'];
+              }
+              break;
+          }
+        }
+        break;
+
+      case 'man':
+        {
+          switch (currUser.dInterest) {
+            case 'everyone':
+              {
+                queryIdentity = ['man', 'woman', 'non-binary'];
+                queryInterest = ['man', 'everyone'];
+              }
+              break;
+
+            case 'man':
+              {
+                queryIdentity = ['man'];
+                queryInterest = ['man', 'everyone'];
+              }
+              break;
+
+            case 'woman':
+              {
+                queryIdentity = ['woman'];
+                queryInterest = ['man', 'everyone'];
+              }
+              break;
+          }
+        }
+        break;
+
+      case 'woman':
+        {
+          switch (currUser.dInterest) {
+            case 'everyone':
+              {
+                queryIdentity = ['man', 'woman', 'non-binary'];
+                queryInterest = ['woman', 'everyone'];
+              }
+              break;
+
+            case 'man':
+              {
+                queryIdentity = ['man'];
+                queryInterest = ['woman', 'everyone'];
+              }
+              break;
+
+            case 'woman':
+              {
+                queryIdentity = ['woman'];
+                queryInterest = ['woman', 'everyone'];
+              }
+              break;
+            default:
+              {
+                queryIdentity = ['man'];
+                queryInterest = ['woman'];
+              }
+              break;
+          }
+        }
+        break;
+    }
+
+    // Get snapshot of all users the user reacted (liked or disliked) to. Convert
+    // to list and subtract from list of all users
+    QuerySnapshot reactionsSnapshot =
+        await userCollection.doc(uid).collection("outgoing").get();
+    final allReactions =
+        reactionsSnapshot.docs.map((doc) => doc.get("user").id).toList();
+
+    QuerySnapshot usersSnapshot = await userCollection.get();
+    final allUsers = usersSnapshot.docs.map((doc) => doc.id).toList();
+
+    var availableUsers = allUsers.toSet().difference(allReactions.toSet());
+    availableUsers = availableUsers.difference([uid].toSet());
+
+    // Query based on the given parameters
+    QuerySnapshot snapshot;
+    if (queryIdentity.length == 3) {
+      snapshot = await userCollection
+          .where('dating-interest', whereIn: queryInterest)
+          .limit(1)
+          .get();
+    } else {
+      snapshot = await userCollection
+          .where('dating-identity', isEqualTo: queryIdentity[0])
+          .where('dating-interest', whereIn: queryInterest)
+          .limit(1)
+          .get();
+    }
+
+    // Create a list of potential recommendations
+    List<String> snapshotUIDs = snapshot.docs.map((doc) => doc.id).toList();
+    List<String> potentialUIDs =
+        availableUsers.intersection(snapshotUIDs.toSet()).toList();
+
+    // Randomly pick from potentialUIDs. Max 3 picks, unless there are less than
+    // 3 potenialUIDs
+    int userListMaxLength;
+    if (potentialUIDs.length < 3) {
+      userListMaxLength = potentialUIDs.length;
+    } else {
+      userListMaxLength = 3;
+    }
+    List<ZestiUser> userList = [];
+    while (userList.length < userListMaxLength) {
+      final random = new Random();
+      var selectedUID = potentialUIDs[random.nextInt(potentialUIDs.length)];
+      potentialUIDs.remove(selectedUID);
+      DocumentReference selectedDoc = userCollection.doc(selectedUID);
+      ZestiUser selectedUser = await _referenceToZestiUser(selectedDoc);
+      userList.add(selectedUser);
+    }
+    return userList;
+  }
+
+  Future<void> outgoingInteraction(String youid, bool requested) async {
+    // Define timestamp and unique ID for the interaction (will be used for the chat)
+    DateTime ts = DateTime.now();
+    String chatid = uuid.v4();
+
+    // Update requester's "outgoing" collection
+    await userCollection
+        .doc(uid)
+        .collection("outgoing")
+        .doc(chatid)
+        .set({
+          "timestamp": ts,
+          "user-ref": userCollection.doc(youid),
+          "requested": requested,
+        })
+        .then((value) => print(requested ? "Request sent." : "Denial sent."))
+        .catchError((error) => print("Failed to send: $error"));
+
+    // Update requestee's "incoming" collection if request is sent
+    if (requested) {
+      await userCollection
+          .doc(youid)
+          .collection("incoming")
+          .doc(chatid)
+          .set({"timestamp": ts, "user-ref": userCollection.doc(uid)})
+          .then((value) => print("Incoming request received."))
+          .catchError(
+              (error) => print("Failed to receive incoming request: $error"));
+    }
+  }
+
+  // Helper function for converting a user DocumentReference to a dart map.
+  Future<Map<String, dynamic>> _referenceToMap(
+      DocumentReference userRef) async {
+    DocumentSnapshot snapshot = await userRef.get();
+    return snapshot.data() as Map<String, dynamic>;
+  }
+
+  Future<void> incomingInteraction(
+      String youid, String chatid, bool accepted) async {
+    // Define timestamp for the interaction
+    DateTime ts = DateTime.now();
+
+    // Get both user info.
+    Map<String, dynamic> initiator =
+        await _referenceToMap(userCollection.doc(uid));
+    Map<String, dynamic> receiver =
+        await _referenceToMap(userCollection.doc(youid));
+
+    // Update user's "matched" collection on acceptance. On denial, delete the incoming request.
+    if (accepted) {
+      await userCollection
+          .doc(uid)
+          .collection("matched")
+          .doc(chatid)
+          .set({
+            "timestamp": ts,
+            "user-ref": userCollection.doc(youid),
+            "first-name": receiver['first-name'],
+            "photo-ref": receiver['photo-ref'],
+          })
+          .then((value) => print("Acceptance (initiator) sent."))
+          .catchError((error) => print("Failed to send: $error"));
+      await userCollection
+          .doc(youid)
+          .collection("matched")
+          .doc(chatid)
+          .set({
+            "timestamp": ts,
+            "user-ref": userCollection.doc(uid),
+            "first-name": initiator['first-name'],
+            "photo-ref": initiator['photo-ref'],
+          })
+          .then((value) => print("Acceptance (receiver) sent."))
+          .catchError((error) => print("Failed to send: $error"));
+      await chatCollection
+          .doc(chatid)
+          .set({
+            "user1-ref": userCollection.doc(uid),
+            "user2-ref": userCollection.doc(youid)
+          })
+          .then((value) => print("Chat created."))
+          .catchError((error) => print("Failed to create chat: $error"));
+    } else {
+      await userCollection
+          .doc(uid)
+          .collection("incoming")
+          .doc(chatid)
+          .delete()
+          .then((value) => print("Incoming request deleted."))
+          .catchError(
+              (error) => print("Failed to delete incoming request: $error"));
+    }
   }
 }
