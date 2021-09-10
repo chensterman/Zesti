@@ -128,34 +128,17 @@ class _RecommendationsState extends State<Recommendations> {
                       // Other indeces used to populate user cards in the ListView.
                       Map<String, dynamic> data =
                           tmp.docs[index - 1].data() as Map<String, dynamic>;
-                      // FutureBuilder used to fetch user photo from Firebase storage.
-                      return FutureBuilder(
-                          future: DatabaseService(uid: widget.uid)
-                              .getProfPic(data['photo-ref']),
-                          builder: (context,
-                              AsyncSnapshot<ImageProvider<Object>> snapshot) {
-                            // On error.
-                            if (snapshot.hasError) {
-                              return Text(snapshot.error.toString());
-                              // On success.
-                            } else if (snapshot.connectionState ==
-                                ConnectionState.done) {
-                              ZestiUser incUser = ZestiUser(
-                                  uid: data['user-ref'].id,
-                                  first: data['first-name'],
-                                  last: data['last-name'],
-                                  bio: data['bio'],
-                                  dIdentity: data['dating-identity'],
-                                  dInterest: data['dating-interest'],
-                                  house: data['house'],
-                                  age: data['age'],
-                                  profpic: snapshot.data!);
-                              return UserCard(userOnCard: incUser, rec: true);
-                              // On loading, return an empty container.
-                            } else {
-                              return Container();
-                            }
-                          });
+                      ZestiUser recUser = ZestiUser(
+                          uid: tmp.docs[index - 1].id,
+                          first: data['first-name'],
+                          last: data['last-name'],
+                          bio: data['bio'],
+                          dIdentity: data['dating-identity'],
+                          dInterest: data['dating-interest'],
+                          house: data['house'],
+                          photoURL: data['photo-ref'],
+                          age: data['age']);
+                      return UserCard(userOnCard: recUser, rec: true);
                     },
                     // SizedBox used as separated between user cards.
                     separatorBuilder: (context, index) =>
@@ -214,37 +197,17 @@ class _RequestsState extends State<Requests> {
                       }
                       Map<String, dynamic> data =
                           tmp.docs[index - 1].data() as Map<String, dynamic>;
-                      // FutureBuilder used to load user profile photo from Firebase Storage.
-                      return FutureBuilder(
-                          future: DatabaseService(uid: widget.uid)
-                              .getProfPic(data['photo-ref']),
-                          builder: (context,
-                              AsyncSnapshot<ImageProvider<Object>> snapshot) {
-                            // On error.
-                            if (snapshot.hasError) {
-                              return Text(snapshot.error.toString());
-                              // On success.
-                            } else if (snapshot.connectionState ==
-                                ConnectionState.done) {
-                              ZestiUser incUser = ZestiUser(
-                                  uid: data['user-ref'].id,
-                                  first: data['first-name'],
-                                  last: data['last-name'],
-                                  bio: data['bio'],
-                                  dIdentity: data['dating-identity'],
-                                  dInterest: data['dating-interest'],
-                                  house: data['house'],
-                                  age: data['age'],
-                                  profpic: snapshot.data!);
-                              return UserCard(
-                                  userOnCard: incUser,
-                                  id: tmp.docs[index - 1].id,
-                                  rec: false);
-                              // On loading, return an empty container.
-                            } else {
-                              return Container();
-                            }
-                          });
+                      ZestiUser incUser = ZestiUser(
+                          uid: tmp.docs[index - 1].id,
+                          first: data['first-name'],
+                          last: data['last-name'],
+                          bio: data['bio'],
+                          dIdentity: data['dating-identity'],
+                          dInterest: data['dating-interest'],
+                          house: data['house'],
+                          photoURL: data['photo-ref'],
+                          age: data['age']);
+                      return UserCard(userOnCard: incUser, rec: false);
                     },
                     separatorBuilder: (context, index) =>
                         SizedBox(height: 16.0),

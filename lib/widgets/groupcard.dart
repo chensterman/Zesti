@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
-import 'package:zesti/models/zestiuser.dart';
+import 'package:zesti/models/zestigroup.dart';
 import 'package:zesti/services/database.dart';
 
 // Widget displaying user cards to make decisions on.
-class UserCard extends StatelessWidget {
-  final ZestiUser userOnCard;
+class GroupCard extends StatelessWidget {
+  final String gid;
+  final ZestiGroup groupOnCard;
   final bool rec;
 
-  UserCard({
-    required this.userOnCard,
+  GroupCard({
+    required this.gid,
+    required this.groupOnCard,
     required this.rec,
     Key? key,
   }) : super(key: key);
@@ -21,8 +23,7 @@ class UserCard extends StatelessWidget {
     final size = MediaQuery.of(context).size;
     // FutureBuilder used to fetch user photo from Firebase storage.
     return FutureBuilder(
-        future:
-            DatabaseService(uid: userOnCard.uid).getPhoto(userOnCard.photoURL),
+        future: DatabaseService(uid: user!.uid).getPhoto(null),
         builder: (context, AsyncSnapshot<ImageProvider<Object>> snapshot) {
           // On error.
           if (snapshot.hasError) {
@@ -65,7 +66,7 @@ class UserCard extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.end,
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          buildUserInfo(user: userOnCard),
+                          buildGroupInfo(group: groupOnCard),
                           // If "rec" is true, we display user cards meant for match recommendations.
                           // Otherwise, the user card is for incoming match requests. They look slightly different
                           // And the buttons call different database functions.
@@ -76,13 +77,13 @@ class UserCard extends StatelessWidget {
                                   color: Colors.red, size: 64.0),
                               onTap: () async {
                                 if (rec) {
-                                  await DatabaseService(uid: user!.uid)
-                                      .outgoingInteraction(
-                                          userOnCard.uid, false);
+                                  await DatabaseService(uid: user.uid)
+                                      .outgoingGroupInteraction(
+                                          gid, groupOnCard.gid, false);
                                 } else {
-                                  await DatabaseService(uid: user!.uid)
-                                      .incomingInteraction(
-                                          userOnCard.uid, false);
+                                  await DatabaseService(uid: user.uid)
+                                      .incomingGroupInteraction(
+                                          gid, groupOnCard.gid, false);
                                 }
                               },
                             ),
@@ -95,13 +96,13 @@ class UserCard extends StatelessWidget {
                                   size: 64.0),
                               onTap: () async {
                                 if (rec) {
-                                  await DatabaseService(uid: user!.uid)
-                                      .outgoingInteraction(
-                                          userOnCard.uid, true);
+                                  await DatabaseService(uid: user.uid)
+                                      .outgoingGroupInteraction(
+                                          gid, groupOnCard.gid, true);
                                 } else {
-                                  await DatabaseService(uid: user!.uid)
-                                      .incomingInteraction(
-                                          userOnCard.uid, true);
+                                  await DatabaseService(uid: user.uid)
+                                      .incomingGroupInteraction(
+                                          gid, groupOnCard.gid, true);
                                 }
                               },
                             ),
@@ -122,7 +123,7 @@ class UserCard extends StatelessWidget {
   }
 
   // Put user information onto the cards.
-  Widget buildUserInfo({@required final user}) {
+  Widget buildGroupInfo({@required final group}) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       // Column displaying user info
@@ -131,7 +132,7 @@ class UserCard extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            '${user.first}, ${user.age}',
+            '${group.name}',
             style: TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.bold,
@@ -140,12 +141,12 @@ class UserCard extends StatelessWidget {
           ),
           SizedBox(height: 8),
           Text(
-            user.bio,
+            group.funFact,
             style: TextStyle(color: Colors.white),
           ),
           SizedBox(height: 4),
           Text(
-            '${user.house} House',
+            '',
             style: TextStyle(color: Colors.white),
           )
         ],

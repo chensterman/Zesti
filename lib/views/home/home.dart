@@ -90,10 +90,7 @@ class Home extends StatelessWidget {
                         onPressed: () async {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(
-                                builder: (context) => Choose(
-                                      uid: user!.uid,
-                                    )),
+                            MaterialPageRoute(builder: (context) => Choose()),
                           );
                         },
                       ),

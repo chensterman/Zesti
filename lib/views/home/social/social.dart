@@ -3,15 +3,17 @@ import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
+import 'package:zesti/models/zestigroup.dart';
 import 'package:zesti/services/database.dart';
 import 'package:zesti/theme/theme.dart';
 import 'package:zesti/widgets/formwidgets.dart';
+import 'package:zesti/widgets/groupcard.dart';
 import 'package:zesti/views/home/social/choose.dart';
 
 // Widget containing swiping, profile management, and matches
 class Social extends StatefulWidget {
-  final DocumentReference groupRef;
-  Social({Key? key, required this.groupRef}) : super(key: key);
+  final String gid;
+  Social({Key? key, required this.gid}) : super(key: key);
 
   @override
   _SocialState createState() => _SocialState();
@@ -29,7 +31,7 @@ class _SocialState extends State<Social> {
     Size size = MediaQuery.of(context).size;
     // Widget list for bottom nav bar
     final List<Widget> _widgetSet = <Widget>[
-      Group(groupRef: widget.groupRef),
+      Group(gid: widget.gid),
       Text('Group Recommendations'),
       Text('Incoming Requests'),
       Text('Matches'),
@@ -75,10 +77,10 @@ class _SocialState extends State<Social> {
 }
 
 class Group extends StatefulWidget {
-  final DocumentReference groupRef;
+  final String gid;
   Group({
     Key? key,
-    required this.groupRef,
+    required this.gid,
   }) : super(key: key);
 
   @override
@@ -126,7 +128,7 @@ class _GroupState extends State<Group> {
                       onPressed: () async {
                         if (_formKey.currentState!.validate()) {
                           await DatabaseService(uid: user!.uid)
-                              .addUserToGroup(widget.groupRef, zestKey);
+                              .addUserToGroup(widget.gid, zestKey);
                           setState(() => zestKey = '');
                         }
                       }),
@@ -135,11 +137,10 @@ class _GroupState extends State<Group> {
                       text: 'Leave Group',
                       onPressed: () async {
                         await DatabaseService(uid: user!.uid)
-                            .leaveGroup(widget.groupRef);
+                            .leaveGroup(widget.gid);
                         Navigator.push(
                           context,
-                          MaterialPageRoute(
-                              builder: (context) => Choose(uid: user.uid)),
+                          MaterialPageRoute(builder: (context) => Choose()),
                         );
                       }),
                 ],
@@ -152,13 +153,12 @@ class _GroupState extends State<Group> {
   }
 }
 
-/*
 // Displays list of recommended matches.
 class Recommendations extends StatefulWidget {
-  final String uid;
+  final String gid;
   Recommendations({
     Key? key,
-    required this.uid,
+    required this.gid,
   }) : super(key: key);
 
   @override
@@ -166,22 +166,15 @@ class Recommendations extends StatefulWidget {
 }
 
 class _RecommendationsState extends State<Recommendations> {
-  // Stream of current recommendations (initialized in initState).
-  Stream<QuerySnapshot>? recommendations;
-
-  @override
-  void initState() {
-    recommendations = DatabaseService(uid: widget.uid).getRecommendations();
-    super.initState();
-  }
-
   @override
   Widget build(BuildContext context) {
+    final user = Provider.of<User?>(context);
     final size = MediaQuery.of(context).size;
     return Container(
       // Streambuilder for recommendations stream.
       child: StreamBuilder(
-          stream: recommendations,
+          stream: DatabaseService(uid: user!.uid)
+              .getGroupRecommendations(widget.gid),
           builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
             QuerySnapshot? tmp = snapshot.data;
             return tmp != null
@@ -201,8 +194,8 @@ class _RecommendationsState extends State<Recommendations> {
                             TextButton(
                               child: Text('Generate'),
                               onPressed: () async {
-                                await DatabaseService(uid: widget.uid)
-                                    .generateRecommendations();
+                                await DatabaseService(uid: user.uid)
+                                    .generateGroupRecommendations(widget.gid);
                               },
                             ),
                           ]),
@@ -212,34 +205,12 @@ class _RecommendationsState extends State<Recommendations> {
                       // Other indeces used to populate user cards in the ListView.
                       Map<String, dynamic> data =
                           tmp.docs[index - 1].data() as Map<String, dynamic>;
-                      // FutureBuilder used to fetch user photo from Firebase storage.
-                      return FutureBuilder(
-                          future: DatabaseService(uid: widget.uid)
-                              .getProfPic(data['photo-ref']),
-                          builder: (context,
-                              AsyncSnapshot<ImageProvider<Object>> snapshot) {
-                            // On error.
-                            if (snapshot.hasError) {
-                              return Text(snapshot.error.toString());
-                              // On success.
-                            } else if (snapshot.connectionState ==
-                                ConnectionState.done) {
-                              ZestiUser incUser = ZestiUser(
-                                  uid: data['user-ref'].id,
-                                  first: data['first-name'],
-                                  last: data['last-name'],
-                                  bio: data['bio'],
-                                  dIdentity: data['dating-identity'],
-                                  dInterest: data['dating-interest'],
-                                  house: data['house'],
-                                  age: data['age'],
-                                  profpic: snapshot.data!);
-                              return UserCard(userOnCard: incUser, rec: true);
-                              // On loading, return an empty container.
-                            } else {
-                              return Container();
-                            }
-                          });
+                      ZestiGroup recGroup = ZestiGroup(
+                          gid: tmp.docs[index - 1].id,
+                          name: data['group-name'],
+                          funFact: data['fun-fact']);
+                      return GroupCard(
+                          gid: widget.gid, groupOnCard: recGroup, rec: true);
                     },
                     // SizedBox used as separated between user cards.
                     separatorBuilder: (context, index) =>
@@ -254,10 +225,10 @@ class _RecommendationsState extends State<Recommendations> {
 
 // Displays list of incoming match requests.
 class Requests extends StatefulWidget {
-  final String uid;
+  final String gid;
   Requests({
     Key? key,
-    required this.uid,
+    required this.gid,
   }) : super(key: key);
 
   @override
@@ -270,7 +241,7 @@ class _RequestsState extends State<Requests> {
 
   @override
   void initState() {
-    incoming = DatabaseService(uid: widget.uid).getIncoming();
+    incoming = DatabaseService(uid: widget.gid).getGroupIncoming(widget.gid);
     super.initState();
   }
 
@@ -298,37 +269,14 @@ class _RequestsState extends State<Requests> {
                       }
                       Map<String, dynamic> data =
                           tmp.docs[index - 1].data() as Map<String, dynamic>;
-                      // FutureBuilder used to load user profile photo from Firebase Storage.
-                      return FutureBuilder(
-                          future: DatabaseService(uid: widget.uid)
-                              .getProfPic(data['photo-ref']),
-                          builder: (context,
-                              AsyncSnapshot<ImageProvider<Object>> snapshot) {
-                            // On error.
-                            if (snapshot.hasError) {
-                              return Text(snapshot.error.toString());
-                              // On success.
-                            } else if (snapshot.connectionState ==
-                                ConnectionState.done) {
-                              ZestiUser incUser = ZestiUser(
-                                  uid: data['user-ref'].id,
-                                  first: data['first-name'],
-                                  last: data['last-name'],
-                                  bio: data['bio'],
-                                  dIdentity: data['dating-identity'],
-                                  dInterest: data['dating-interest'],
-                                  house: data['house'],
-                                  age: data['age'],
-                                  profpic: snapshot.data!);
-                              return UserCard(
-                                  userOnCard: incUser,
-                                  id: tmp.docs[index - 1].id,
-                                  rec: false);
-                              // On loading, return an empty container.
-                            } else {
-                              return Container();
-                            }
-                          });
+                      ZestiGroup incGroup = ZestiGroup(
+                          gid: tmp.docs[index - 1].id,
+                          name: data['group-name'],
+                          funFact: data['fun-fact']);
+                      return GroupCard(
+                          groupOnCard: incGroup,
+                          gid: tmp.docs[index - 1].id,
+                          rec: false);
                     },
                     separatorBuilder: (context, index) =>
                         SizedBox(height: 16.0),
@@ -338,6 +286,4 @@ class _RequestsState extends State<Requests> {
           }),
     );
   }
- 
 }
- */

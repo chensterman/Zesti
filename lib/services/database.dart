@@ -124,22 +124,22 @@ class DatabaseService {
   }
 
   // Retrieves the stored image from a given reference to Firebase Storage.
-  Future<ImageProvider<Object>> getProfPic(String? photoref) async {
-    ImageProvider<Object> profpic;
+  Future<ImageProvider<Object>> getPhoto(String? photoURL) async {
+    ImageProvider<Object> photo;
 
     // Check if user has an uploaded profile picture.
     // Set profile picture variable to the corresponding case.
-    if (photoref == null) {
-      profpic = AssetImage('assets/profile.jpg');
+    if (photoURL == null) {
+      photo = AssetImage('assets/profile.jpg');
     } else {
-      Uint8List? profpicref = await _storage.ref().child(photoref).getData();
-      if (profpicref == null) {
-        profpic = AssetImage('assets/profile.jpg');
+      Uint8List? photoData = await _storage.ref().child(photoURL).getData();
+      if (photoData == null) {
+        photo = AssetImage('assets/profile.jpg');
       } else {
-        profpic = MemoryImage(profpicref);
+        photo = MemoryImage(photoData);
       }
     }
-    return profpic;
+    return photo;
   }
 
   // Stream to retrieve profile info from the given uid.
@@ -161,10 +161,28 @@ class DatabaseService {
         .snapshots();
   }
 
+  // Stream to retrieve group recommendations (generated with function below).
+  Stream<QuerySnapshot> getGroupRecommendations(String gid) {
+    return groupCollection
+        .doc(gid)
+        .collection('recommendations')
+        .orderBy('timestamp')
+        .snapshots();
+  }
+
   // Stream to retrieve incoming match requests.
   Stream<QuerySnapshot> getIncoming() {
     return userCollection
         .doc(uid)
+        .collection('incoming')
+        .orderBy('timestamp')
+        .snapshots();
+  }
+
+  // Stream to retrieve incoming group requests.
+  Stream<QuerySnapshot> getGroupIncoming(String gid) {
+    return groupCollection
+        .doc(gid)
         .collection('incoming')
         .orderBy('timestamp')
         .snapshots();
@@ -209,8 +227,7 @@ class DatabaseService {
   }
 
   // Helper function for converting a user DocumentReference to a dart map.
-  Future<Map<String, dynamic>> _referenceToMap(
-      DocumentReference userRef) async {
+  Future<Map<String, dynamic>> _userRefToMap(DocumentReference userRef) async {
     // Get snapshot of user doc reference.
     DocumentSnapshot snapshot = await userRef.get();
 
@@ -226,7 +243,7 @@ class DatabaseService {
   Future<void> generateRecommendations() async {
     // Get current user info
     Map<String, dynamic> currUser =
-        await _referenceToMap(userCollection.doc(uid));
+        await _userRefToMap(userCollection.doc(uid));
 
     // Get querying parameters based on user info
     List<String> queryIdentity = [];
@@ -365,7 +382,7 @@ class DatabaseService {
       var selectedUID = potentialUIDs[random.nextInt(potentialUIDs.length)];
       potentialUIDs.remove(selectedUID);
       DocumentReference selectedDoc = userCollection.doc(selectedUID);
-      Map<String, dynamic> selectedUser = await _referenceToMap(selectedDoc);
+      Map<String, dynamic> selectedUser = await _userRefToMap(selectedDoc);
       userList.add(selectedUser);
     }
 
@@ -402,7 +419,7 @@ class DatabaseService {
 
     // Get current user info
     Map<String, dynamic> currUser =
-        await _referenceToMap(userCollection.doc(uid));
+        await _userRefToMap(userCollection.doc(uid));
 
     // Update requester's "outgoing" collection.
     await userCollection
@@ -453,16 +470,15 @@ class DatabaseService {
   }
 
   // Handles the interactions a user conducts on an incoming match request.
-  Future<void> incomingInteraction(
-      String youid, String? rid, bool accepted) async {
+  Future<void> incomingInteraction(String youid, bool accepted) async {
     // Define timestamp and for the match
     DateTime ts = DateTime.now();
 
     // Get both user info.
     Map<String, dynamic> initiator =
-        await _referenceToMap(userCollection.doc(uid));
+        await _userRefToMap(userCollection.doc(uid));
     Map<String, dynamic> receiver =
-        await _referenceToMap(userCollection.doc(youid));
+        await _userRefToMap(userCollection.doc(youid));
 
     // Update user's "matched" collection on acceptance.
     if (accepted) {
@@ -509,7 +525,7 @@ class DatabaseService {
     await userCollection
         .doc(uid)
         .collection("incoming")
-        .doc(rid)
+        .doc(youid)
         .delete()
         .then((value) => print("Incoming request deleted."))
         .catchError(
@@ -535,17 +551,18 @@ class DatabaseService {
     });
   }
 
-  Future<void> addUserToGroup(
-      DocumentReference groupRef, String zestKey) async {
+  Future<void> addUserToGroup(String gid, String zestKey) async {
     DateTime ts = DateTime.now();
 
-    QuerySnapshot cap = await groupRef.collection("users").get();
+    QuerySnapshot cap =
+        await groupCollection.doc(gid).collection("users").get();
     if (cap.docs.length >= 4) {
       print("Full group.");
       return;
     }
 
-    QuerySnapshot hit = await groupRef
+    QuerySnapshot hit = await groupCollection
+        .doc(gid)
         .collection("users")
         .where('zest-key', isEqualTo: zestKey)
         .get();
@@ -557,34 +574,224 @@ class DatabaseService {
     QuerySnapshot userByZestKey =
         await userCollection.where("zest-key", isEqualTo: zestKey).get();
     String uidToAdd = userByZestKey.docs[0].id;
-    await groupRef.collection("users").doc(uidToAdd).set({
+    await groupCollection.doc(gid).collection("users").doc(uidToAdd).set({
       'user-ref': userCollection.doc(uidToAdd),
       'timestamp': ts,
       'zest-key': zestKey
     });
-    await userCollection
-        .doc(uidToAdd)
-        .collection("groups")
-        .doc(groupRef.id)
-        .set({
-      'group-ref': groupRef,
+    await userCollection.doc(uidToAdd).collection("groups").doc(gid).set({
+      'group-ref': groupCollection.doc(gid),
       'timestamp': ts,
     });
     print("User added.");
   }
 
-  Future<void> leaveGroup(DocumentReference groupRef) async {
-    await groupRef.collection("users").doc(uid).delete();
-    await userCollection
-        .doc(uid)
-        .collection("groups")
-        .doc(groupRef.id)
-        .delete();
-    QuerySnapshot cap = await groupRef.collection("users").get();
+  Future<void> leaveGroup(String gid) async {
+    await groupCollection.doc(gid).collection("users").doc(uid).delete();
+    await userCollection.doc(uid).collection("groups").doc(gid).delete();
+    QuerySnapshot cap =
+        await groupCollection.doc(gid).collection("users").get();
     if (cap.docs.length <= 0) {
       print("Permanently deleting this group.");
-      await groupRef.delete();
+      await groupCollection.doc(gid).delete();
       return;
     }
+  }
+
+  // Helper function for converting a group DocumentReference to a dart map.
+  Future<Map<String, dynamic>> _groupRefToMap(
+      DocumentReference groupRef) async {
+    // Get snapshot of group doc reference.
+    DocumentSnapshot snapshot = await groupRef.get();
+
+    // Convert snapshot data into a dart map.
+    Map<String, dynamic> mapData = snapshot.data() as Map<String, dynamic>;
+
+    // Add group reference to the dart map.
+    mapData['group-ref'] = groupRef;
+    return mapData;
+  }
+
+  Future<void> generateGroupRecommendations(String gid) async {
+    // Get snapshot of all users the user reacted (liked or disliked) to. Convert
+    // to list and subtract from list of all users
+    QuerySnapshot reactionsSnapshot =
+        await groupCollection.doc(gid).collection("outgoing").get();
+    final allReactions =
+        reactionsSnapshot.docs.map((doc) => doc.get("group-ref").id).toList();
+
+    QuerySnapshot groupsSnapshot = await groupCollection.get();
+    final allGroups = groupsSnapshot.docs.map((doc) => doc.id).toList();
+
+    var availableGroups = allGroups.toSet().difference(allReactions.toSet());
+    availableGroups = availableGroups.difference([gid].toSet());
+
+    // Query based on the given parameters
+    QuerySnapshot snapshot =
+        await groupCollection.where('user-count', isGreaterThan: 1).get();
+
+    // Create a list of potential recommendations
+    List<String> snapshotGIDs = snapshot.docs.map((doc) => doc.id).toList();
+    List<String> potentialGIDs =
+        availableGroups.intersection(snapshotGIDs.toSet()).toList();
+
+    // Randomly pick from potentialUIDs. Max 3 picks, unless there are less than
+    // 3 potenialUIDs
+    int groupListMaxLength;
+    if (potentialGIDs.length < 3) {
+      groupListMaxLength = potentialGIDs.length;
+    } else {
+      groupListMaxLength = 3;
+    }
+    List<Map<String, dynamic>> groupList = [];
+    while (groupList.length < groupListMaxLength) {
+      final random = new Random();
+      var selectedGID = potentialGIDs[random.nextInt(potentialGIDs.length)];
+      potentialGIDs.remove(selectedGID);
+      DocumentReference selectedDoc = userCollection.doc(selectedGID);
+      Map<String, dynamic> selectedGroup = await _groupRefToMap(selectedDoc);
+      groupList.add(selectedGroup);
+    }
+
+    // Delete all currently stored recommendations.
+    QuerySnapshot recommendations =
+        await groupCollection.doc(uid).collection("recommendations").get();
+    for (QueryDocumentSnapshot recGroup in recommendations.docs) {
+      await recGroup.reference.delete();
+    }
+
+    // Populate recommendations collection with newly generated users.
+    DateTime ts = DateTime.now();
+    for (Map<String, dynamic> recGroup in groupList) {
+      await groupCollection
+          .doc(gid)
+          .collection("recommendations")
+          .doc(recGroup['group-ref'].id)
+          .set({
+        "timestamp": ts,
+        "group-ref": recGroup['group-ref'],
+        "group-name": recGroup['group-name'],
+        "fun-fact": recGroup['fun-fact'],
+      });
+    }
+  }
+
+  // Handles the interactions a user conducts on a recommended match.
+  Future<void> outgoingGroupInteraction(
+      String gid, String yougid, bool requested) async {
+    // Define timestamp and for the interaction
+    DateTime ts = DateTime.now();
+
+    // Get current user info
+    Map<String, dynamic> currGroup =
+        await _groupRefToMap(groupCollection.doc(gid));
+
+    // Update requester's "outgoing" collection.
+    await groupCollection
+        .doc(gid)
+        .collection("outgoing")
+        .doc(yougid)
+        .set({
+          "timestamp": ts,
+          "group-ref": groupCollection.doc(yougid),
+          "requested": requested,
+        })
+        .then((value) => print(requested ? "Request sent." : "Denial sent."))
+        .catchError((error) => print("Failed to send: $error"));
+
+    // Delete from the requester's "recommendations" collection.
+    await groupCollection
+        .doc(gid)
+        .collection("recommendations")
+        .doc(yougid)
+        .delete();
+
+    // To avoid double matching, also delete from the requestee's "recommendations" collection (even if it is not there).
+    await groupCollection
+        .doc(yougid)
+        .collection("recommendations")
+        .doc(gid)
+        .delete();
+
+    // Update requestee's "incoming" collection if request is sent
+    if (requested) {
+      await groupCollection
+          .doc(yougid)
+          .collection("incoming")
+          .doc(uid)
+          .set({
+            "timestamp": ts,
+            "group-ref": groupCollection.doc(yougid),
+            "group-name": currGroup['group-name'],
+            "fun-fact": currGroup['fun-fact'],
+          })
+          .then((value) => print("Incoming request received."))
+          .catchError(
+              (error) => print("Failed to receive incoming request: $error"));
+    }
+  }
+
+  // Handles the interactions a user conducts on an incoming match request.
+  Future<void> incomingGroupInteraction(
+      String gid, String yougid, bool accepted) async {
+    // Define timestamp and for the match
+    DateTime ts = DateTime.now();
+
+    // Get both user info.
+    Map<String, dynamic> initiator =
+        await _groupRefToMap(groupCollection.doc(gid));
+    Map<String, dynamic> receiver =
+        await _groupRefToMap(groupCollection.doc(yougid));
+
+    // Update user's "matched" collection on acceptance.
+    if (accepted) {
+      // Create chat document (generated id is used to identify the match).
+      DocumentReference chatRef = chatCollection.doc();
+      /*
+      await chatCollection
+          .doc(chatRef.id)
+          .set({
+            "user1-ref": userCollection.doc(uid),
+            "user2-ref": userCollection.doc(youid),
+            "timestamp": ts,
+          })
+          .then((value) => print("Chat created."))
+          .catchError((error) => print("Failed to create chat: $error"));
+      */
+      await groupCollection
+          .doc(gid)
+          .collection("matched")
+          .doc(chatRef.id)
+          .set({
+            "timestamp": ts,
+            "group-ref": groupCollection.doc(yougid),
+            "group-name": receiver['group-name'],
+            "chat-ref": chatRef,
+          })
+          .then((value) => print("Acceptance (initiator) sent."))
+          .catchError((error) => print("Failed to send: $error"));
+      await groupCollection
+          .doc(yougid)
+          .collection("matched")
+          .doc(chatRef.id)
+          .set({
+            "timestamp": ts,
+            "group-ref": groupCollection.doc(gid),
+            "group-name": initiator['group-name'],
+            "chat-ref": chatRef,
+          })
+          .then((value) => print("Acceptance (receiver) sent."))
+          .catchError((error) => print("Failed to send: $error"));
+    }
+
+    // Delete the incoming request regardless of acceptance.
+    await groupCollection
+        .doc(gid)
+        .collection("incoming")
+        .doc(yougid)
+        .delete()
+        .then((value) => print("Incoming request deleted."))
+        .catchError(
+            (error) => print("Failed to delete incoming request: $error"));
   }
 }

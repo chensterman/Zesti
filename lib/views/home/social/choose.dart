@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
+import 'package:provider/provider.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:zesti/services/database.dart';
 import 'package:zesti/theme/theme.dart';
@@ -7,11 +9,8 @@ import 'package:zesti/views/home/social/create.dart';
 import 'package:zesti/views/home/social/social.dart';
 
 class Choose extends StatefulWidget {
-  final String uid;
-
   Choose({
     Key? key,
-    required this.uid,
   }) : super(key: key);
 
   @override
@@ -19,18 +18,9 @@ class Choose extends StatefulWidget {
 }
 
 class _ChooseState extends State<Choose> {
-  Stream<QuerySnapshot>? groups;
-  Stream<DocumentSnapshot>? userInfo;
-
-  @override
-  void initState() {
-    groups = DatabaseService(uid: widget.uid).getGroups();
-    userInfo = DatabaseService(uid: widget.uid).getProfileInfo();
-    super.initState();
-  }
-
   @override
   Widget build(BuildContext context) {
+    final user = Provider.of<User?>(context);
     final size = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
@@ -38,7 +28,7 @@ class _ChooseState extends State<Choose> {
         title: Text("Group Selection"),
       ),
       body: StreamBuilder(
-          stream: groups,
+          stream: DatabaseService(uid: user!.uid).getGroups(),
           builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
             QuerySnapshot? tmp = snapshot.data;
             if (tmp != null) {
@@ -75,7 +65,7 @@ class _ChooseState extends State<Choose> {
                             tmp.docs[index].data() as Map<String, dynamic>;
                         return index == groupCount
                             ? createGroup()
-                            : dummySlot(groupData['group-ref']);
+                            : dummySlot(groupData['group-ref'], user.uid);
                       }
                     },
                     // A divider widgets is placed in between each matchsheet widget.
@@ -97,7 +87,7 @@ class _ChooseState extends State<Choose> {
         onTap: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => Create(gid: gid)),
+            MaterialPageRoute(builder: (context) => CreateGroup(gid: gid)),
           );
         },
         child: Padding(
@@ -119,7 +109,7 @@ class _ChooseState extends State<Choose> {
     );
   }
 
-  Widget dummySlot(DocumentReference groupRef) {
+  Widget dummySlot(DocumentReference groupRef, String uid) {
     return Card(
       margin: EdgeInsets.all(16.0),
       child: InkWell(
@@ -127,11 +117,11 @@ class _ChooseState extends State<Choose> {
         onTap: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => Social(groupRef: groupRef)),
+            MaterialPageRoute(builder: (context) => Social(gid: groupRef.id)),
           );
         },
         child: FutureBuilder(
-            future: DatabaseService(uid: widget.uid).getGroupInfo(groupRef),
+            future: DatabaseService(uid: uid).getGroupInfo(groupRef),
             builder: (context, AsyncSnapshot<Map<String, dynamic>> snapshot) {
               // On error.
               if (snapshot.hasError) {

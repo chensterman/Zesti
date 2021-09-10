@@ -64,7 +64,7 @@ class _MatchesState extends State<Matches> {
     print(photoref);
     // FutureBuilder used to retrieve profile photo of your match.
     return FutureBuilder(
-        future: DatabaseService(uid: uid).getProfPic(photoref),
+        future: DatabaseService(uid: uid).getPhoto(photoref),
         builder: (context, AsyncSnapshot<ImageProvider<Object>> snapshot) {
           // On error.
           if (snapshot.hasError) {

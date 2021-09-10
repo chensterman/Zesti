@@ -115,8 +115,8 @@ class _ProfileState extends State<Profile> {
                     padding: const EdgeInsets.symmetric(horizontal: 64.0),
                     // FutureBuilder retrieves profile photo from Firebase Storage.
                     child: FutureBuilder(
-                        future: DatabaseService(uid: widget.uid)
-                            .getProfPic(photoref),
+                        future:
+                            DatabaseService(uid: widget.uid).getPhoto(photoref),
                         builder: (context,
                             AsyncSnapshot<ImageProvider<Object>> snapshot) {
                           // On error.
@@ -212,34 +212,21 @@ class _ProfileState extends State<Profile> {
 
   // Preview widget.
   Widget preview() {
+    ZestiUser previewUser = ZestiUser(
+        uid: "",
+        first: name.toString(),
+        last: "",
+        bio: bio.toString(),
+        dIdentity: "",
+        dInterest: "",
+        house: house.toString(),
+        age: 21,
+        photoURL: profpic);
     return Padding(
-        padding: EdgeInsets.all(16.0),
-        // FutureBuilder to retrieve profile photo from Firebase Storage.
-        child: FutureBuilder(
-            future: DatabaseService(uid: widget.uid).getProfPic(photoref),
-            builder: (context, AsyncSnapshot<ImageProvider<Object>> snapshot) {
-              // On error.
-              if (snapshot.hasError) {
-                return Text(snapshot.error.toString());
-                // On success.
-              } else if (snapshot.connectionState == ConnectionState.done) {
-                profpic = snapshot.data;
-                ZestiUser previewUser = ZestiUser(
-                    uid: "",
-                    first: name.toString(),
-                    last: "",
-                    bio: bio.toString(),
-                    dIdentity: "",
-                    dInterest: "",
-                    house: house.toString(),
-                    age: 21,
-                    profpic: profpic);
-                return UserCard(userOnCard: previewUser, rec: true);
-                // On loading.
-              } else {
-                return Center(child: CircularProgressIndicator());
-              }
-            }));
+      padding: EdgeInsets.all(16.0),
+      // FutureBuilder to retrieve profile photo from Firebase Storage.
+      child: UserCard(userOnCard: previewUser, rec: true),
+    );
   }
 
   // Image Picker:

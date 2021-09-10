@@ -1,23 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 import 'package:zesti/theme/theme.dart';
 import 'package:zesti/services/database.dart';
 import 'package:zesti/widgets/formwidgets.dart';
 
-class Create extends StatefulWidget {
+class CreateGroup extends StatefulWidget {
   final String gid;
-  Create({
+  CreateGroup({
     Key? key,
     required this.gid,
   }) : super(key: key);
 
   @override
-  _CreateState createState() => _CreateState();
+  _CreateGroupState createState() => _CreateGroupState();
 }
 
-class _CreateState extends State<Create> {
+class _CreateGroupState extends State<CreateGroup> {
   final _formKey = GlobalKey<FormState>();
   String groupName = '';
   String funFact = '';
