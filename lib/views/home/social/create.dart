@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 import 'package:zesti/theme/theme.dart';
 import 'package:zesti/services/database.dart';
@@ -75,14 +76,15 @@ class _CreateState extends State<Create> {
                         onChanged: (val) {
                           setState(() => funFact = val);
                         },
-                        decoration: const InputDecoration(hintText: "Last")),
+                        decoration:
+                            const InputDecoration(hintText: "Fun Fact")),
                     SizedBox(height: 20.0),
                     RoundedButton(
                         text: 'Continue',
                         onPressed: () async {
                           if (_formKey.currentState!.validate()) {
                             await DatabaseService(uid: user!.uid)
-                                .updateName(first, last);
+                                .createGroup(groupName, funFact);
                             Navigator.pop(context);
                           }
                         }),

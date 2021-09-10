@@ -47,7 +47,7 @@ class _MatchesState extends State<Matches> {
                         // Remaining indeces used for matchsheet widgets.
                         Map<String, dynamic> data =
                             tmp.docs[index - 1].data() as Map<String, dynamic>;
-                        return matchSheet(widget.uid, tmp.docs[index - 1].id,
+                        return matchSheet(widget.uid, data['chat-ref'],
                             data['first-name'], data['photo-ref']);
                       },
                       // A divider widgets is placed in between each matchsheet widget.
@@ -59,7 +59,8 @@ class _MatchesState extends State<Matches> {
   }
 
   // To display info about each match you have.
-  Widget matchSheet(String uid, String? chatid, String name, String photoref) {
+  Widget matchSheet(
+      String uid, DocumentReference chatRef, String name, String photoref) {
     print(photoref);
     // FutureBuilder used to retrieve profile photo of your match.
     return FutureBuilder(
@@ -77,7 +78,7 @@ class _MatchesState extends State<Matches> {
                   MaterialPageRoute(
                       builder: (context) => Chat(
                           uid: uid,
-                          chatid: chatid,
+                          chatRef: chatRef,
                           name: name,
                           profpic: snapshot.data)),
                 );

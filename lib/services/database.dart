@@ -44,7 +44,6 @@ class DatabaseService {
           'dating-interest': null,
           'photo-ref': null,
           'bio': null,
-          'group-count': 0,
           'zest-key': uuid.v4().substring(0, 8),
         })
         .then((value) => print("User added"))
@@ -172,15 +171,14 @@ class DatabaseService {
   }
 
   // Stream to retrieve messages from a given chatid.
-  Stream<QuerySnapshot> getMessages(String? chatid) {
-    return chatCollection
-        .doc(chatid)
+  Stream<QuerySnapshot> getMessages(DocumentReference chatRef) {
+    return chatRef
         .collection('messages')
         .orderBy('timestamp', descending: true)
         .snapshots();
   }
 
-  // Stream to retrieve messages from a given chatid.
+  // Stream to retrieve all group references of a user.
   Stream<QuerySnapshot> getGroups() {
     return userCollection
         .doc(uid)
@@ -189,12 +187,17 @@ class DatabaseService {
         .snapshots();
   }
 
+  Future<Map<String, dynamic>> getGroupInfo(DocumentReference groupRef) async {
+    DocumentSnapshot groupSnapshot = await groupRef.get();
+    return groupSnapshot.data() as Map<String, dynamic>;
+  }
+
   // Send a chat message.
-  Future<void> sendMessage(String? chatid, String type, String content) async {
-    await chatCollection
-        .doc(chatid)
+  Future<void> sendMessage(
+      DocumentReference chatRef, String type, String content) async {
+    await chatRef
         .collection('messages')
-        .doc(uuid.v1())
+        .doc()
         .set({
           'timestamp': DateTime.now(),
           'sender': uid,
@@ -379,7 +382,7 @@ class DatabaseService {
       await userCollection
           .doc(uid)
           .collection("recommendations")
-          .doc(uuid.v4())
+          .doc(recUser['user-ref'].id)
           .set({
         "timestamp": ts,
         "user-ref": recUser['user-ref'],
@@ -394,19 +397,18 @@ class DatabaseService {
 
   // Handles the interactions a user conducts on a recommended match.
   Future<void> outgoingInteraction(String youid, bool requested) async {
-    // Define timestamp and unique ID for the interaction
+    // Define timestamp and for the interaction
     DateTime ts = DateTime.now();
-    String id = uuid.v4();
 
     // Get current user info
     Map<String, dynamic> currUser =
         await _referenceToMap(userCollection.doc(uid));
 
-    // Update requester's "outgoing" collection
+    // Update requester's "outgoing" collection.
     await userCollection
         .doc(uid)
         .collection("outgoing")
-        .doc(id)
+        .doc(youid)
         .set({
           "timestamp": ts,
           "user-ref": userCollection.doc(youid),
@@ -415,12 +417,26 @@ class DatabaseService {
         .then((value) => print(requested ? "Request sent." : "Denial sent."))
         .catchError((error) => print("Failed to send: $error"));
 
+    // Delete from the requester's "recommendations" collection.
+    await userCollection
+        .doc(uid)
+        .collection("recommendations")
+        .doc(youid)
+        .delete();
+
+    // To avoid double matching, also delete from the requestee's "recommendations" collection (even if it is not there).
+    await userCollection
+        .doc(youid)
+        .collection("recommendations")
+        .doc(uid)
+        .delete();
+
     // Update requestee's "incoming" collection if request is sent
     if (requested) {
       await userCollection
           .doc(youid)
           .collection("incoming")
-          .doc(id)
+          .doc(uid)
           .set({
             "timestamp": ts,
             "user-ref": userCollection.doc(uid),
@@ -438,10 +454,9 @@ class DatabaseService {
 
   // Handles the interactions a user conducts on an incoming match request.
   Future<void> incomingInteraction(
-      String youid, String? id, bool accepted) async {
-    // Define timestamp and unique ID for the match (used for chat as well)
+      String youid, String? rid, bool accepted) async {
+    // Define timestamp and for the match
     DateTime ts = DateTime.now();
-    String chatid = uuid.v4();
 
     // Get both user info.
     Map<String, dynamic> initiator =
@@ -451,56 +466,125 @@ class DatabaseService {
 
     // Update user's "matched" collection on acceptance.
     if (accepted) {
+      // Create chat document (generated id is used to identify the match).
+      DocumentReference chatRef = chatCollection.doc();
+      await chatCollection
+          .doc(chatRef.id)
+          .set({
+            "user1-ref": userCollection.doc(uid),
+            "user2-ref": userCollection.doc(youid),
+            "timestamp": ts,
+          })
+          .then((value) => print("Chat created."))
+          .catchError((error) => print("Failed to create chat: $error"));
       await userCollection
           .doc(uid)
           .collection("matched")
-          .doc(chatid)
+          .doc(chatRef.id)
           .set({
             "timestamp": ts,
             "user-ref": userCollection.doc(youid),
             "first-name": receiver['first-name'],
             "photo-ref": receiver['photo-ref'],
+            "chat-ref": chatRef,
           })
           .then((value) => print("Acceptance (initiator) sent."))
           .catchError((error) => print("Failed to send: $error"));
       await userCollection
           .doc(youid)
           .collection("matched")
-          .doc(chatid)
+          .doc(chatRef.id)
           .set({
             "timestamp": ts,
             "user-ref": userCollection.doc(uid),
             "first-name": initiator['first-name'],
             "photo-ref": initiator['photo-ref'],
+            "chat-ref": chatRef,
           })
           .then((value) => print("Acceptance (receiver) sent."))
           .catchError((error) => print("Failed to send: $error"));
-      await chatCollection
-          .doc(chatid)
-          .set({
-            "user1-ref": userCollection.doc(uid),
-            "user2-ref": userCollection.doc(youid)
-          })
-          .then((value) => print("Chat created."))
-          .catchError((error) => print("Failed to create chat: $error"));
     }
 
     // Delete the incoming request regardless of acceptance.
     await userCollection
         .doc(uid)
         .collection("incoming")
-        .doc(id)
+        .doc(rid)
         .delete()
         .then((value) => print("Incoming request deleted."))
         .catchError(
             (error) => print("Failed to delete incoming request: $error"));
   }
 
-  Future<void> createGroup(String gid, String groupName, String funFact) async {
+  Future<void> createGroup(String groupName, String funFact) async {
+    DateTime ts = DateTime.now();
+
+    DocumentReference groupRef = groupCollection.doc();
+    DocumentSnapshot currUser = await userCollection.doc(uid).get();
+    Map<String, dynamic> currUserMap = currUser.data() as Map<String, dynamic>;
+    await groupRef
+        .set({'group-name': groupName, 'fun-fact': funFact, 'timestamp': ts});
+    await groupRef.collection("users").doc(uid).set({
+      'user-ref': userCollection.doc(uid),
+      'timestamp': ts,
+      'zest-key': currUserMap['zest-key']
+    });
+    await userCollection.doc(uid).collection("groups").doc(groupRef.id).set({
+      'group-ref': groupRef,
+      'timestamp': ts,
+    });
+  }
+
+  Future<void> addUserToGroup(
+      DocumentReference groupRef, String zestKey) async {
+    DateTime ts = DateTime.now();
+
+    QuerySnapshot cap = await groupRef.collection("users").get();
+    if (cap.docs.length >= 4) {
+      print("Full group.");
+      return;
+    }
+
+    QuerySnapshot hit = await groupRef
+        .collection("users")
+        .where('zest-key', isEqualTo: zestKey)
+        .get();
+    if (hit.docs.length > 0) {
+      print("User already added.");
+      return;
+    }
+
+    QuerySnapshot userByZestKey =
+        await userCollection.where("zest-key", isEqualTo: zestKey).get();
+    String uidToAdd = userByZestKey.docs[0].id;
+    await groupRef.collection("users").doc(uidToAdd).set({
+      'user-ref': userCollection.doc(uidToAdd),
+      'timestamp': ts,
+      'zest-key': zestKey
+    });
+    await userCollection
+        .doc(uidToAdd)
+        .collection("groups")
+        .doc(groupRef.id)
+        .set({
+      'group-ref': groupRef,
+      'timestamp': ts,
+    });
+    print("User added.");
+  }
+
+  Future<void> leaveGroup(DocumentReference groupRef) async {
+    await groupRef.collection("users").doc(uid).delete();
     await userCollection
         .doc(uid)
         .collection("groups")
-        .doc(gid)
-        .set({'group-name': groupName, 'fun-fact': funFact, 'user-count': 1});
+        .doc(groupRef.id)
+        .delete();
+    QuerySnapshot cap = await groupRef.collection("users").get();
+    if (cap.docs.length <= 0) {
+      print("Permanently deleting this group.");
+      await groupRef.delete();
+      return;
+    }
   }
 }

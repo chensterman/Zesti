@@ -9,13 +9,13 @@ import 'package:zesti/views/home/redeem.dart';
 // Widget displaying the chat page for a specific match.
 class Chat extends StatefulWidget {
   final String uid;
-  final String? chatid;
+  final DocumentReference chatRef;
   final String name;
   final ImageProvider<Object>? profpic;
   Chat({
     Key? key,
     required this.uid,
-    required this.chatid,
+    required this.chatRef,
     required this.name,
     required this.profpic,
   }) : super(key: key);
@@ -32,7 +32,7 @@ class _ChatState extends State<Chat> {
 
   @override
   void initState() {
-    messages = DatabaseService(uid: widget.uid).getMessages(widget.chatid);
+    messages = DatabaseService(uid: widget.uid).getMessages(widget.chatRef);
     super.initState();
   }
 
@@ -162,7 +162,7 @@ class _ChatState extends State<Chat> {
                         } else {
                           // Check for an empty text editor (don't send empty chats).
                           if (messageText.text != '') {
-                            sendMessage(user.uid, widget.chatid, 'text',
+                            sendMessage(user.uid, widget.chatRef, 'text',
                                 messageText.text);
                           } else {
                             print('No message content');
@@ -277,8 +277,9 @@ class _ChatState extends State<Chat> {
   }
 
   // Call database service to send message.
-  sendMessage(String uid, String? chatid, String type, String content) {
-    DatabaseService(uid: uid).sendMessage(chatid, type, content);
+  sendMessage(
+      String uid, DocumentReference chatRef, String type, String content) {
+    DatabaseService(uid: uid).sendMessage(chatRef, type, content);
     // Reset the text editor controller after message is sent.
     messageText.text = '';
   }
