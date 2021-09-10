@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:zesti/theme/theme.dart';
-import 'package:provider/provider.dart';
 
 // Widget containing swiping, profile management, and matches
 class Social extends StatefulWidget {
@@ -21,11 +19,6 @@ class _SocialState extends State<Social> {
 
   @override
   Widget build(BuildContext context) {
-    final user = Provider.of<User?>(context);
-    if (user == null) {
-      return Text('User Error');
-    }
-
     Size size = MediaQuery.of(context).size;
     // Widget list for bottom nav bar
     final List<Widget> _widgetSet = <Widget>[

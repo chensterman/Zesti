@@ -1,6 +1,6 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:zesti/services/database.dart';
 import 'package:zesti/theme/theme.dart';
@@ -232,7 +232,7 @@ class _ChatState extends State<Chat> {
         return tmp != null
             ? ListView.builder(
                 padding: EdgeInsets.only(bottom: 90, top: 16),
-                itemCount: snapshot.data?.docs.length,
+                itemCount: tmp.docs.length,
                 reverse: true,
                 itemBuilder: (context, index) {
                   Map<String, dynamic> data =

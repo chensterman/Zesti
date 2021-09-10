@@ -18,6 +18,10 @@ class DatabaseService {
   final CollectionReference userCollection =
       FirebaseFirestore.instance.collection('users');
 
+  // Access to 'groups' collection.
+  final CollectionReference groupCollection =
+      FirebaseFirestore.instance.collection('groups');
+
   // Access to 'chats' collection.
   final CollectionReference chatCollection =
       FirebaseFirestore.instance.collection('chats');
@@ -40,6 +44,8 @@ class DatabaseService {
           'dating-interest': null,
           'photo-ref': null,
           'bio': null,
+          'group-count': 0,
+          'zest-key': uuid.v4().substring(0, 8),
         })
         .then((value) => print("User added"))
         .catchError((error) => print("Failed"));
@@ -170,6 +176,15 @@ class DatabaseService {
     return chatCollection
         .doc(chatid)
         .collection('messages')
+        .orderBy('timestamp', descending: true)
+        .snapshots();
+  }
+
+  // Stream to retrieve messages from a given chatid.
+  Stream<QuerySnapshot> getGroups() {
+    return userCollection
+        .doc(uid)
+        .collection('groups')
         .orderBy('timestamp', descending: true)
         .snapshots();
   }
@@ -479,5 +494,13 @@ class DatabaseService {
         .then((value) => print("Incoming request deleted."))
         .catchError(
             (error) => print("Failed to delete incoming request: $error"));
+  }
+
+  Future<void> createGroup(String gid, String groupName, String funFact) async {
+    await userCollection
+        .doc(uid)
+        .collection("groups")
+        .doc(gid)
+        .set({'group-name': groupName, 'fun-fact': funFact, 'user-count': 1});
   }
 }
