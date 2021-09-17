@@ -41,7 +41,7 @@ class _SignInState extends State<SignIn> {
             colors: [
               // Colors are easy thanks to Flutter's Colors class.
               CustomTheme.lightTheme.primaryColor,
-              Colors.white,
+              CustomTheme.lightTheme.backgroundColor,
             ],
           ),
         ),

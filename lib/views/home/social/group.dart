@@ -29,8 +29,7 @@ class _GroupState extends State<Group> {
     final user = Provider.of<User?>(context);
     Size size = MediaQuery.of(context).size;
     return Container(
-      padding: EdgeInsets.symmetric(
-          vertical: size.height * 0.1, horizontal: size.width * 0.1),
+      padding: EdgeInsets.symmetric(horizontal: size.width * 0.05),
       child: Form(
         key: _formKey,
         child: Center(
@@ -38,104 +37,120 @@ class _GroupState extends State<Group> {
             Center(
               child: Column(
                 children: [
+                  SizedBox(height: 20.0),
                   GroupCardDummy(
                       groupRef: DatabaseService(uid: user!.uid)
                           .groupCollection
                           .doc(widget.gid)),
                   SizedBox(height: 50.0),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    child: Text(
-                      "Change group tagline:",
-                      style: CustomTheme.lightTheme.textTheme.headline1,
+                  Card(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    margin: EdgeInsets.all(8.0),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                      child: Column(children: [
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8.0),
+                          child: Text(
+                            "Change group tagline:",
+                            style: CustomTheme.lightTheme.textTheme.headline1,
+                          ),
+                        ),
+                        TextFormField(
+                            validator: (val) {
+                              if (val == null || val.isEmpty) {
+                                return "Please enter a group tagline.";
+                              }
+                            },
+                            onChanged: (val) {
+                              setState(() => groupTagline = val);
+                            },
+                            decoration: const InputDecoration(
+                                hintText: "Group Tagline")),
+                        SizedBox(height: 20.0),
+                        RoundedButton(
+                            text: 'Update',
+                            onPressed: () async {
+                              if (_formKey.currentState!.validate()) {
+                                await DatabaseService(uid: user.uid)
+                                    .updateGroupTagline(
+                                        widget.gid, groupTagline);
+                              }
+                            }),
+                        SizedBox(height: 50.0),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8.0),
+                          child: Text(
+                            "Change group name:",
+                            style: CustomTheme.lightTheme.textTheme.headline1,
+                          ),
+                        ),
+                        TextFormField(
+                            validator: (val) {
+                              if (val == null || val.isEmpty) {
+                                return "Please enter a group name.";
+                              }
+                            },
+                            onChanged: (val) {
+                              setState(() => groupName = val);
+                            },
+                            decoration:
+                                const InputDecoration(hintText: "Group Name")),
+                        SizedBox(height: 20.0),
+                        RoundedButton(
+                            text: 'Update',
+                            onPressed: () async {
+                              if (_formKey.currentState!.validate()) {
+                                await DatabaseService(uid: user.uid)
+                                    .updateGroupName(widget.gid, groupName);
+                              }
+                            }),
+                        SizedBox(height: 50.0),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8.0),
+                          child: Text(
+                            "Add a user:",
+                            style: CustomTheme.lightTheme.textTheme.headline1,
+                          ),
+                        ),
+                        TextFormField(
+                            validator: (val) {
+                              if (val == null || val.isEmpty) {
+                                return "Please enter a ZestKey.";
+                              }
+                            },
+                            onChanged: (val) {
+                              setState(() => zestKey = val);
+                            },
+                            decoration:
+                                const InputDecoration(hintText: "ZestKey")),
+                        SizedBox(height: 20.0),
+                        RoundedButton(
+                            text: 'Add!',
+                            onPressed: () async {
+                              if (_formKey.currentState!.validate()) {
+                                await DatabaseService(uid: user.uid)
+                                    .addUserToGroup(widget.gid, zestKey);
+                              }
+                            }),
+                        SizedBox(height: 20.0),
+                        RoundedButton(
+                            text: 'Leave Group',
+                            onPressed: () async {
+                              await DatabaseService(uid: user.uid)
+                                  .leaveGroup(widget.gid);
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => Choose()),
+                              );
+                            }),
+                        SizedBox(height: 20.0)
+                      ]),
                     ),
                   ),
-                  TextFormField(
-                      validator: (val) {
-                        if (val == null || val.isEmpty) {
-                          return "Please enter a group tagline.";
-                        }
-                      },
-                      onChanged: (val) {
-                        setState(() => groupTagline = val);
-                      },
-                      decoration:
-                          const InputDecoration(hintText: "Group Tagline")),
-                  SizedBox(height: 20.0),
-                  RoundedButton(
-                      text: 'Update',
-                      onPressed: () async {
-                        if (_formKey.currentState!.validate()) {
-                          await DatabaseService(uid: user.uid)
-                              .updateGroupTagline(widget.gid, groupTagline);
-                        }
-                      }),
-                  SizedBox(height: 50.0),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    child: Text(
-                      "Change group name:",
-                      style: CustomTheme.lightTheme.textTheme.headline1,
-                    ),
-                  ),
-                  TextFormField(
-                      validator: (val) {
-                        if (val == null || val.isEmpty) {
-                          return "Please enter a group name.";
-                        }
-                      },
-                      onChanged: (val) {
-                        setState(() => groupName = val);
-                      },
-                      decoration:
-                          const InputDecoration(hintText: "Group Name")),
-                  SizedBox(height: 20.0),
-                  RoundedButton(
-                      text: 'Update',
-                      onPressed: () async {
-                        if (_formKey.currentState!.validate()) {
-                          await DatabaseService(uid: user.uid)
-                              .updateGroupName(widget.gid, groupName);
-                        }
-                      }),
-                  SizedBox(height: 50.0),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    child: Text(
-                      "Add a user:",
-                      style: CustomTheme.lightTheme.textTheme.headline1,
-                    ),
-                  ),
-                  TextFormField(
-                      validator: (val) {
-                        if (val == null || val.isEmpty) {
-                          return "Please enter a ZestKey.";
-                        }
-                      },
-                      onChanged: (val) {
-                        setState(() => zestKey = val);
-                      },
-                      decoration: const InputDecoration(hintText: "ZestKey")),
-                  SizedBox(height: 20.0),
-                  RoundedButton(
-                      text: 'Add!',
-                      onPressed: () async {
-                        if (_formKey.currentState!.validate()) {
-                          await DatabaseService(uid: user.uid)
-                              .addUserToGroup(widget.gid, zestKey);
-                        }
-                      }),
-                  SizedBox(height: 20.0),
-                  RoundedButton(
-                      text: 'Leave Group',
-                      onPressed: () async {
-                        await DatabaseService(uid: user.uid)
-                            .leaveGroup(widget.gid);
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => Choose()),
-                        );
-                      }),
                 ],
               ),
             ),

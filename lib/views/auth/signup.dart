@@ -42,7 +42,7 @@ class _SignUpState extends State<SignUp> {
             colors: [
               // Colors are easy thanks to Flutter's Colors class.
               CustomTheme.lightTheme.primaryColor,
-              Colors.white,
+              CustomTheme.lightTheme.backgroundColor,
             ],
           ),
         ),

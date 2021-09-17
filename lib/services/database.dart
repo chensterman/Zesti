@@ -172,6 +172,11 @@ class DatabaseService {
     return userCollection.doc(uid).collection("matched").snapshots();
   }
 
+  // Stream to retrieve list of matches from the given gid.
+  Stream<QuerySnapshot> getGroupMatches(String gid) {
+    return groupCollection.doc(gid).collection("matched").snapshots();
+  }
+
   // Stream to retrieve match recommendations (generated with function below).
   Stream<QuerySnapshot> getRecommendations() {
     return userCollection
@@ -813,12 +818,6 @@ class DatabaseService {
     // Define timestamp and for the match
     DateTime ts = DateTime.now();
 
-    // Get both user info.
-    Map<String, dynamic> initiator =
-        await _groupRefToMap(groupCollection.doc(gid));
-    Map<String, dynamic> receiver =
-        await _groupRefToMap(groupCollection.doc(yougid));
-
     // Update user's "matched" collection on acceptance.
     if (accepted) {
       // Create chat document (generated id is used to identify the match).
@@ -841,7 +840,6 @@ class DatabaseService {
           .set({
             "timestamp": ts,
             "group-ref": groupCollection.doc(yougid),
-            "group-name": receiver['group-name'],
             "chat-ref": chatRef,
           })
           .then((value) => print("Acceptance (initiator) sent."))
@@ -853,7 +851,6 @@ class DatabaseService {
           .set({
             "timestamp": ts,
             "group-ref": groupCollection.doc(gid),
-            "group-name": initiator['group-name'],
             "chat-ref": chatRef,
           })
           .then((value) => print("Acceptance (receiver) sent."))

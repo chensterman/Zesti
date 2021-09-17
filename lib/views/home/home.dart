@@ -31,7 +31,7 @@ class Home extends StatelessWidget {
             colors: [
               // Colors are easy thanks to Flutter's Colors class.
               CustomTheme.lightTheme.primaryColor,
-              Colors.orange.shade100,
+              CustomTheme.lightTheme.backgroundColor,
             ],
           ),
         ),

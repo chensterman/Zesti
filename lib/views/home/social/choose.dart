@@ -49,8 +49,8 @@ class _ChooseState extends State<Choose> {
                       stops: [0.3, 0.9],
                       colors: [
                         // Colors are easy thanks to Flutter's Colors class.
-                        CustomTheme.lightTheme.primaryColor,
-                        Colors.white,
+                        CustomTheme.lightTheme.primaryColorDark,
+                        CustomTheme.lightTheme.cardColor,
                       ],
                     ),
                   ),
@@ -85,6 +85,9 @@ class _ChooseState extends State<Choose> {
   Widget createGroup() {
     String gid = Uuid().v4();
     return Card(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
       margin: EdgeInsets.all(16.0),
       child: InkWell(
         splashColor: CustomTheme.lightTheme.primaryColor,
@@ -95,7 +98,7 @@ class _ChooseState extends State<Choose> {
           );
         },
         child: Padding(
-          padding: EdgeInsets.all(16.0),
+          padding: EdgeInsets.all(8.0),
           child: Column(
             children: [
               CircleAvatar(
@@ -115,7 +118,10 @@ class _ChooseState extends State<Choose> {
 
   Widget dummySlot(DocumentReference groupRef, String uid) {
     return Card(
-      margin: EdgeInsets.all(16.0),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+      margin: EdgeInsets.all(8.0),
       child: InkWell(
         splashColor: CustomTheme.lightTheme.primaryColor,
         onTap: () {

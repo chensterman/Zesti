@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:provider/provider.dart';
 import 'package:zesti/theme/theme.dart';
 import 'package:zesti/views/home/love/matches.dart';
@@ -36,24 +37,34 @@ class _LoveState extends State<Love> {
         backgroundColor: CustomTheme.lightTheme.primaryColor,
         title: Text("Zesti Love"),
       ),
-      body: Center(
-        child: _widgetSet.elementAt(_selectedIndex),
+      body: Container(
+        decoration: BoxDecoration(
+          // Box decoration takes a gradient
+          gradient: LinearGradient(
+            // Where the linear gradient begins and ends
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+
+            // Add one stop for each color. Stops should increase from 0 to 1
+            stops: [0.2, 0.9],
+            colors: [
+              // Colors are easy thanks to Flutter's Colors class.
+              CustomTheme.lightTheme.cardColor,
+              CustomTheme.lightTheme.primaryColor,
+            ],
+          ),
+        ),
+        child: Center(
+          child: _widgetSet.elementAt(_selectedIndex),
+        ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        showSelectedLabels: false,
-        showUnselectedLabels: false,
-        iconSize: size.width * 0.08,
-        items: <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-              icon: Icon(Icons.hourglass_top), label: "Match Recommendations"),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.favorite), label: "Match Requests"),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.chat_bubble), label: "Matches"),
+      bottomNavigationBar: CurvedNavigationBar(
+        backgroundColor: CustomTheme.lightTheme.primaryColor,
+        items: <Widget>[
+          Icon(Icons.hourglass_top),
+          Icon(Icons.favorite),
+          Icon(Icons.chat_bubble),
         ],
-        currentIndex: _selectedIndex,
-        selectedItemColor: CustomTheme.lightTheme.primaryColor,
-        unselectedItemColor: Colors.grey,
         onTap: _onItemTapped,
       ),
     );

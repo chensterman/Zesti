@@ -9,8 +9,12 @@ class CustomTheme {
     //1
     return ThemeData(
         //2
-        primaryColor: Color(0xFFFD8440),
-        accentColor: Color(0xFFF2A000),
+        primaryColor: Color(0xFFFD6000),
+        primaryColorDark: Color(0xFFFC8D4C),
+        primaryColorLight: Color(0xFFFF8E6A),
+        backgroundColor: Color(0xFFFFC984),
+        cardColor: Color(0xFFFAF2E9),
+        splashColor: Color(0xFFC6F7A6),
         scaffoldBackgroundColor: Colors.white,
         fontFamily: 'Jost', //3
         textTheme: TextTheme(

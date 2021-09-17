@@ -52,6 +52,8 @@ dependencies:
   flutter_datetime_picker: ^1.5.1
   flutter_cupertino_date_picker: ^1.0.26+2
 
+  curved_navigation_bar: ^1.0.1
+
 
 dev_dependencies:
   flutter_test:
