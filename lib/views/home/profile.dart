@@ -8,7 +8,7 @@ import 'package:zesti/services/database.dart';
 import 'package:zesti/theme/theme.dart';
 import 'package:zesti/views/home/home.dart';
 import 'package:zesti/widgets/usercard.dart';
-
+/*
 // Widget for the profile edit.
 class Profile extends StatefulWidget {
   final String uid;
@@ -336,3 +336,4 @@ class _ProfileState extends State<Profile> {
     );
   }
 }
+*/

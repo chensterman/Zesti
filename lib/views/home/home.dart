@@ -50,11 +50,13 @@ class Home extends StatelessWidget {
                       TextButton(
                         child: Text('Edit Profile'),
                         onPressed: () {
+                          /*
                           Navigator.push(
                             context,
                             MaterialPageRoute(
                                 builder: (context) => Profile(uid: user!.uid)),
                           );
+                          */
                         },
                       ),
                       TextButton(

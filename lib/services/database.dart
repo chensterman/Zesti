@@ -4,6 +4,8 @@ import 'package:uuid/uuid.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:zesti/models/zestigroup.dart';
+import 'package:zesti/models/zestiuser.dart';
 
 // DatabaseService class:
 //  Contains all methods and data pertaining to the user database.
@@ -123,8 +125,26 @@ class DatabaseService {
         .catchError((error) => print("Failed to update user: $error"));
   }
 
+  // Update group name.
+  Future<void> updateGroupName(String gid, String groupName) async {
+    await groupCollection
+        .doc(gid)
+        .update({'group-name': groupName})
+        .then((value) => print("Group Name Updated"))
+        .catchError((error) => print("Failed to update group name: $error"));
+  }
+
+  // Update group tagline.
+  Future<void> updateGroupTagline(String gid, String groupTagline) async {
+    await groupCollection
+        .doc(gid)
+        .update({'fun-fact': groupTagline})
+        .then((value) => print("Group Tagline Updated"))
+        .catchError((error) => print("Failed to update group tagline: $error"));
+  }
+
   // Retrieves the stored image from a given reference to Firebase Storage.
-  Future<ImageProvider<Object>> getPhoto(String? photoURL) async {
+  Future<ImageProvider<Object>> _getPhoto(String? photoURL) async {
     ImageProvider<Object> photo;
 
     // Check if user has an uploaded profile picture.
@@ -205,9 +225,52 @@ class DatabaseService {
         .snapshots();
   }
 
-  Future<Map<String, dynamic>> getGroupInfo(DocumentReference groupRef) async {
+  // Stream to retrieve all users.
+  Stream<QuerySnapshot> getGroupUsers(String gid) {
+    return groupCollection
+        .doc(gid)
+        .collection('users')
+        .orderBy('timestamp', descending: true)
+        .snapshots();
+  }
+
+  // Retrieves all info of a group document including user photos.
+  Future<ZestiGroup> getGroupInfo(DocumentReference groupRef) async {
     DocumentSnapshot groupSnapshot = await groupRef.get();
-    return groupSnapshot.data() as Map<String, dynamic>;
+    Map<String, dynamic> groupInfo =
+        groupSnapshot.data() as Map<String, dynamic>;
+    QuerySnapshot groupUsers = await groupRef.collection("users").get();
+    List groupUserRefs =
+        groupUsers.docs.map((doc) => doc.get("user-ref")).toList();
+    List userPhotos = [];
+    for (DocumentReference userRef in groupUserRefs) {
+      DocumentSnapshot userSnapshot = await userRef.get();
+      String photoURL = userSnapshot.get("photo-ref");
+      userPhotos.add(await _getPhoto(photoURL));
+    }
+    return ZestiGroup(
+        gid: groupRef.id,
+        groupName: groupInfo['group-name'],
+        funFact: groupInfo['fun-fact'],
+        groupPhotos: userPhotos);
+  }
+
+  // Retrieves all info of a user document including profile picture.
+  Future<ZestiUser> getUserInfo(DocumentReference userRef) async {
+    DocumentSnapshot userSnapshot = await userRef.get();
+    Map<String, dynamic> userInfo = userSnapshot.data() as Map<String, dynamic>;
+    return ZestiUser(
+      uid: userRef.id,
+      first: userInfo['first-name'],
+      last: userInfo['last-name'],
+      bio: userInfo['bio'],
+      dIdentity: userInfo['dating-identity'],
+      dInterest: userInfo['dating-interest'],
+      house: userInfo['house'],
+      photoURL: userInfo['photo-ref'],
+      profPic: await _getPhoto(userInfo['photo-ref']),
+      age: userInfo['age'],
+    );
   }
 
   // Send a chat message.
@@ -403,11 +466,6 @@ class DatabaseService {
           .set({
         "timestamp": ts,
         "user-ref": recUser['user-ref'],
-        "first-name": recUser['first-name'],
-        "bio": recUser['bio'],
-        "age": recUser['age'],
-        "photo-ref": recUser['photo-ref'],
-        "house": recUser['house'],
       });
     }
   }
@@ -416,10 +474,6 @@ class DatabaseService {
   Future<void> outgoingInteraction(String youid, bool requested) async {
     // Define timestamp and for the interaction
     DateTime ts = DateTime.now();
-
-    // Get current user info
-    Map<String, dynamic> currUser =
-        await _userRefToMap(userCollection.doc(uid));
 
     // Update requester's "outgoing" collection.
     await userCollection
@@ -457,11 +511,6 @@ class DatabaseService {
           .set({
             "timestamp": ts,
             "user-ref": userCollection.doc(uid),
-            "first-name": currUser['first-name'],
-            "bio": currUser['bio'],
-            "age": currUser['age'],
-            "photo-ref": currUser['photo-ref'],
-            "house": currUser['house'],
           })
           .then((value) => print("Incoming request received."))
           .catchError(
@@ -471,14 +520,8 @@ class DatabaseService {
 
   // Handles the interactions a user conducts on an incoming match request.
   Future<void> incomingInteraction(String youid, bool accepted) async {
-    // Define timestamp and for the match
+    // Initialize timestamp for the match.
     DateTime ts = DateTime.now();
-
-    // Get both user info.
-    Map<String, dynamic> initiator =
-        await _userRefToMap(userCollection.doc(uid));
-    Map<String, dynamic> receiver =
-        await _userRefToMap(userCollection.doc(youid));
 
     // Update user's "matched" collection on acceptance.
     if (accepted) {
@@ -500,8 +543,6 @@ class DatabaseService {
           .set({
             "timestamp": ts,
             "user-ref": userCollection.doc(youid),
-            "first-name": receiver['first-name'],
-            "photo-ref": receiver['photo-ref'],
             "chat-ref": chatRef,
           })
           .then((value) => print("Acceptance (initiator) sent."))
@@ -513,8 +554,6 @@ class DatabaseService {
           .set({
             "timestamp": ts,
             "user-ref": userCollection.doc(uid),
-            "first-name": initiator['first-name'],
-            "photo-ref": initiator['photo-ref'],
             "chat-ref": chatRef,
           })
           .then((value) => print("Acceptance (receiver) sent."))
@@ -532,35 +571,53 @@ class DatabaseService {
             (error) => print("Failed to delete incoming request: $error"));
   }
 
+  // Handles when any user creates a new group.
   Future<void> createGroup(String groupName, String funFact) async {
+    // Initialize timestamp for the match.
     DateTime ts = DateTime.now();
 
+    // Firebase auto-generate unique group ID.
     DocumentReference groupRef = groupCollection.doc();
+
+    // Get info of user that's creating the group and convert it to a dart map.
     DocumentSnapshot currUser = await userCollection.doc(uid).get();
     Map<String, dynamic> currUserMap = currUser.data() as Map<String, dynamic>;
-    await groupRef
-        .set({'group-name': groupName, 'fun-fact': funFact, 'timestamp': ts});
+
+    // Set the group information.
+    await groupRef.set({
+      'group-name': groupName,
+      'fun-fact': funFact,
+      'timestamp': ts,
+      'user-count': 1
+    });
+    // Set the current user info within the group.
     await groupRef.collection("users").doc(uid).set({
       'user-ref': userCollection.doc(uid),
       'timestamp': ts,
-      'zest-key': currUserMap['zest-key']
+      'zest-key': currUserMap['zest-key'],
     });
+    // Update the group reference in the document of the current user.
     await userCollection.doc(uid).collection("groups").doc(groupRef.id).set({
       'group-ref': groupRef,
       'timestamp': ts,
     });
   }
 
+  // Handles when a user attemps to add a user to the group.
   Future<void> addUserToGroup(String gid, String zestKey) async {
+    // Initialize timestamp for the match.
     DateTime ts = DateTime.now();
 
+    // Get current users in the group.
     QuerySnapshot cap =
         await groupCollection.doc(gid).collection("users").get();
+    // Check for a capacity of over 4.
     if (cap.docs.length >= 4) {
       print("Full group.");
       return;
     }
 
+    // Check for the zest-key already present in the group.
     QuerySnapshot hit = await groupCollection
         .doc(gid)
         .collection("users")
@@ -571,14 +628,22 @@ class DatabaseService {
       return;
     }
 
+    // Search for the user by unique zest-key.
     QuerySnapshot userByZestKey =
         await userCollection.where("zest-key", isEqualTo: zestKey).get();
+    // Get the UID.
     String uidToAdd = userByZestKey.docs[0].id;
+    // Add the user info to the group.
     await groupCollection.doc(gid).collection("users").doc(uidToAdd).set({
       'user-ref': userCollection.doc(uidToAdd),
       'timestamp': ts,
       'zest-key': zestKey
     });
+    // Update the group user count.
+    await groupCollection
+        .doc(gid)
+        .update({'user-count': FieldValue.increment(1)});
+    // Update the group reference in the user (the one being added) document.
     await userCollection.doc(uidToAdd).collection("groups").doc(gid).set({
       'group-ref': groupCollection.doc(gid),
       'timestamp': ts,
@@ -586,15 +651,25 @@ class DatabaseService {
     print("User added.");
   }
 
+  // Handles when a user leaves a particular group.
   Future<void> leaveGroup(String gid) async {
+    // Delete the user reference from the group.
     await groupCollection.doc(gid).collection("users").doc(uid).delete();
+    // Delete the group reference from the user document.
     await userCollection.doc(uid).collection("groups").doc(gid).delete();
+    // Check for capacity.
     QuerySnapshot cap =
         await groupCollection.doc(gid).collection("users").get();
     if (cap.docs.length <= 0) {
-      print("Permanently deleting this group.");
+      // Delete the group if there are no users left in it.
       await groupCollection.doc(gid).delete();
+      print("Permanently deleting this group.");
       return;
+    } else {
+      // Otherwise just decrement the group user count.
+      await groupCollection
+          .doc(gid)
+          .update({'user-count': FieldValue.increment(-1)});
     }
   }
 
@@ -605,10 +680,10 @@ class DatabaseService {
     DocumentSnapshot snapshot = await groupRef.get();
 
     // Convert snapshot data into a dart map.
-    Map<String, dynamic> mapData = snapshot.data() as Map<String, dynamic>;
+    final mapData = snapshot.data() as Map<String, dynamic>;
 
     // Add group reference to the dart map.
-    mapData['group-ref'] = groupRef;
+    mapData["group-ref"] = groupRef;
     return mapData;
   }
 
@@ -626,12 +701,16 @@ class DatabaseService {
     var availableGroups = allGroups.toSet().difference(allReactions.toSet());
     availableGroups = availableGroups.difference([gid].toSet());
 
+    print('available Groups:');
+    print(availableGroups);
+
     // Query based on the given parameters
     QuerySnapshot snapshot =
         await groupCollection.where('user-count', isGreaterThan: 1).get();
 
     // Create a list of potential recommendations
     List<String> snapshotGIDs = snapshot.docs.map((doc) => doc.id).toList();
+
     List<String> potentialGIDs =
         availableGroups.intersection(snapshotGIDs.toSet()).toList();
 
@@ -648,7 +727,7 @@ class DatabaseService {
       final random = new Random();
       var selectedGID = potentialGIDs[random.nextInt(potentialGIDs.length)];
       potentialGIDs.remove(selectedGID);
-      DocumentReference selectedDoc = userCollection.doc(selectedGID);
+      DocumentReference selectedDoc = groupCollection.doc(selectedGID);
       Map<String, dynamic> selectedGroup = await _groupRefToMap(selectedDoc);
       groupList.add(selectedGroup);
     }
@@ -659,7 +738,6 @@ class DatabaseService {
     for (QueryDocumentSnapshot recGroup in recommendations.docs) {
       await recGroup.reference.delete();
     }
-
     // Populate recommendations collection with newly generated users.
     DateTime ts = DateTime.now();
     for (Map<String, dynamic> recGroup in groupList) {
@@ -718,12 +796,10 @@ class DatabaseService {
       await groupCollection
           .doc(yougid)
           .collection("incoming")
-          .doc(uid)
+          .doc(gid)
           .set({
             "timestamp": ts,
-            "group-ref": groupCollection.doc(yougid),
-            "group-name": currGroup['group-name'],
-            "fun-fact": currGroup['fun-fact'],
+            "group-ref": groupCollection.doc(gid),
           })
           .then((value) => print("Incoming request received."))
           .catchError(

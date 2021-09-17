@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:zesti/models/zestiuser.dart';
 import 'package:zesti/services/database.dart';
 import 'package:zesti/views/home/love/chat.dart';
 
@@ -47,8 +48,8 @@ class _MatchesState extends State<Matches> {
                         // Remaining indeces used for matchsheet widgets.
                         Map<String, dynamic> data =
                             tmp.docs[index - 1].data() as Map<String, dynamic>;
-                        return matchSheet(widget.uid, data['chat-ref'],
-                            data['first-name'], data['photo-ref']);
+                        return matchSheet(
+                            widget.uid, data['chat-ref'], data['user-ref']);
                       },
                       // A divider widgets is placed in between each matchsheet widget.
                       separatorBuilder: (context, index) => Divider(),
@@ -60,12 +61,11 @@ class _MatchesState extends State<Matches> {
 
   // To display info about each match you have.
   Widget matchSheet(
-      String uid, DocumentReference chatRef, String name, String photoref) {
-    print(photoref);
+      String uid, DocumentReference chatRef, DocumentReference userRef) {
     // FutureBuilder used to retrieve profile photo of your match.
     return FutureBuilder(
-        future: DatabaseService(uid: uid).getPhoto(photoref),
-        builder: (context, AsyncSnapshot<ImageProvider<Object>> snapshot) {
+        future: DatabaseService(uid: uid).getUserInfo(userRef),
+        builder: (context, AsyncSnapshot<ZestiUser> snapshot) {
           // On error.
           if (snapshot.hasError) {
             return Text(snapshot.error.toString());
@@ -79,8 +79,8 @@ class _MatchesState extends State<Matches> {
                       builder: (context) => Chat(
                           uid: uid,
                           chatRef: chatRef,
-                          name: name,
-                          profpic: snapshot.data)),
+                          name: snapshot.data!.first,
+                          profpic: snapshot.data!.profPic)),
                 );
               },
               // Display match info (user data) on the sheet.
@@ -91,7 +91,7 @@ class _MatchesState extends State<Matches> {
                       padding: const EdgeInsets.all(12.0),
                       child: CircleAvatar(
                         radius: 40.0,
-                        backgroundImage: snapshot.data,
+                        backgroundImage: snapshot.data!.profPic,
                         backgroundColor: Colors.white,
                       ),
                     ),
@@ -99,7 +99,7 @@ class _MatchesState extends State<Matches> {
                       padding: const EdgeInsets.all(8.0),
                       child: Column(
                         children: [
-                          Text(name,
+                          Text(snapshot.data!.first,
                               style: TextStyle(
                                   fontWeight: FontWeight.bold, fontSize: 20)),
                           SizedBox(height: 10.0),

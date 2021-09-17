@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 // User class for the app
 //  Useful to hold unpackaged requests from the database
 class ZestiUser {
@@ -9,6 +11,7 @@ class ZestiUser {
   final String dInterest;
   final String house;
   final String photoURL;
+  final ImageProvider<Object> profPic;
   final int age;
 
   ZestiUser({
@@ -20,6 +23,7 @@ class ZestiUser {
     required this.dInterest,
     required this.house,
     required this.photoURL,
+    required this.profPic,
     required this.age,
   });
 }

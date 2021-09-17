@@ -3,10 +3,12 @@ import 'package:uuid/uuid.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:zesti/models/zestigroup.dart';
 import 'package:zesti/services/database.dart';
 import 'package:zesti/theme/theme.dart';
 import 'package:zesti/views/home/social/create.dart';
 import 'package:zesti/views/home/social/social.dart';
+import 'package:zesti/widgets/groupavatar.dart';
 
 class Choose extends StatefulWidget {
   Choose({
@@ -34,6 +36,8 @@ class _ChooseState extends State<Choose> {
             if (tmp != null) {
               int groupCount = tmp.docs.length;
               return Container(
+                  width: size.width,
+                  height: size.height,
                   decoration: BoxDecoration(
                     // Box decoration takes a gradient
                     gradient: LinearGradient(
@@ -122,7 +126,7 @@ class _ChooseState extends State<Choose> {
         },
         child: FutureBuilder(
             future: DatabaseService(uid: uid).getGroupInfo(groupRef),
-            builder: (context, AsyncSnapshot<Map<String, dynamic>> snapshot) {
+            builder: (context, AsyncSnapshot<ZestiGroup> snapshot) {
               // On error.
               if (snapshot.hasError) {
                 return Text(snapshot.error.toString());
@@ -132,13 +136,11 @@ class _ChooseState extends State<Choose> {
                   padding: EdgeInsets.all(16.0),
                   child: Column(
                     children: [
-                      CircleAvatar(
-                          radius: 80.0,
-                          backgroundImage:
-                              AssetImage("assets/baked-potatoes.jpeg"),
-                          backgroundColor: Colors.white),
+                      GroupAvatar(
+                          radius: 160.0,
+                          groupPhotos: snapshot.data!.groupPhotos),
                       SizedBox(height: 16.0),
-                      Text(snapshot.data!['group-name'],
+                      Text(snapshot.data!.groupName,
                           textAlign: TextAlign.center,
                           style: TextStyle(
                               color: Colors.orange[900], fontSize: 24.0)),
@@ -146,7 +148,9 @@ class _ChooseState extends State<Choose> {
                   ),
                 );
               } else {
-                return Center(child: CircularProgressIndicator());
+                return Padding(
+                    padding: EdgeInsets.all(100.0),
+                    child: Center(child: CircularProgressIndicator()));
               }
             }),
       ),

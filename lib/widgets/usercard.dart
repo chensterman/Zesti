@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
@@ -6,11 +7,11 @@ import 'package:zesti/services/database.dart';
 
 // Widget displaying user cards to make decisions on.
 class UserCard extends StatelessWidget {
-  final ZestiUser userOnCard;
+  final DocumentReference userRef;
   final bool rec;
 
   UserCard({
-    required this.userOnCard,
+    required this.userRef,
     required this.rec,
     Key? key,
   }) : super(key: key);
@@ -21,9 +22,8 @@ class UserCard extends StatelessWidget {
     final size = MediaQuery.of(context).size;
     // FutureBuilder used to fetch user photo from Firebase storage.
     return FutureBuilder(
-        future:
-            DatabaseService(uid: userOnCard.uid).getPhoto(userOnCard.photoURL),
-        builder: (context, AsyncSnapshot<ImageProvider<Object>> snapshot) {
+        future: DatabaseService(uid: user!.uid).getUserInfo(userRef),
+        builder: (context, AsyncSnapshot<ZestiUser> snapshot) {
           // On error.
           if (snapshot.hasError) {
             return Text(snapshot.error.toString());
@@ -37,7 +37,7 @@ class UserCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(10),
                 // User profile pic on card.
                 image: DecorationImage(
-                  image: snapshot.data!,
+                  image: snapshot.data!.profPic,
                   fit: BoxFit.cover,
                 ),
               ),
@@ -65,7 +65,7 @@ class UserCard extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.end,
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          buildUserInfo(user: userOnCard),
+                          buildUserInfo(snapshot.data!),
                           // If "rec" is true, we display user cards meant for match recommendations.
                           // Otherwise, the user card is for incoming match requests. They look slightly different
                           // And the buttons call different database functions.
@@ -76,13 +76,13 @@ class UserCard extends StatelessWidget {
                                   color: Colors.red, size: 64.0),
                               onTap: () async {
                                 if (rec) {
-                                  await DatabaseService(uid: user!.uid)
+                                  await DatabaseService(uid: user.uid)
                                       .outgoingInteraction(
-                                          userOnCard.uid, false);
+                                          snapshot.data!.uid, false);
                                 } else {
-                                  await DatabaseService(uid: user!.uid)
+                                  await DatabaseService(uid: user.uid)
                                       .incomingInteraction(
-                                          userOnCard.uid, false);
+                                          snapshot.data!.uid, false);
                                 }
                               },
                             ),
@@ -95,13 +95,13 @@ class UserCard extends StatelessWidget {
                                   size: 64.0),
                               onTap: () async {
                                 if (rec) {
-                                  await DatabaseService(uid: user!.uid)
+                                  await DatabaseService(uid: user.uid)
                                       .outgoingInteraction(
-                                          userOnCard.uid, true);
+                                          snapshot.data!.uid, true);
                                 } else {
-                                  await DatabaseService(uid: user!.uid)
+                                  await DatabaseService(uid: user.uid)
                                       .incomingInteraction(
-                                          userOnCard.uid, true);
+                                          snapshot.data!.uid, true);
                                 }
                               },
                             ),
@@ -122,7 +122,7 @@ class UserCard extends StatelessWidget {
   }
 
   // Put user information onto the cards.
-  Widget buildUserInfo({@required final user}) {
+  Widget buildUserInfo(ZestiUser userOnCard) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       // Column displaying user info
@@ -131,7 +131,7 @@ class UserCard extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            '${user.first}, ${user.age}',
+            '${userOnCard.first}, ${userOnCard.age}',
             style: TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.bold,
@@ -140,12 +140,12 @@ class UserCard extends StatelessWidget {
           ),
           SizedBox(height: 8),
           Text(
-            user.bio,
+            userOnCard.bio,
             style: TextStyle(color: Colors.white),
           ),
           SizedBox(height: 4),
           Text(
-            '${user.house} House',
+            '${userOnCard.house} House',
             style: TextStyle(color: Colors.white),
           )
         ],
@@ -154,78 +154,82 @@ class UserCard extends StatelessWidget {
   }
 }
 
-// Dummy card class with empty fields.
+// Dummy card class with no decision buttons.
 class UserCardDummy extends StatelessWidget {
-  final bool rec;
+  final DocumentReference userRef;
 
   UserCardDummy({
-    required this.rec,
+    required this.userRef,
     Key? key,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final user = Provider.of<User?>(context);
     final size = MediaQuery.of(context).size;
-
-    return Container(
-      height: size.height * 0.7,
-      width: size.width * 0.95,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
-        // User profile pic on card.
-        image: DecorationImage(
-          image: AssetImage("assets/profile.jpg"),
-          fit: BoxFit.cover,
-        ),
-      ),
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          boxShadow: [
-            BoxShadow(color: Colors.black12, spreadRadius: 0.5),
-          ],
-          gradient: LinearGradient(
-            colors: [Colors.black12, Colors.black87],
-            begin: Alignment.center,
-            stops: [0.4, 1],
-            end: Alignment.bottomCenter,
-          ),
-        ),
-        child: Stack(
-          children: [
-            Positioned(
-              right: 10,
-              left: 10,
-              bottom: 10,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  buildUserInfo(),
-                  Padding(
-                    padding: EdgeInsets.all(16.0),
-                    child: InkWell(
-                      child: Icon(Icons.cancel_rounded,
-                          color: Colors.red, size: 64.0),
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.all(16.0),
-                    child: InkWell(
-                      child: Icon(rec ? Icons.send : Icons.check_circle,
-                          color: rec ? Colors.blue : Colors.green, size: 64.0),
-                    ),
-                  ),
-                ],
+    // FutureBuilder used to fetch user photo from Firebase storage.
+    return FutureBuilder(
+        future: DatabaseService(uid: user!.uid).getUserInfo(userRef),
+        builder: (context, AsyncSnapshot<ZestiUser> snapshot) {
+          // On error.
+          if (snapshot.hasError) {
+            return Text(snapshot.error.toString());
+          }
+          // On success.
+          else if (snapshot.connectionState == ConnectionState.done) {
+            return Container(
+              height: size.height * 0.7,
+              width: size.width * 0.95,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                // User profile pic on card.
+                image: DecorationImage(
+                  image: snapshot.data!.profPic,
+                  fit: BoxFit.cover,
+                ),
               ),
-            ),
-          ],
-        ),
-      ),
-    );
+              child: Container(
+                // Box decoraion and gradient.
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  boxShadow: [
+                    BoxShadow(color: Colors.black12, spreadRadius: 0.5),
+                  ],
+                  gradient: LinearGradient(
+                    colors: [Colors.black12, Colors.black87],
+                    begin: Alignment.center,
+                    stops: [0.4, 1],
+                    end: Alignment.bottomCenter,
+                  ),
+                ),
+                child: Stack(
+                  children: [
+                    Positioned(
+                      right: 10,
+                      left: 10,
+                      bottom: 10,
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          buildUserInfo(snapshot.data!),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
+          // On loading, return an empty container.
+          else {
+            return Container();
+          }
+        });
   }
 
-  Widget buildUserInfo() {
+  // Put user information onto the cards.
+  Widget buildUserInfo(ZestiUser userOnCard) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       // Column displaying user info
@@ -234,7 +238,7 @@ class UserCardDummy extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            "",
+            '${userOnCard.first}, ${userOnCard.age}',
             style: TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.bold,
@@ -243,12 +247,12 @@ class UserCardDummy extends StatelessWidget {
           ),
           SizedBox(height: 8),
           Text(
-            "",
+            userOnCard.bio,
             style: TextStyle(color: Colors.white),
           ),
           SizedBox(height: 4),
           Text(
-            "",
+            '${userOnCard.house} House',
             style: TextStyle(color: Colors.white),
           )
         ],
