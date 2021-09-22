@@ -22,7 +22,9 @@ class Identity extends StatelessWidget {
         decoration: CustomTheme.mode,
         child: Center(
           child: Container(
-            padding: EdgeInsets.symmetric(horizontal: size.width * 0.05),
+            padding: EdgeInsets.symmetric(
+                vertical: size.height * CustomTheme.paddingMultiplier,
+                horizontal: size.width * CustomTheme.paddingMultiplier),
             child: Form(
               child: Center(
                 child: ListView(shrinkWrap: true, children: <Widget>[
@@ -44,19 +46,15 @@ class Identity extends StatelessWidget {
                                       const EdgeInsets.symmetric(vertical: 8.0),
                                   child: Text(
                                     "How do you identify?",
-                                    style: CustomTheme.textTheme.headline1,
+                                    style: CustomTheme.textTheme.headline2,
                                   ),
                                 ),
                                 SizedBox(height: 20.0),
                                 RoundedButton(
                                   text: 'Man',
                                   onPressed: () async {
-                                    if (user == null) {
-                                      print("Error");
-                                    } else {
-                                      await DatabaseService(uid: user.uid)
-                                          .updateDatingIdentity("man");
-                                    }
+                                    await DatabaseService(uid: user!.uid)
+                                        .updateDatingIdentity("man");
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(

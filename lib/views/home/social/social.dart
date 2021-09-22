@@ -25,7 +25,6 @@ class _SocialState extends State<Social> {
 
   @override
   Widget build(BuildContext context) {
-    Size size = MediaQuery.of(context).size;
     // Widget list for bottom nav bar
     final List<Widget> _widgetSet = <Widget>[
       Group(gid: widget.gid),

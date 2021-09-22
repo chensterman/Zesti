@@ -32,8 +32,9 @@ class _RedeemState extends State<Redeem> {
       ),
       body: Center(
         child: Container(
-          width: size.width * CustomTheme.containerWidth,
-          padding: const EdgeInsets.all(20),
+          padding: EdgeInsets.symmetric(
+              vertical: size.height * CustomTheme.paddingMultiplier,
+              horizontal: size.width * CustomTheme.paddingMultiplier),
           child: Form(
             key: _formKey,
             child: Column(
@@ -46,11 +47,10 @@ class _RedeemState extends State<Redeem> {
                 SizedBox(height: 20.0),
                 Text(widget.vendor,
                     textAlign: TextAlign.center,
-                    style:
-                        TextStyle(color: Colors.orange[900], fontSize: 24.0)),
+                    style: CustomTheme.textTheme.headline1),
                 Text(widget.description,
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 24.0)),
+                    style: TextStyle(fontSize: 24.0, fontFamily: 'Hind')),
                 SizedBox(height: 20.0),
                 TextFormField(
                     validator: (val) {

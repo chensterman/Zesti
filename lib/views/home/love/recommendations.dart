@@ -41,16 +41,16 @@ class _RecommendationsState extends State<Recommendations> {
                     // Amount of space to be cached (about 3 user cards in height).
                     //  This stops the FutureBuilder from being super jumpy.
                     cacheExtent: size.height * 0.7 * 3,
-                    padding: EdgeInsets.all(16.0),
+                    padding: EdgeInsets.symmetric(
+                        vertical: size.height * CustomTheme.paddingMultiplier,
+                        horizontal: size.width * CustomTheme.paddingMultiplier),
                     itemBuilder: (context, index) {
                       // First index reserved for text "RECOMMENDATIONS".
                       if (index == 0) {
                         return Center(
                           child: Column(children: [
-                            Padding(
-                                padding: EdgeInsets.only(top: 8.0),
-                                child: Text('RECOMMENDATIONS',
-                                    style: CustomTheme.textTheme.headline3)),
+                            Text('RECOMMENDATIONS',
+                                style: CustomTheme.textTheme.headline3),
                             TextButton(
                               child: Text('Generate'),
                               onPressed: () async {

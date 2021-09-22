@@ -430,22 +430,7 @@ class _GroupUsersState extends State<GroupUsers> {
               return Container(
                   width: size.width,
                   height: size.height,
-                  decoration: BoxDecoration(
-                    // Box decoration takes a gradient
-                    gradient: LinearGradient(
-                      // Where the linear gradient begins and ends
-                      begin: Alignment.topRight,
-                      end: Alignment.bottomLeft,
-
-                      // Add one stop for each color. Stops should increase from 0 to 1
-                      stops: [0.3, 0.9],
-                      colors: [
-                        // Colors are easy thanks to Flutter's Colors class.
-                        CustomTheme.reallyBrightOrange,
-                        Colors.white,
-                      ],
-                    ),
-                  ),
+                  decoration: CustomTheme.mode,
                   child: ListView.separated(
                     padding: EdgeInsets.all(16.0),
                     cacheExtent: size.height * 0.7 * 3,

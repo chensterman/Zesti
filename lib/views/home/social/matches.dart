@@ -23,6 +23,7 @@ class _MatchesState extends State<Matches> {
   @override
   Widget build(BuildContext context) {
     final user = Provider.of<User?>(context);
+    final size = MediaQuery.of(context).size;
     return Container(
         // StreamBuilder to load match stream.
         child: StreamBuilder(
@@ -31,15 +32,16 @@ class _MatchesState extends State<Matches> {
               QuerySnapshot? tmp = snapshot.data;
               return tmp != null
                   ? ListView.separated(
-                      padding: EdgeInsets.all(16.0),
+                      padding: EdgeInsets.symmetric(
+                          vertical: size.height * CustomTheme.paddingMultiplier,
+                          horizontal:
+                              size.width * CustomTheme.paddingMultiplier),
                       itemBuilder: (context, index) {
                         // First index is reserved for text "MATCHES".
                         if (index == 0) {
                           return Center(
-                              child: Padding(
-                                  padding: EdgeInsets.only(top: 8.0),
-                                  child: Text('MATCHES',
-                                      style: CustomTheme.textTheme.headline3)));
+                              child: Text('MATCHES',
+                                  style: CustomTheme.textTheme.headline3));
                         }
 
                         // Remaining indeces used for matchsheet widgets.

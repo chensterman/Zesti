@@ -22,7 +22,9 @@ class Interest extends StatelessWidget {
         decoration: CustomTheme.mode,
         child: Center(
           child: Container(
-            padding: EdgeInsets.symmetric(horizontal: size.width * 0.05),
+            padding: EdgeInsets.symmetric(
+                vertical: size.height * CustomTheme.paddingMultiplier,
+                horizontal: size.width * CustomTheme.paddingMultiplier),
             child: Form(
               child: Center(
                 child: ListView(shrinkWrap: true, children: <Widget>[
@@ -44,19 +46,15 @@ class Interest extends StatelessWidget {
                                       const EdgeInsets.symmetric(vertical: 8.0),
                                   child: Text(
                                     "Who would you see?",
-                                    style: CustomTheme.textTheme.headline1,
+                                    style: CustomTheme.textTheme.headline2,
                                   ),
                                 ),
                                 SizedBox(height: 20.0),
                                 RoundedButton(
                                   text: 'Men',
                                   onPressed: () async {
-                                    if (user == null) {
-                                      print("Error");
-                                    } else {
-                                      await DatabaseService(uid: user.uid)
-                                          .updateDatingInterest("man");
-                                    }
+                                    await DatabaseService(uid: user!.uid)
+                                        .updateDatingInterest("man");
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(

@@ -32,7 +32,8 @@ class _CreateGroupState extends State<CreateGroup> {
       ),
       body: Container(
         padding: EdgeInsets.symmetric(
-            vertical: size.height * 0.1, horizontal: size.width * 0.1),
+            vertical: size.height * CustomTheme.paddingMultiplier,
+            horizontal: size.width * CustomTheme.paddingMultiplier),
         child: Form(
           key: _formKey,
           child: Center(

@@ -63,8 +63,11 @@ class _HouseState extends State<House> {
         decoration: CustomTheme.mode,
         child: Center(
           child: Container(
-            padding: EdgeInsets.symmetric(horizontal: size.width * 0.05),
+            padding: EdgeInsets.symmetric(
+                vertical: size.height * CustomTheme.paddingMultiplier,
+                horizontal: size.width * CustomTheme.paddingMultiplier),
             child: Form(
+              key: _formKey,
               child: Center(
                 child: ListView(shrinkWrap: true, children: <Widget>[
                   Center(
@@ -92,7 +95,7 @@ class _HouseState extends State<House> {
                                       const EdgeInsets.symmetric(vertical: 8.0),
                                   child: Text(
                                     "Which house do you live in?",
-                                    style: CustomTheme.textTheme.headline1,
+                                    style: CustomTheme.textTheme.headline2,
                                   ),
                                 ),
                                 SizedBox(height: 20.0),
@@ -119,17 +122,15 @@ class _HouseState extends State<House> {
                                 RoundedButton(
                                     text: 'Continue',
                                     onPressed: () async {
-                                      if (user == null) {
-                                        print("Error");
-                                      } else {
-                                        await DatabaseService(uid: user.uid)
+                                      if (_house != null) {
+                                        await DatabaseService(uid: user!.uid)
                                             .updateHouse(_house.toLowerCase());
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) => Identity()),
+                                        );
                                       }
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) => Identity()),
-                                      );
                                     }),
                               ],
                             ),

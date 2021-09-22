@@ -50,7 +50,9 @@ class _BirthdayState extends State<Birthday> {
         decoration: CustomTheme.mode,
         child: Center(
           child: Container(
-            padding: EdgeInsets.symmetric(horizontal: size.width * 0.05),
+            padding: EdgeInsets.symmetric(
+                vertical: size.height * CustomTheme.paddingMultiplier,
+                horizontal: size.width * CustomTheme.paddingMultiplier),
             child: Form(
               child: Center(
                 child: ListView(shrinkWrap: true, children: <Widget>[
@@ -72,7 +74,7 @@ class _BirthdayState extends State<Birthday> {
                                       vertical: 10.0),
                                   child: Text(
                                     "What's your date of birth?",
-                                    style: CustomTheme.textTheme.headline1,
+                                    style: CustomTheme.textTheme.headline2,
                                   ),
                                 ),
                                 Container(

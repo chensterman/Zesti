@@ -29,7 +29,8 @@ class _SignUpState extends State<SignUp> {
     return Scaffold(
       body: Container(
         padding: EdgeInsets.symmetric(
-            vertical: size.height * 0.1, horizontal: size.width * 0.1),
+            vertical: size.height * CustomTheme.paddingMultiplier,
+            horizontal: size.width * CustomTheme.paddingMultiplier),
         decoration: CustomTheme.standard,
         child: Form(
           key: _formKey,

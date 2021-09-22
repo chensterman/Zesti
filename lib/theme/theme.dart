@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 class CustomTheme {
   // Widget sizing.
   static double containerWidth = 0.85;
-  static double paddingMultiplier = 0.1;
+  static double paddingMultiplier = 0.05;
 
   // Color scheme.
   static Color reallyBrightOrange = Color(0xFFFD6000);
@@ -13,7 +13,7 @@ class CustomTheme {
   static Color transitioningOrange = Color(0xFFFFC984);
   static Color cream = Color(0xFFFAF2E9);
   static Color mintyGreen = Color(0xFFC6F7A6);
-  static Color gray = Color(0xFFDCDCDC);
+  static Color blackText = Colors.black54;
 
   // Text theme.
   static TextTheme textTheme = TextTheme(
@@ -22,7 +22,11 @@ class CustomTheme {
         fontSize: 30,
         fontWeight: FontWeight.bold,
         fontFamily: 'Jost'),
-    headline2: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+    headline2: TextStyle(
+        color: CustomTheme.blackText,
+        fontSize: 30,
+        fontWeight: FontWeight.bold,
+        fontFamily: 'Jost'),
     headline3: TextStyle(
         color: CustomTheme.reallyBrightOrange,
         fontSize: 20,

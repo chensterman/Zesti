@@ -22,7 +22,6 @@ class _LoveState extends State<Love> {
   @override
   Widget build(BuildContext context) {
     final user = Provider.of<User?>(context);
-    Size size = MediaQuery.of(context).size;
     // Widget list for bottom nav bar.
     final List<Widget> _widgetSet = <Widget>[
       Recommendations(uid: user!.uid),

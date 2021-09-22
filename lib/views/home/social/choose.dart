@@ -40,8 +40,10 @@ class _ChooseState extends State<Choose> {
                   height: size.height,
                   decoration: CustomTheme.mode,
                   child: ListView.separated(
-                    padding: EdgeInsets.all(16.0),
-                    cacheExtent: size.height * 0.7 * 3,
+                    padding: EdgeInsets.symmetric(
+                        vertical: size.height * CustomTheme.paddingMultiplier,
+                        horizontal: size.width * CustomTheme.paddingMultiplier),
+                    cacheExtent: size.height * 3,
                     itemCount: groupCount + 1,
                     itemBuilder: (context, index) {
                       if (groupCount == 0) {
@@ -73,7 +75,7 @@ class _ChooseState extends State<Choose> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
       ),
-      margin: EdgeInsets.all(16.0),
+      margin: EdgeInsets.all(8.0),
       child: InkWell(
         splashColor: CustomTheme.reallyBrightOrange,
         onTap: () {
@@ -83,7 +85,7 @@ class _ChooseState extends State<Choose> {
           );
         },
         child: Padding(
-          padding: EdgeInsets.all(8.0),
+          padding: EdgeInsets.all(16.0),
           child: Column(
             children: [
               CircleAvatar(
@@ -93,7 +95,7 @@ class _ChooseState extends State<Choose> {
               SizedBox(height: 16.0),
               Text("Create Group",
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.orange[900], fontSize: 24.0)),
+                  style: CustomTheme.textTheme.headline3),
             ],
           ),
         ),
@@ -106,7 +108,7 @@ class _ChooseState extends State<Choose> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
       ),
-      margin: EdgeInsets.all(16.0),
+      margin: EdgeInsets.all(8.0),
       child: InkWell(
         splashColor: CustomTheme.reallyBrightOrange,
         onTap: () {
@@ -133,8 +135,7 @@ class _ChooseState extends State<Choose> {
                       SizedBox(height: 16.0),
                       Text(snapshot.data!.groupName,
                           textAlign: TextAlign.center,
-                          style: TextStyle(
-                              color: Colors.orange[900], fontSize: 24.0)),
+                          style: CustomTheme.textTheme.headline3),
                     ],
                   ),
                 );

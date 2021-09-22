@@ -183,6 +183,9 @@ class _ChatState extends State<Chat> {
   // Card that displays a specific partner deal.
   Widget dealCard(String imagePath, String vendor, String description) {
     return Card(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
       margin: EdgeInsets.all(16.0),
       child: InkWell(
         splashColor: CustomTheme.reallyBrightOrange,

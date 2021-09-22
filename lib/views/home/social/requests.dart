@@ -40,15 +40,15 @@ class _RequestsState extends State<Requests> {
                     // Amount of space to be cached (about 3 user cards in height).
                     //  This stops the FutureBuilder from being super jumpy.
                     cacheExtent: size.height * 0.7 * 3,
-                    padding: EdgeInsets.all(16.0),
+                    padding: EdgeInsets.symmetric(
+                        vertical: size.height * CustomTheme.paddingMultiplier,
+                        horizontal: size.width * CustomTheme.paddingMultiplier),
                     itemBuilder: (context, index) {
                       // First index reserved for text "INCOMING REQUESTS".
                       if (index == 0) {
                         return Center(
-                            child: Padding(
-                                padding: EdgeInsets.only(top: 8.0),
-                                child: Text('INCOMING REQUESTS',
-                                    style: CustomTheme.textTheme.headline3)));
+                            child: Text('INCOMING REQUESTS',
+                                style: CustomTheme.textTheme.headline3));
                       }
                       Map<String, dynamic> data =
                           tmp.docs[index - 1].data() as Map<String, dynamic>;

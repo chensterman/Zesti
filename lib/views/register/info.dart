@@ -40,8 +40,11 @@ class _InfoState extends State<Info> {
         decoration: CustomTheme.mode,
         child: Center(
           child: Container(
-            padding: EdgeInsets.symmetric(horizontal: size.width * 0.05),
+            padding: EdgeInsets.symmetric(
+                vertical: size.height * CustomTheme.paddingMultiplier,
+                horizontal: size.width * CustomTheme.paddingMultiplier),
             child: Form(
+              key: _formKey,
               child: Center(
                 child: ListView(shrinkWrap: true, children: <Widget>[
                   Center(
@@ -62,7 +65,7 @@ class _InfoState extends State<Info> {
                                       vertical: 32.0),
                                   child: Text(
                                     "Upload your best picture...",
-                                    style: CustomTheme.textTheme.headline1,
+                                    style: CustomTheme.textTheme.headline2,
                                   ),
                                 ),
                                 Padding(
@@ -75,7 +78,7 @@ class _InfoState extends State<Info> {
                                       vertical: 32.0),
                                   child: Text(
                                     "and say something cool!",
-                                    style: CustomTheme.textTheme.headline1,
+                                    style: CustomTheme.textTheme.headline2,
                                   ),
                                 ),
                                 TextFormField(
@@ -110,29 +113,25 @@ class _InfoState extends State<Info> {
                                         // Form validation:
                                         //  Does nothing if validation is incorrect.
                                         if (_formKey.currentState!.validate()) {
-                                          // Check for null user.
-                                          if (user != null) {
-                                            // Do not upload if dynamic imageFile is null.
-                                            if (imageFile != null) {
-                                              // Upload image and store the reference.
-                                              // Side note: no need to delete previous image from storage,
-                                              // as we assume this will always be the first (and only) time
-                                              // a user sees this page.
-                                              String storageRef =
-                                                  await uploadImage(
-                                                      imageFile, user.uid);
-                                              // Update user document with the reference.
-                                              await DatabaseService(
-                                                      uid: user.uid)
-                                                  .updatePhoto(storageRef);
-                                            }
-                                            // Update user document with bio.
+                                          // Do not upload if dynamic imageFile is null.
+                                          if (imageFile != null) {
+                                            // Upload image and store the reference.
+                                            // Side note: no need to delete previous image from storage,
+                                            // as we assume this will always be the first (and only) time
+                                            // a user sees this page.
+                                            String storageRef =
+                                                await uploadImage(
+                                                    imageFile, user!.uid);
+                                            // Update user document with the reference.
                                             await DatabaseService(uid: user.uid)
-                                                .updateBio(bio);
-                                            // Flag account as fully set up
-                                            await DatabaseService(uid: user.uid)
-                                                .updateAccountSetup();
+                                                .updatePhoto(storageRef);
                                           }
+                                          // Update user document with bio.
+                                          await DatabaseService(uid: user!.uid)
+                                              .updateBio(bio);
+                                          // Flag account as fully set up
+                                          await DatabaseService(uid: user.uid)
+                                              .updateAccountSetup();
                                           // Navigate accordingly.
                                           Navigator.push(
                                             context,

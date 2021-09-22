@@ -29,7 +29,8 @@ class _GroupState extends State<Group> {
     final user = Provider.of<User?>(context);
     Size size = MediaQuery.of(context).size;
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: size.width * 0.05),
+      padding: EdgeInsets.symmetric(
+          horizontal: size.width * CustomTheme.paddingMultiplier),
       child: Form(
         key: _formKey,
         child: Center(
@@ -47,16 +48,17 @@ class _GroupState extends State<Group> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20),
                     ),
-                    margin: EdgeInsets.all(8.0),
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 32.0, horizontal: 32.0),
+                      padding: EdgeInsets.symmetric(
+                          vertical: size.height * CustomTheme.paddingMultiplier,
+                          horizontal:
+                              size.width * CustomTheme.paddingMultiplier),
                       child: Column(children: [
                         Padding(
                           padding: const EdgeInsets.symmetric(vertical: 8.0),
                           child: Text(
                             "Change group tagline:",
-                            style: CustomTheme.textTheme.headline1,
+                            style: CustomTheme.textTheme.headline2,
                           ),
                         ),
                         TextFormField(
@@ -85,7 +87,7 @@ class _GroupState extends State<Group> {
                           padding: const EdgeInsets.symmetric(vertical: 8.0),
                           child: Text(
                             "Change group name:",
-                            style: CustomTheme.textTheme.headline1,
+                            style: CustomTheme.textTheme.headline2,
                           ),
                         ),
                         TextFormField(
@@ -113,7 +115,7 @@ class _GroupState extends State<Group> {
                           padding: const EdgeInsets.symmetric(vertical: 8.0),
                           child: Text(
                             "Add a user:",
-                            style: CustomTheme.textTheme.headline1,
+                            style: CustomTheme.textTheme.headline2,
                           ),
                         ),
                         TextFormField(

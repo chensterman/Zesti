@@ -31,7 +31,9 @@ class _NameState extends State<Name> {
         decoration: CustomTheme.mode,
         child: Center(
           child: Container(
-            padding: EdgeInsets.symmetric(horizontal: size.width * 0.05),
+            padding: EdgeInsets.symmetric(
+                vertical: size.height * CustomTheme.paddingMultiplier,
+                horizontal: size.width * CustomTheme.paddingMultiplier),
             child: Form(
               key: _formKey,
               child: Center(
@@ -54,7 +56,7 @@ class _NameState extends State<Name> {
                                       const EdgeInsets.symmetric(vertical: 8.0),
                                   child: Text(
                                     "What's your name?",
-                                    style: CustomTheme.textTheme.headline1,
+                                    style: CustomTheme.textTheme.headline2,
                                   ),
                                 ),
                                 TextFormField(
