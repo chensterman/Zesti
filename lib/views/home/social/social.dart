@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:zesti/theme/theme.dart';
+import 'package:zesti/views/home/home.dart';
 import 'package:zesti/views/home/social/recommendations.dart';
 import 'package:zesti/views/home/social/requests.dart';
 import 'package:zesti/views/home/social/group.dart';
@@ -36,6 +37,13 @@ class _SocialState extends State<Social> {
     // Main page widget (contains nav bar pages as well)
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => Home()),
+          ),
+        ),
         backgroundColor: CustomTheme.reallyBrightOrange,
         title: Text("Zesti Social"),
       ),

@@ -41,6 +41,12 @@ class CustomTheme {
 
   // Container gradients.
   static BoxDecoration standard = BoxDecoration(
+    image: DecorationImage(
+      image: AssetImage("assets/orange.png"),
+      scale: 1.5,
+      alignment: Alignment.topRight,
+      fit: BoxFit.none,
+    ),
     // Box decoration takes a gradient.
     gradient: LinearGradient(
       // Where the linear gradient begins and ends.
@@ -66,6 +72,20 @@ class CustomTheme {
       colors: [
         CustomTheme.cream,
         CustomTheme.reallyBrightOrange,
+      ],
+    ),
+  );
+  static BoxDecoration social = BoxDecoration(
+    // Box decoration takes a gradient.
+    gradient: LinearGradient(
+      // Where the linear gradient begins and ends.
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+      // Add one stop for each color. Stops should increase from 0 to 1.
+      stops: [0.3, 0.9],
+      colors: [
+        CustomTheme.cream,
+        CustomTheme.peachyOrange,
       ],
     ),
   );

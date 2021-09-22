@@ -1,36 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
-import 'package:zesti/theme/theme.dart';
 import 'package:zesti/services/database.dart';
-import 'package:zesti/views/home/social/choose.dart';
+import 'package:zesti/theme/theme.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:zesti/views/home/home.dart';
+import 'package:zesti/views/register/birthday.dart';
 import 'package:zesti/widgets/formwidgets.dart';
 
-class CreateGroup extends StatefulWidget {
-  final String gid;
-  CreateGroup({
-    Key? key,
-    required this.gid,
-  }) : super(key: key);
-
+// Widget for name form
+class ZestKey extends StatefulWidget {
   @override
-  _CreateGroupState createState() => _CreateGroupState();
+  _ZestKeyState createState() => _ZestKeyState();
 }
 
-class _CreateGroupState extends State<CreateGroup> {
+class _ZestKeyState extends State<ZestKey> {
   final _formKey = GlobalKey<FormState>();
-  String groupName = '';
-  String funFact = '';
+  String zestKey = '';
+  bool zestKeyFlag = true;
 
   @override
   Widget build(BuildContext context) {
-    final user = Provider.of<User?>(context);
     Size size = MediaQuery.of(context).size;
+    final user = Provider.of<User?>(context);
 
     return Scaffold(
       appBar: AppBar(
         backgroundColor: CustomTheme.reallyBrightOrange,
-        title: Text("Group Creation"),
       ),
       body: Container(
         decoration: CustomTheme.mode,
@@ -60,56 +56,52 @@ class _CreateGroupState extends State<CreateGroup> {
                                   padding:
                                       const EdgeInsets.symmetric(vertical: 8.0),
                                   child: Text(
-                                    "Enter your group name:",
+                                    "Finally, choose a ZestKey!",
                                     style: CustomTheme.textTheme.headline2,
                                   ),
                                 ),
                                 TextFormField(
                                   validator: (val) {
                                     if (val == null || val.isEmpty) {
-                                      return "Please enter a group name.";
+                                      return "Please enter a ZestKey.";
                                     }
+                                    if (zestKeyFlag)
+                                      return "This ZestKey is already taken.";
                                   },
                                   onChanged: (val) {
-                                    setState(() => groupName = val);
+                                    setState(() => zestKey = val);
                                   },
                                   decoration: const InputDecoration(
-                                      hintText: "Group Name"),
+                                      hintText:
+                                          "To get added to blocking groups!"),
                                 ),
-                                SizedBox(height: 20.0),
-                                Padding(
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 8.0),
-                                  child: Text(
-                                    "Enter a fun fact:",
-                                    style: CustomTheme.textTheme.headline2,
-                                  ),
-                                ),
-                                TextFormField(
-                                    validator: (val) {
-                                      if (val == null || val.isEmpty) {
-                                        return "Please enter a fun fact.";
-                                      }
-                                    },
-                                    onChanged: (val) {
-                                      setState(() => funFact = val);
-                                    },
-                                    decoration: const InputDecoration(
-                                        hintText: "Fun Fact")),
                                 SizedBox(height: 20.0),
                                 RoundedButton(
-                                    text: 'Continue',
+                                    text: "I'm Ready!",
                                     onPressed: () async {
+                                      bool tmp =
+                                          await DatabaseService(uid: user!.uid)
+                                              .checkZestKey(zestKey);
+                                      setState(() {
+                                        zestKeyFlag = tmp;
+                                      });
                                       if (_formKey.currentState!.validate()) {
-                                        await DatabaseService(uid: user!.uid)
-                                            .createGroup(groupName, funFact);
+                                        await DatabaseService(uid: user.uid)
+                                            .updateZestKey(zestKey);
                                         Navigator.push(
                                           context,
                                           MaterialPageRoute(
-                                              builder: (context) => Choose()),
+                                              builder: (context) => Home()),
                                         );
                                       }
                                     }),
+                                SizedBox(height: 20.0),
+                                SizedBox(
+                                  width: double.infinity,
+                                  height: size.height * 0.3,
+                                  child: SvgPicture.asset("assets/zestkey.svg",
+                                      semanticsLabel: "Name"),
+                                ),
                               ],
                             ),
                           ),

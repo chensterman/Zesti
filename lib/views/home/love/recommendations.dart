@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:zesti/widgets/errors.dart';
 import 'package:zesti/widgets/usercard.dart';
 import 'package:zesti/theme/theme.dart';
 import 'package:zesti/services/database.dart';
@@ -58,6 +59,11 @@ class _RecommendationsState extends State<Recommendations> {
                                     .generateRecommendations();
                               },
                             ),
+                            tmp.docs.length == 0
+                                ? Empty(
+                                    reason:
+                                        "You've ran out of recommendations for the week! Check back in for next round!")
+                                : Container(),
                           ]),
                         );
                       }

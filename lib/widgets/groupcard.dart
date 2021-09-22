@@ -5,17 +5,20 @@ import 'package:provider/provider.dart';
 import 'package:zesti/models/zestigroup.dart';
 import 'package:zesti/services/database.dart';
 import 'package:zesti/theme/theme.dart';
+import 'package:zesti/widgets/errors.dart';
 import 'package:zesti/widgets/usercard.dart';
 
 // Widget displaying user cards to make decisions on.
 class GroupCard extends StatelessWidget {
   final String gid;
   final DocumentReference groupRef;
+  final DocumentReference parentGroupRef;
   final bool rec;
 
   GroupCard({
     required this.gid,
     required this.groupRef,
+    required this.parentGroupRef,
     required this.rec,
     Key? key,
   }) : super(key: key);
@@ -30,7 +33,9 @@ class GroupCard extends StatelessWidget {
         builder: (context, AsyncSnapshot<ZestiGroup> snapshot) {
           // On error.
           if (snapshot.hasError) {
-            return Text(snapshot.error.toString());
+            return NotFound(
+                reason: "It looks like this group just disbanded :(",
+                doc: parentGroupRef);
           }
           // On success.
           else if (snapshot.connectionState == ConnectionState.done) {

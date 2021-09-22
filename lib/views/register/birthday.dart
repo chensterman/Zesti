@@ -36,6 +36,7 @@ class _BirthdayState extends State<Birthday> {
   dynamic month = "--";
   dynamic day = "--";
   dynamic year = "--";
+  bool picked = false;
 
   @override
   Widget build(BuildContext context) {
@@ -139,6 +140,7 @@ class _BirthdayState extends State<Birthday> {
                                                   month = date.month;
                                                   day = date.day;
                                                   year = date.year;
+                                                  picked = true;
                                                 });
                                               }, onConfirm: (date) {
                                                 print('confirm $date');
@@ -175,21 +177,18 @@ class _BirthdayState extends State<Birthday> {
                                                                 30.0))),
                                             onPressed: () async {
                                               // Check for non-user
-                                              if (user == null) {
-                                                print("Error");
-                                                // Update user birthday
-                                              } else {
+                                              if (picked) {
                                                 await DatabaseService(
-                                                        uid: user.uid)
+                                                        uid: user!.uid)
                                                     .updateAge(birthday);
+                                                // Push to House form
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          House()),
+                                                );
                                               }
-                                              // Push to House form
-                                              Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                    builder: (context) =>
-                                                        House()),
-                                              );
                                             },
                                             child: Text("Confirm"),
                                           )),

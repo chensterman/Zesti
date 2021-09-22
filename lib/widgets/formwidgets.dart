@@ -1,5 +1,4 @@
 // Dart file container various widgets used across the app
-
 import 'package:flutter/material.dart';
 import 'package:zesti/theme/theme.dart';
 

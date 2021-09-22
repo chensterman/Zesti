@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:zesti/services/database.dart';
+import 'package:zesti/widgets/errors.dart';
 import 'package:zesti/widgets/groupcard.dart';
 import 'package:zesti/theme/theme.dart';
 
@@ -46,15 +47,23 @@ class _RequestsState extends State<Requests> {
                     itemBuilder: (context, index) {
                       // First index reserved for text "INCOMING REQUESTS".
                       if (index == 0) {
-                        return Center(
-                            child: Text('INCOMING REQUESTS',
-                                style: CustomTheme.textTheme.headline3));
+                        return Column(children: [
+                          Center(
+                              child: Text('INCOMING REQUESTS',
+                                  style: CustomTheme.textTheme.headline3)),
+                          tmp.docs.length == 0
+                              ? Empty(
+                                  reason:
+                                      "No incoming requests  at the moment, but maybe later!")
+                              : Container(),
+                        ]);
                       }
                       Map<String, dynamic> data =
                           tmp.docs[index - 1].data() as Map<String, dynamic>;
                       return GroupCard(
                           gid: widget.gid,
                           groupRef: data['group-ref'],
+                          parentGroupRef: tmp.docs[index - 1].reference,
                           rec: false);
                     },
                     separatorBuilder: (context, index) =>

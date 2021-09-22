@@ -6,6 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:zesti/models/zestigroup.dart';
 import 'package:zesti/services/database.dart';
 import 'package:zesti/theme/theme.dart';
+import 'package:zesti/views/home/home.dart';
 import 'package:zesti/views/home/social/create.dart';
 import 'package:zesti/views/home/social/social.dart';
 import 'package:zesti/widgets/groupavatar.dart';
@@ -28,6 +29,13 @@ class _ChooseState extends State<Choose> {
       appBar: AppBar(
         backgroundColor: CustomTheme.reallyBrightOrange,
         title: Text("Group Selection"),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => Home()),
+          ),
+        ),
       ),
       body: StreamBuilder(
           stream: DatabaseService(uid: user!.uid).getGroups(),

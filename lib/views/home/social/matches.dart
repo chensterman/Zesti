@@ -1,10 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:zesti/models/zestigroup.dart';
 import 'package:zesti/services/database.dart';
 import 'package:zesti/theme/theme.dart';
+import 'package:zesti/widgets/errors.dart';
 import 'package:zesti/widgets/groupavatar.dart';
 
 // Widget displaying the chat page for a specific match.
@@ -39,16 +41,23 @@ class _MatchesState extends State<Matches> {
                       itemBuilder: (context, index) {
                         // First index is reserved for text "MATCHES".
                         if (index == 0) {
-                          return Center(
-                              child: Text('MATCHES',
-                                  style: CustomTheme.textTheme.headline3));
+                          return Column(children: [
+                            Center(
+                                child: Text('MATCHES',
+                                    style: CustomTheme.textTheme.headline3)),
+                            tmp.docs.length == 0
+                                ? Empty(
+                                    reason:
+                                        "No matches  at the moment, but keep trying! For the discounts!")
+                                : Container(),
+                          ]);
                         }
 
                         // Remaining indeces used for matchsheet widgets.
                         Map<String, dynamic> data =
                             tmp.docs[index - 1].data() as Map<String, dynamic>;
-                        return matchSheet(
-                            user.uid, data['chat-ref'], data['group-ref']);
+                        return matchSheet(user.uid, data['chat-ref'],
+                            data['group-ref'], tmp.docs[index - 1].reference);
                       },
                       // A divider widgets is placed in between each matchsheet widget.
                       separatorBuilder: (context, index) =>
@@ -60,15 +69,15 @@ class _MatchesState extends State<Matches> {
   }
 
   // To display info about each match you have.
-  Widget matchSheet(
-      String uid, DocumentReference chatRef, DocumentReference groupRef) {
+  Widget matchSheet(String uid, DocumentReference chatRef,
+      DocumentReference groupRef, DocumentReference parentGroupRef) {
     // FutureBuilder used to retrieve profile photo of your match.
     return FutureBuilder(
         future: DatabaseService(uid: uid).getGroupInfo(groupRef),
         builder: (context, AsyncSnapshot<ZestiGroup> snapshot) {
           // On error.
           if (snapshot.hasError) {
-            return Text(snapshot.error.toString());
+            return NotFoundMatchSheet(doc: parentGroupRef);
             // On success.
           } else if (snapshot.connectionState == ConnectionState.done) {
             return Card(

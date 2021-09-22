@@ -46,7 +46,7 @@ class DatabaseService {
           'dating-interest': null,
           'photo-ref': null,
           'bio': null,
-          'zest-key': uuid.v4().substring(0, 8),
+          'zest-key': null,
         })
         .then((value) => print("User added"))
         .catchError((error) => print("Failed"));
@@ -117,11 +117,27 @@ class DatabaseService {
   }
 
   // Update user bio.
-  Future<void> updateBio(String? bio) async {
+  Future<void> updateBio(String bio) async {
     await userCollection
         .doc(uid)
         .update({'bio': bio})
         .then((value) => print("Bio Updated"))
+        .catchError((error) => print("Failed to update user: $error"));
+  }
+
+  // Check for existing ZestKey.
+  Future<bool> checkZestKey(String zestKey) async {
+    QuerySnapshot sameKey =
+        await userCollection.where('zest-key', isEqualTo: zestKey).get();
+    return sameKey.docs.length == 0 ? false : true;
+  }
+
+  // Update user ZestKey.
+  Future<void> updateZestKey(String zestKey) async {
+    await userCollection
+        .doc(uid)
+        .update({'zest-key': zestKey})
+        .then((value) => print("ZestKey Updated"))
         .catchError((error) => print("Failed to update user: $error"));
   }
 
@@ -286,7 +302,7 @@ class DatabaseService {
         .doc()
         .set({
           'timestamp': DateTime.now(),
-          'sender': uid,
+          'sender-ref': userCollection.doc(uid),
           'type': type,
           'content': content,
         })

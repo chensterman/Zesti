@@ -7,7 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:zesti/services/database.dart';
 import 'package:zesti/theme/theme.dart';
-import 'package:zesti/views/home/home.dart';
+import 'package:zesti/views/register/zestkey.dart';
 
 // Widget for profile picture upload and bio
 class Info extends StatefulWidget {
@@ -136,11 +136,12 @@ class _InfoState extends State<Info> {
                                           Navigator.push(
                                             context,
                                             MaterialPageRoute(
-                                                builder: (context) => Home()),
+                                                builder: (context) =>
+                                                    ZestKey()),
                                           );
                                         }
                                       },
-                                      child: Text("I'm Ready!"),
+                                      child: Text("Continue"),
                                     )),
                               ],
                             ),

@@ -4,6 +4,7 @@ import 'package:zesti/models/zestiuser.dart';
 import 'package:zesti/services/database.dart';
 import 'package:zesti/views/home/love/chat.dart';
 import 'package:zesti/theme/theme.dart';
+import 'package:zesti/widgets/errors.dart';
 
 // Widget displaying the chat page for a specific match.
 class Matches extends StatefulWidget {
@@ -45,9 +46,16 @@ class _MatchesState extends State<Matches> {
                       itemBuilder: (context, index) {
                         // First index is reserved for text "MATCHES".
                         if (index == 0) {
-                          return Center(
-                              child: Text('MATCHES',
-                                  style: CustomTheme.textTheme.headline3));
+                          return Column(children: [
+                            Center(
+                                child: Text('MATCHES',
+                                    style: CustomTheme.textTheme.headline3)),
+                            tmp.docs.length == 0
+                                ? Empty(
+                                    reason:
+                                        "No matches  at the moment, but keep trying! For the discounts!")
+                                : Container(),
+                          ]);
                         }
 
                         // Remaining indeces used for matchsheet widgets.

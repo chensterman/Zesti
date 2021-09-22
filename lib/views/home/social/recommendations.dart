@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:zesti/services/database.dart';
+import 'package:zesti/widgets/errors.dart';
 import 'package:zesti/widgets/groupcard.dart';
 import 'package:zesti/theme/theme.dart';
 
@@ -53,6 +54,11 @@ class _RecommendationsState extends State<Recommendations> {
                                     .generateGroupRecommendations(widget.gid);
                               },
                             ),
+                            tmp.docs.length == 0
+                                ? Empty(
+                                    reason:
+                                        "You've ran out of recommendations for the week! Make sure your group has more than one member!")
+                                : Container(),
                           ]),
                         );
                       }
@@ -63,6 +69,7 @@ class _RecommendationsState extends State<Recommendations> {
                       return GroupCard(
                           gid: widget.gid,
                           groupRef: data['group-ref'],
+                          parentGroupRef: tmp.docs[index - 1].reference,
                           rec: true);
                     },
                     // SizedBox used as separated between user cards.
