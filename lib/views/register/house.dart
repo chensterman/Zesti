@@ -57,68 +57,89 @@ class _HouseState extends State<House> {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: CustomTheme.lightTheme.primaryColor,
-        elevation: 0.0,
+        backgroundColor: CustomTheme.reallyBrightOrange,
       ),
-      body: Center(
-        child: Container(
-          width: size.width * CustomTheme.containerWidth,
-          padding: const EdgeInsets.all(20),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                SizedBox(
-                  width: double.infinity,
-                  height: size.height * 0.27,
-                  child: SvgPicture.asset("assets/harvard.svg",
-                      semanticsLabel: "Harvard"),
-                ),
-                SizedBox(height: 30.0),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0),
-                  child: Text(
-                    "Which house do you live in?",
-                    style: CustomTheme.lightTheme.textTheme.headline1,
+      body: Container(
+        decoration: CustomTheme.mode,
+        child: Center(
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: size.width * 0.05),
+            child: Form(
+              child: Center(
+                child: ListView(shrinkWrap: true, children: <Widget>[
+                  Center(
+                    child: Column(
+                      children: [
+                        Card(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          margin: EdgeInsets.all(8.0),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 32.0, horizontal: 32.0),
+                            child: Column(
+                              children: [
+                                SizedBox(
+                                  width: double.infinity,
+                                  height: size.height * 0.27,
+                                  child: SvgPicture.asset("assets/harvard.svg",
+                                      semanticsLabel: "Harvard"),
+                                ),
+                                SizedBox(height: 30.0),
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 8.0),
+                                  child: Text(
+                                    "Which house do you live in?",
+                                    style: CustomTheme.textTheme.headline1,
+                                  ),
+                                ),
+                                SizedBox(height: 20.0),
+                                DropdownButton<String>(
+                                  value: _house,
+                                  hint: Text('Select'),
+                                  style: TextStyle(color: Colors.black),
+                                  isExpanded: true,
+                                  items: _houseList.map((val) {
+                                    return DropdownMenuItem(
+                                        value: val, child: Text(val));
+                                  }).toList(),
+                                  onChanged: (String? val) {
+                                    if (val == null) {
+                                      print('Error');
+                                    } else {
+                                      setState(() {
+                                        _house = val;
+                                      });
+                                    }
+                                  },
+                                ),
+                                SizedBox(height: 20.0),
+                                RoundedButton(
+                                    text: 'Continue',
+                                    onPressed: () async {
+                                      if (user == null) {
+                                        print("Error");
+                                      } else {
+                                        await DatabaseService(uid: user.uid)
+                                            .updateHouse(_house.toLowerCase());
+                                      }
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) => Identity()),
+                                      );
+                                    }),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                SizedBox(height: 20.0),
-                DropdownButton<String>(
-                  value: _house,
-                  hint: Text('Select'),
-                  style: TextStyle(color: Colors.black),
-                  isExpanded: true,
-                  items: _houseList.map((val) {
-                    return DropdownMenuItem(value: val, child: Text(val));
-                  }).toList(),
-                  onChanged: (String? val) {
-                    if (val == null) {
-                      print('Error');
-                    } else {
-                      setState(() {
-                        _house = val;
-                      });
-                    }
-                  },
-                ),
-                SizedBox(height: 20.0),
-                RoundedButton(
-                    text: 'Continue',
-                    onPressed: () async {
-                      if (user == null) {
-                        print("Error");
-                      } else {
-                        await DatabaseService(uid: user.uid)
-                            .updateHouse(_house.toLowerCase());
-                      }
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => Identity()),
-                      );
-                    }),
-              ],
+                ]),
+              ),
             ),
           ),
         ),

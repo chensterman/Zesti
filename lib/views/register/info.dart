@@ -31,102 +31,127 @@ class _InfoState extends State<Info> {
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
     final user = Provider.of<User?>(context);
+
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: CustomTheme.lightTheme.primaryColor,
-        elevation: 0.0,
+        backgroundColor: CustomTheme.reallyBrightOrange,
       ),
-      body: Center(
-        child: Container(
-          padding: EdgeInsets.symmetric(
-              vertical: size.height * 0.05, horizontal: size.width * 0.1),
-          child: Form(
-            key: _formKey,
-            child: Center(
-              child: ListView(shrinkWrap: true, children: <Widget>[
-                Center(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 32.0),
-                        child: Text(
-                          "Upload your best picture...",
-                          style: CustomTheme.lightTheme.textTheme.headline1,
+      body: Container(
+        decoration: CustomTheme.mode,
+        child: Center(
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: size.width * 0.05),
+            child: Form(
+              child: Center(
+                child: ListView(shrinkWrap: true, children: <Widget>[
+                  Center(
+                    child: Column(
+                      children: [
+                        Card(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          margin: EdgeInsets.all(8.0),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 32.0, horizontal: 32.0),
+                            child: Column(
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 32.0),
+                                  child: Text(
+                                    "Upload your best picture...",
+                                    style: CustomTheme.textTheme.headline1,
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 64.0),
+                                  child: profileImage(),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 32.0),
+                                  child: Text(
+                                    "and say something cool!",
+                                    style: CustomTheme.textTheme.headline1,
+                                  ),
+                                ),
+                                TextFormField(
+                                  validator: (val) {
+                                    if (val == null || val.isEmpty) {
+                                      return "Please say something at least mildly entertaining.";
+                                    }
+                                  },
+                                  onChanged: (val) {
+                                    setState(() => bio = val);
+                                  },
+                                  decoration:
+                                      const InputDecoration(hintText: "Bio"),
+                                ),
+                                Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 16.0),
+                                    child: ElevatedButton(
+                                      style: ElevatedButton.styleFrom(
+                                          primary:
+                                              CustomTheme.reallyBrightOrange,
+                                          padding: const EdgeInsets.only(
+                                              left: 30,
+                                              top: 10,
+                                              right: 30,
+                                              bottom: 10),
+                                          shape: new RoundedRectangleBorder(
+                                              borderRadius:
+                                                  new BorderRadius.circular(
+                                                      30.0))),
+                                      onPressed: () async {
+                                        // Form validation:
+                                        //  Does nothing if validation is incorrect.
+                                        if (_formKey.currentState!.validate()) {
+                                          // Check for null user.
+                                          if (user != null) {
+                                            // Do not upload if dynamic imageFile is null.
+                                            if (imageFile != null) {
+                                              // Upload image and store the reference.
+                                              // Side note: no need to delete previous image from storage,
+                                              // as we assume this will always be the first (and only) time
+                                              // a user sees this page.
+                                              String storageRef =
+                                                  await uploadImage(
+                                                      imageFile, user.uid);
+                                              // Update user document with the reference.
+                                              await DatabaseService(
+                                                      uid: user.uid)
+                                                  .updatePhoto(storageRef);
+                                            }
+                                            // Update user document with bio.
+                                            await DatabaseService(uid: user.uid)
+                                                .updateBio(bio);
+                                            // Flag account as fully set up
+                                            await DatabaseService(uid: user.uid)
+                                                .updateAccountSetup();
+                                          }
+                                          // Navigate accordingly.
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                                builder: (context) => Home()),
+                                          );
+                                        }
+                                      },
+                                      child: Text("I'm Ready!"),
+                                    )),
+                              ],
+                            ),
+                          ),
                         ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 64.0),
-                        child: profileImage(),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 32.0),
-                        child: Text(
-                          "and say something cool!",
-                          style: CustomTheme.lightTheme.textTheme.headline1,
-                        ),
-                      ),
-                      TextFormField(
-                        validator: (val) {
-                          if (val == null || val.isEmpty) {
-                            return "Please say something at least mildly entertaining.";
-                          }
-                        },
-                        onChanged: (val) {
-                          setState(() => bio = val);
-                        },
-                        decoration: const InputDecoration(hintText: "Bio"),
-                      ),
-                      Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 16.0),
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                                primary: CustomTheme.lightTheme.primaryColor,
-                                padding: const EdgeInsets.only(
-                                    left: 30, top: 10, right: 30, bottom: 10),
-                                shape: new RoundedRectangleBorder(
-                                    borderRadius:
-                                        new BorderRadius.circular(30.0))),
-                            onPressed: () async {
-                              // Form validation:
-                              //  Does nothing if validation is incorrect.
-                              if (_formKey.currentState!.validate()) {
-                                // Check for null user.
-                                if (user != null) {
-                                  // Do not upload if dynamic imageFile is null.
-                                  if (imageFile != null) {
-                                    // Upload image and store the reference.
-                                    // Side note: no need to delete previous image from storage,
-                                    // as we assume this will always be the first (and only) time
-                                    // a user sees this page.
-                                    String storageRef =
-                                        await uploadImage(imageFile, user.uid);
-                                    // Update user document with the reference.
-                                    await DatabaseService(uid: user.uid)
-                                        .updatePhoto(storageRef);
-                                  }
-                                  // Update user document with bio.
-                                  await DatabaseService(uid: user.uid)
-                                      .updateBio(bio);
-                                  // Flag account as fully set up
-                                  await DatabaseService(uid: user.uid)
-                                      .updateAccountSetup();
-                                }
-                                // Navigate accordingly.
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => Home()),
-                                );
-                              }
-                            },
-                            child: Text("I'm Ready!"),
-                          )),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-              ]),
+                ]),
+              ),
             ),
           ),
         ),

@@ -43,22 +43,7 @@ class _ChatState extends State<Chat> {
       // endDrawer is the restaurant display for discounts.
       endDrawer: Drawer(
         child: Container(
-          decoration: BoxDecoration(
-            // Box decoration takes a gradient.
-            gradient: LinearGradient(
-              // Where the linear gradient begins and ends.
-              begin: Alignment.topRight,
-              end: Alignment.bottomLeft,
-
-              // Add one stop for each color. Stops should increase from 0 to 1.
-              stops: [0.3, 0.9],
-              colors: [
-                // Colors are easy thanks to Flutter's Colors class.
-                CustomTheme.lightTheme.primaryColor,
-                Colors.white,
-              ],
-            ),
-          ),
+          decoration: CustomTheme.standard,
           child: ListView(
             padding: EdgeInsets.zero,
             children: <Widget>[
@@ -76,8 +61,10 @@ class _ChatState extends State<Chat> {
                   ),
                 ),
               ),
-              dealCard("assets/spyce.jpg", "SPYCE",
+              dealCard("assets/amorino.jpg", "AMORINO",
                   "20% off of the Spring and Summer menu!"),
+              dealCard("assets/grendels.jpg", "GRENDEL'S DEN",
+                  "Free \$20 gift card for each visit (max 3)!"),
               dealCard("assets/zinnekens.jpg", "ZINNEKEN'S",
                   "20% off of any purchase!"),
               dealCard("assets/maharaja.jpg", "THE MAHARAJA",
@@ -91,13 +78,13 @@ class _ChatState extends State<Chat> {
           icon: Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),
-        backgroundColor: CustomTheme.lightTheme.primaryColor,
+        backgroundColor: CustomTheme.reallyBrightOrange,
         elevation: 0.0,
         actions: [
           IconButton(
             icon: Icon(Icons.cancel),
             onPressed: () {},
-            color: Colors.red,
+            color: Colors.orange[300],
           ),
           Builder(
             builder: (context) => IconButton(
@@ -111,6 +98,15 @@ class _ChatState extends State<Chat> {
         ],
         title: Row(
           children: [
+            Container(
+              width: 40.0,
+              height: 40.0,
+              alignment: Alignment.center,
+              decoration: new BoxDecoration(
+                image: DecorationImage(
+                    image: AssetImage('assets/test.png'), fit: BoxFit.fill),
+              ),
+            ),
             CircleAvatar(
               radius: 20.0,
               backgroundImage: widget.profpic,
@@ -189,7 +185,7 @@ class _ChatState extends State<Chat> {
     return Card(
       margin: EdgeInsets.all(16.0),
       child: InkWell(
-        splashColor: CustomTheme.lightTheme.primaryColor,
+        splashColor: CustomTheme.reallyBrightOrange,
         onTap: () {
           Navigator.push(
             context,

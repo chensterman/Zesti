@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:zesti/widgets/usercard.dart';
-import 'package:zesti/models/zestiuser.dart';
+import 'package:zesti/theme/theme.dart';
 import 'package:zesti/services/database.dart';
 
 // Displays list of recommended matches.
@@ -47,8 +47,10 @@ class _RecommendationsState extends State<Recommendations> {
                       if (index == 0) {
                         return Center(
                           child: Column(children: [
-                            Text('RECOMMENDATIONS',
-                                style: TextStyle(color: Colors.orange[900])),
+                            Padding(
+                                padding: EdgeInsets.only(top: 8.0),
+                                child: Text('RECOMMENDATIONS',
+                                    style: CustomTheme.textTheme.headline3)),
                             TextButton(
                               child: Text('Generate'),
                               onPressed: () async {

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:zesti/widgets/usercard.dart';
-import 'package:zesti/models/zestiuser.dart';
+import 'package:zesti/theme/theme.dart';
 import 'package:zesti/services/database.dart';
 
 // Displays list of incoming match requests.
@@ -45,8 +45,10 @@ class _RequestsState extends State<Requests> {
                       // First index reserved for text "INCOMING REQUESTS".
                       if (index == 0) {
                         return Center(
-                            child: Text('INCOMING REQUESTS',
-                                style: TextStyle(color: Colors.orange[900])));
+                            child: Padding(
+                                padding: EdgeInsets.only(top: 8.0),
+                                child: Text('INCOMING REQUESTS',
+                                    style: CustomTheme.textTheme.headline3)));
                       }
                       Map<String, dynamic> data =
                           tmp.docs[index - 1].data() as Map<String, dynamic>;

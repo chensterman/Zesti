@@ -27,7 +27,7 @@ class _CreateGroupState extends State<CreateGroup> {
     Size size = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: CustomTheme.lightTheme.primaryColor,
+        backgroundColor: CustomTheme.reallyBrightOrange,
         title: Text("Group Creation"),
       ),
       body: Container(
@@ -44,7 +44,7 @@ class _CreateGroupState extends State<CreateGroup> {
                       padding: const EdgeInsets.symmetric(vertical: 8.0),
                       child: Text(
                         "Enter your group name:",
-                        style: CustomTheme.lightTheme.textTheme.headline1,
+                        style: CustomTheme.textTheme.headline1,
                       ),
                     ),
                     TextFormField(
@@ -63,7 +63,7 @@ class _CreateGroupState extends State<CreateGroup> {
                       padding: const EdgeInsets.symmetric(vertical: 8.0),
                       child: Text(
                         "Enter a fun fact:",
-                        style: CustomTheme.lightTheme.textTheme.headline1,
+                        style: CustomTheme.textTheme.headline1,
                       ),
                     ),
                     TextFormField(

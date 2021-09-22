@@ -49,13 +49,14 @@ class _GroupState extends State<Group> {
                     ),
                     margin: EdgeInsets.all(8.0),
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 32.0, horizontal: 32.0),
                       child: Column(children: [
                         Padding(
                           padding: const EdgeInsets.symmetric(vertical: 8.0),
                           child: Text(
                             "Change group tagline:",
-                            style: CustomTheme.lightTheme.textTheme.headline1,
+                            style: CustomTheme.textTheme.headline1,
                           ),
                         ),
                         TextFormField(
@@ -84,7 +85,7 @@ class _GroupState extends State<Group> {
                           padding: const EdgeInsets.symmetric(vertical: 8.0),
                           child: Text(
                             "Change group name:",
-                            style: CustomTheme.lightTheme.textTheme.headline1,
+                            style: CustomTheme.textTheme.headline1,
                           ),
                         ),
                         TextFormField(
@@ -112,7 +113,7 @@ class _GroupState extends State<Group> {
                           padding: const EdgeInsets.symmetric(vertical: 8.0),
                           child: Text(
                             "Add a user:",
-                            style: CustomTheme.lightTheme.textTheme.headline1,
+                            style: CustomTheme.textTheme.headline1,
                           ),
                         ),
                         TextFormField(
@@ -130,10 +131,8 @@ class _GroupState extends State<Group> {
                         RoundedButton(
                             text: 'Add!',
                             onPressed: () async {
-                              if (_formKey.currentState!.validate()) {
-                                await DatabaseService(uid: user.uid)
-                                    .addUserToGroup(widget.gid, zestKey);
-                              }
+                              await DatabaseService(uid: user.uid)
+                                  .addUserToGroup(widget.gid, zestKey);
                             }),
                         SizedBox(height: 20.0),
                         RoundedButton(
@@ -151,6 +150,7 @@ class _GroupState extends State<Group> {
                       ]),
                     ),
                   ),
+                  SizedBox(height: 50.0),
                 ],
               ),
             ),

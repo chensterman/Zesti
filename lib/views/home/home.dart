@@ -19,22 +19,7 @@ class Home extends StatelessWidget {
       body: Container(
         padding: EdgeInsets.symmetric(
             vertical: size.height * 0.1, horizontal: size.width * 0.1),
-        decoration: BoxDecoration(
-          // Box decoration takes a gradient
-          gradient: LinearGradient(
-            // Where the linear gradient begins and ends
-            begin: Alignment.topRight,
-            end: Alignment.bottomLeft,
-
-            // Add one stop for each color. Stops should increase from 0 to 1
-            stops: [0.3, 0.9],
-            colors: [
-              // Colors are easy thanks to Flutter's Colors class.
-              CustomTheme.lightTheme.primaryColor,
-              CustomTheme.lightTheme.backgroundColor,
-            ],
-          ),
-        ),
+        decoration: CustomTheme.standard,
         child: Center(
           child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -50,13 +35,11 @@ class Home extends StatelessWidget {
                       TextButton(
                         child: Text('Edit Profile'),
                         onPressed: () {
-                          /*
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => Profile(uid: user!.uid)),
-                          );
-                          */
+                          // Navigator.push(
+                          //   context,
+                          //   MaterialPageRoute(
+                          //       builder: (context) => Profile()),
+                          // );
                         },
                       ),
                       TextButton(

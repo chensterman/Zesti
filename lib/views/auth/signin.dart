@@ -28,23 +28,9 @@ class _SignInState extends State<SignIn> {
     return Scaffold(
       body: Container(
         padding: EdgeInsets.symmetric(
-            vertical: size.height * 0.1, horizontal: size.width * 0.1),
-        decoration: BoxDecoration(
-          // Box decoration takes a gradient
-          gradient: LinearGradient(
-            // Where the linear gradient begins and ends
-            begin: Alignment.topRight,
-            end: Alignment.bottomLeft,
-
-            // Add one stop for each color. Stops should increase from 0 to 1
-            stops: [0.3, 0.9],
-            colors: [
-              // Colors are easy thanks to Flutter's Colors class.
-              CustomTheme.lightTheme.primaryColor,
-              CustomTheme.lightTheme.backgroundColor,
-            ],
-          ),
-        ),
+            vertical: size.height * CustomTheme.paddingMultiplier,
+            horizontal: size.width * CustomTheme.paddingMultiplier),
+        decoration: CustomTheme.standard,
         child: Form(
           key: _formKey,
           child: Center(
@@ -54,11 +40,7 @@ class _SignInState extends State<SignIn> {
                 Center(
                   child: Column(
                     children: <Widget>[
-                      Text('Login',
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 32.0,
-                              color: Colors.white)),
+                      Text('Login', style: CustomTheme.textTheme.headline1),
                       SizedBox(height: size.height * 0.05),
                       TextFieldContainer(
                         validator: (val) =>
@@ -108,7 +90,7 @@ class _SignInState extends State<SignIn> {
                           children: <Widget>[
                             Text(
                               'Need an account ? ',
-                              style: TextStyle(fontSize: 16.0),
+                              style: CustomTheme.textTheme.bodyText1,
                             ),
                             GestureDetector(
                                 onTap: () {
@@ -119,9 +101,7 @@ class _SignInState extends State<SignIn> {
                                   );
                                 },
                                 child: Text('Sign Up.',
-                                    style: TextStyle(
-                                      color: Colors.orange[900],
-                                    ))),
+                                    style: CustomTheme.textTheme.bodyText2)),
                           ]),
                       Text(
                         error,

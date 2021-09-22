@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:zesti/services/database.dart';
 import 'package:zesti/widgets/groupcard.dart';
+import 'package:zesti/theme/theme.dart';
 
 // Displays list of recommended matches.
 class Recommendations extends StatefulWidget {
@@ -41,8 +42,10 @@ class _RecommendationsState extends State<Recommendations> {
                       if (index == 0) {
                         return Center(
                           child: Column(children: [
-                            Text('RECOMMENDATIONS',
-                                style: TextStyle(color: Colors.orange[900])),
+                            Padding(
+                                padding: EdgeInsets.only(top: 8.0),
+                                child: Text('RECOMMENDATIONS',
+                                    style: CustomTheme.textTheme.headline3)),
                             TextButton(
                               child: Text('Generate'),
                               onPressed: () async {

@@ -37,32 +37,17 @@ class _SocialState extends State<Social> {
     // Main page widget (contains nav bar pages as well)
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: CustomTheme.lightTheme.primaryColor,
+        backgroundColor: CustomTheme.reallyBrightOrange,
         title: Text("Zesti Social"),
       ),
       body: Container(
-        decoration: BoxDecoration(
-          // Box decoration takes a gradient
-          gradient: LinearGradient(
-            // Where the linear gradient begins and ends
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-
-            // Add one stop for each color. Stops should increase from 0 to 1
-            stops: [0.2, 0.9],
-            colors: [
-              // Colors are easy thanks to Flutter's Colors class.
-              CustomTheme.lightTheme.cardColor,
-              CustomTheme.lightTheme.primaryColor,
-            ],
-          ),
-        ),
+        decoration: CustomTheme.mode,
         child: Center(
           child: _widgetSet.elementAt(_selectedIndex),
         ),
       ),
       bottomNavigationBar: CurvedNavigationBar(
-        backgroundColor: CustomTheme.lightTheme.primaryColor,
+        backgroundColor: CustomTheme.reallyBrightOrange,
         items: <Widget>[
           Icon(Icons.groups),
           Icon(Icons.hourglass_top),

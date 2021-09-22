@@ -26,7 +26,7 @@ class _ChooseState extends State<Choose> {
     final size = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: CustomTheme.lightTheme.primaryColor,
+        backgroundColor: CustomTheme.reallyBrightOrange,
         title: Text("Group Selection"),
       ),
       body: StreamBuilder(
@@ -38,22 +38,7 @@ class _ChooseState extends State<Choose> {
               return Container(
                   width: size.width,
                   height: size.height,
-                  decoration: BoxDecoration(
-                    // Box decoration takes a gradient
-                    gradient: LinearGradient(
-                      // Where the linear gradient begins and ends
-                      begin: Alignment.topRight,
-                      end: Alignment.bottomLeft,
-
-                      // Add one stop for each color. Stops should increase from 0 to 1
-                      stops: [0.3, 0.9],
-                      colors: [
-                        // Colors are easy thanks to Flutter's Colors class.
-                        CustomTheme.lightTheme.primaryColorDark,
-                        CustomTheme.lightTheme.cardColor,
-                      ],
-                    ),
-                  ),
+                  decoration: CustomTheme.mode,
                   child: ListView.separated(
                     padding: EdgeInsets.all(16.0),
                     cacheExtent: size.height * 0.7 * 3,
@@ -90,7 +75,7 @@ class _ChooseState extends State<Choose> {
       ),
       margin: EdgeInsets.all(16.0),
       child: InkWell(
-        splashColor: CustomTheme.lightTheme.primaryColor,
+        splashColor: CustomTheme.reallyBrightOrange,
         onTap: () {
           Navigator.push(
             context,
@@ -121,9 +106,9 @@ class _ChooseState extends State<Choose> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
       ),
-      margin: EdgeInsets.all(8.0),
+      margin: EdgeInsets.all(16.0),
       child: InkWell(
-        splashColor: CustomTheme.lightTheme.primaryColor,
+        splashColor: CustomTheme.reallyBrightOrange,
         onTap: () {
           Navigator.push(
             context,

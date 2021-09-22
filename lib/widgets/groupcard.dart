@@ -331,7 +331,13 @@ class GroupCardDummy extends StatelessWidget {
           }
           // On loading, return an empty container.
           else {
-            return Container();
+            return Container(
+                height: size.height * 0.7,
+                width: size.width * 0.95,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Center(child: CircularProgressIndicator()));
           }
         });
   }
@@ -413,7 +419,7 @@ class _GroupUsersState extends State<GroupUsers> {
     final size = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: CustomTheme.lightTheme.primaryColor,
+        backgroundColor: CustomTheme.reallyBrightOrange,
         title: Text(widget.groupName),
       ),
       body: StreamBuilder(
@@ -435,7 +441,7 @@ class _GroupUsersState extends State<GroupUsers> {
                       stops: [0.3, 0.9],
                       colors: [
                         // Colors are easy thanks to Flutter's Colors class.
-                        CustomTheme.lightTheme.primaryColor,
+                        CustomTheme.reallyBrightOrange,
                         Colors.white,
                       ],
                     ),

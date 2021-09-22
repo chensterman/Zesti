@@ -28,7 +28,7 @@ class _RedeemState extends State<Redeem> {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: CustomTheme.lightTheme.primaryColor,
+        backgroundColor: CustomTheme.reallyBrightOrange,
       ),
       body: Center(
         child: Container(
@@ -61,8 +61,8 @@ class _RedeemState extends State<Redeem> {
                     onChanged: (val) {
                       setState(() => code = val);
                     },
-                    decoration:
-                        const InputDecoration(hintText: "Enter code here")),
+                    decoration: const InputDecoration(
+                        hintText: "Enter staff code here")),
                 SizedBox(height: 20.0),
                 RoundedButton(text: 'Redeem', onPressed: () {}),
                 SizedBox(height: 20.0),
