@@ -18,25 +18,47 @@ class CustomTheme {
   // Text theme.
   static TextTheme textTheme = TextTheme(
     headline1: TextStyle(
-        color: CustomTheme.reallyBrightOrange,
-        fontSize: 30,
-        fontWeight: FontWeight.bold,
-        fontFamily: 'Jost'),
+      color: CustomTheme.reallyBrightOrange,
+      fontSize: 30,
+      fontWeight: FontWeight.bold,
+      fontFamily: 'Jost',
+      shadows: <Shadow>[
+        Shadow(
+          offset: Offset(2.0, 2.0),
+          blurRadius: 3.0,
+          color: Colors.grey.shade400,
+        ),
+      ],
+    ),
     headline2: TextStyle(
         color: CustomTheme.blackText,
         fontSize: 30,
         fontWeight: FontWeight.bold,
         fontFamily: 'Jost'),
     headline3: TextStyle(
-        color: CustomTheme.reallyBrightOrange,
-        fontSize: 20,
-        fontWeight: FontWeight.bold,
-        fontFamily: 'Jost'),
+      color: CustomTheme.reallyBrightOrange,
+      fontSize: 20,
+      fontWeight: FontWeight.bold,
+      fontFamily: 'Jost',
+      shadows: <Shadow>[
+        Shadow(
+          offset: Offset(2.0, 2.0),
+          blurRadius: 3.0,
+          color: Colors.grey.shade400,
+        ),
+      ],
+    ),
     bodyText1: TextStyle(color: Colors.black, fontSize: 16, fontFamily: 'Hind'),
     bodyText2: TextStyle(
         color: CustomTheme.reallyBrightOrange,
         fontSize: 16,
         fontFamily: 'Hind'),
+    subtitle1: TextStyle(
+        color: Colors.white,
+        fontSize: 24,
+        fontWeight: FontWeight.bold,
+        fontFamily: 'Hind'),
+    subtitle2: TextStyle(color: Colors.white, fontSize: 20, fontFamily: 'Hind'),
   );
 
   // Container gradients.

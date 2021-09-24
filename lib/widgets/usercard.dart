@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:zesti/models/zestiuser.dart';
 import 'package:zesti/services/database.dart';
+import 'package:zesti/theme/theme.dart';
 
 // Widget displaying user cards to make decisions on.
 class UserCard extends StatelessWidget {
@@ -65,7 +66,7 @@ class UserCard extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.end,
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          buildUserInfo(snapshot.data!),
+                          Flexible(child: buildUserInfo(snapshot.data!)),
                           // If "rec" is true, we display user cards meant for match recommendations.
                           // Otherwise, the user card is for incoming match requests. They look slightly different
                           // And the buttons call different database functions.
@@ -131,22 +132,18 @@ class UserCard extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            '${userOnCard.first}, ${userOnCard.age}',
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 18,
-            ),
+            '${userOnCard.first}, ${userOnCard.year}',
+            style: CustomTheme.textTheme.subtitle1,
           ),
           SizedBox(height: 8),
           Text(
             userOnCard.bio,
-            style: TextStyle(color: Colors.white),
+            style: CustomTheme.textTheme.subtitle2,
           ),
           SizedBox(height: 4),
           Text(
             '${userOnCard.house} House',
-            style: TextStyle(color: Colors.white),
+            style: CustomTheme.textTheme.subtitle2,
           )
         ],
       ),
@@ -212,7 +209,7 @@ class UserCardDummy extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.end,
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          buildUserInfo(snapshot.data!),
+                          Flexible(child: buildUserInfo(snapshot.data!)),
                         ],
                       ),
                     ),
@@ -237,23 +234,17 @@ class UserCardDummy extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            '${userOnCard.first}, ${userOnCard.age}',
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 18,
-            ),
-          ),
+          Text('${userOnCard.first}, ${userOnCard.year}',
+              style: CustomTheme.textTheme.subtitle1),
           SizedBox(height: 8),
           Text(
             userOnCard.bio,
-            style: TextStyle(color: Colors.white),
+            style: CustomTheme.textTheme.subtitle2,
           ),
           SizedBox(height: 4),
           Text(
             '${userOnCard.house} House',
-            style: TextStyle(color: Colors.white),
+            style: CustomTheme.textTheme.subtitle2,
           )
         ],
       ),

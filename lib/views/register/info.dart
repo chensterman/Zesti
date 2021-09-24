@@ -86,6 +86,9 @@ class _InfoState extends State<Info> {
                                     if (val == null || val.isEmpty) {
                                       return "Please say something at least mildly entertaining.";
                                     }
+                                    if (val.length > 140) {
+                                      return "Please enter a shorter bio (140 characters max).";
+                                    }
                                   },
                                   onChanged: (val) {
                                     setState(() => bio = val);

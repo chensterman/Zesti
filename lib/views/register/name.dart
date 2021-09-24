@@ -64,6 +64,9 @@ class _NameState extends State<Name> {
                                     if (val == null || val.isEmpty) {
                                       return "Please enter a first name.";
                                     }
+                                    if (val.length > 50) {
+                                      return "Really sorry - could you shorten your name a bit? :(";
+                                    }
                                   },
                                   onChanged: (val) {
                                     setState(() => first = val);
@@ -76,6 +79,9 @@ class _NameState extends State<Name> {
                                     validator: (val) {
                                       if (val == null || val.isEmpty) {
                                         return "Please enter a last name.";
+                                      }
+                                      if (val.length > 50) {
+                                        return "Really sorry - could you shorten your name a bit? :(";
                                       }
                                     },
                                     onChanged: (val) {

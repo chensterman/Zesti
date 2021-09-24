@@ -15,9 +15,9 @@ class House extends StatefulWidget {
 
 class _HouseState extends State<House> {
   final _formKey = GlobalKey<FormState>();
-  dynamic _house;
 
   // List of Harvard houses
+  dynamic _house;
   List<String> _houseList = [
     'Apley Court',
     'Canaday',
@@ -48,6 +48,15 @@ class _HouseState extends State<House> {
     'Pfohozeimer',
     'Quincy',
     'Winthrop',
+  ];
+
+  // List of years
+  dynamic _year;
+  List<String> _yearList = [
+    '\'22',
+    '\'23',
+    '\'24',
+    '\'25',
   ];
 
   @override
@@ -119,12 +128,41 @@ class _HouseState extends State<House> {
                                   },
                                 ),
                                 SizedBox(height: 20.0),
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 8.0),
+                                  child: Text(
+                                    "Which year do graduate?",
+                                    style: CustomTheme.textTheme.headline2,
+                                  ),
+                                ),
+                                SizedBox(height: 20.0),
+                                DropdownButton<String>(
+                                  value: _year,
+                                  hint: Text('Select'),
+                                  style: TextStyle(color: Colors.black),
+                                  isExpanded: true,
+                                  items: _yearList.map((val) {
+                                    return DropdownMenuItem(
+                                        value: val, child: Text(val));
+                                  }).toList(),
+                                  onChanged: (String? val) {
+                                    if (val != null) {
+                                      setState(() {
+                                        _year = val;
+                                      });
+                                    }
+                                  },
+                                ),
+                                SizedBox(height: 20.0),
                                 RoundedButton(
                                     text: 'Continue',
                                     onPressed: () async {
-                                      if (_house != null) {
+                                      if (_house != null && _year != null) {
                                         await DatabaseService(uid: user!.uid)
-                                            .updateHouse(_house.toLowerCase());
+                                            .updateHouse(_house);
+                                        await DatabaseService(uid: user.uid)
+                                            .updateYear(_year);
                                         Navigator.push(
                                           context,
                                           MaterialPageRoute(

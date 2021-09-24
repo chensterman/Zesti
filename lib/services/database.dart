@@ -46,6 +46,7 @@ class DatabaseService {
           'dating-interest': null,
           'photo-ref': null,
           'bio': null,
+          'year': null,
           'zest-key': null,
         })
         .then((value) => print("User added"))
@@ -70,9 +71,7 @@ class DatabaseService {
   }
 
   // Update user birthday.
-  Future<void> updateAge(DateTime birthday) async {
-    Duration difference = DateTime.now().difference(birthday);
-    num age = difference.inDays ~/ 365;
+  Future<void> updateAge(num age) async {
     await userCollection
         .doc(uid)
         .update({'age': age})
@@ -86,6 +85,15 @@ class DatabaseService {
         .doc(uid)
         .update({'house': house})
         .then((value) => print("House Updated"))
+        .catchError((error) => print("Failed to update user: $error"));
+  }
+
+  // Update user year.
+  Future<void> updateYear(String year) async {
+    await userCollection
+        .doc(uid)
+        .update({'year': year})
+        .then((value) => print("Year Updated"))
         .catchError((error) => print("Failed to update user: $error"));
   }
 
@@ -291,6 +299,8 @@ class DatabaseService {
       photoURL: userInfo['photo-ref'],
       profPic: await _getPhoto(userInfo['photo-ref']),
       age: userInfo['age'],
+      year: userInfo['year'],
+      zestKey: userInfo['zest-key'],
     );
   }
 

@@ -13,6 +13,8 @@ class ZestiUser {
   final String photoURL;
   final ImageProvider<Object> profPic;
   final int age;
+  final String year;
+  final String zestKey;
 
   ZestiUser({
     required this.uid,
@@ -25,5 +27,7 @@ class ZestiUser {
     required this.photoURL,
     required this.profPic,
     required this.age,
+    required this.year,
+    required this.zestKey,
   });
 }

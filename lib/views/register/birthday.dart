@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:zesti/theme/theme.dart';
 import 'package:zesti/services/database.dart';
 import 'package:zesti/views/register/house.dart';
+import 'package:zesti/widgets/dialogs.dart';
 
 class NumberLine extends StatelessWidget {
   NumberLine({@required this.width, @required this.text});
@@ -143,9 +144,7 @@ class _BirthdayState extends State<Birthday> {
                                                   picked = true;
                                                 });
                                               }, onConfirm: (date) {
-                                                print('confirm $date');
                                                 birthday = date;
-                                                print(birthday);
                                               },
                                                   currentTime: DateTime.now(),
                                                   locale: LocaleType.en);
@@ -178,16 +177,28 @@ class _BirthdayState extends State<Birthday> {
                                             onPressed: () async {
                                               // Check for non-user
                                               if (picked) {
-                                                await DatabaseService(
-                                                        uid: user!.uid)
-                                                    .updateAge(birthday);
-                                                // Push to House form
-                                                Navigator.push(
-                                                  context,
-                                                  MaterialPageRoute(
+                                                Duration difference =
+                                                    DateTime.now()
+                                                        .difference(birthday);
+                                                num age =
+                                                    difference.inDays ~/ 365;
+                                                if (age >= 18) {
+                                                  await DatabaseService(
+                                                          uid: user!.uid)
+                                                      .updateAge(age);
+                                                  // Push to House form
+                                                  Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                        builder: (context) =>
+                                                            House()),
+                                                  );
+                                                } else {
+                                                  showDialog(
+                                                      context: context,
                                                       builder: (context) =>
-                                                          House()),
-                                                );
+                                                          ageDialog(context));
+                                                }
                                               }
                                             },
                                             child: Text("Confirm"),

@@ -109,7 +109,7 @@ class GroupCard extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.end,
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          buildGroupInfo(snapshot.data!),
+                          Flexible(child: buildGroupInfo(snapshot.data!)),
                           // If "rec" is true, we display user cards meant for match recommendations.
                           // Otherwise, the user card is for incoming match requests. They look slightly different
                           // And the buttons call different database functions.
@@ -199,21 +199,17 @@ class GroupCard extends StatelessWidget {
         children: [
           Text(
             '${groupOnCard.groupName}',
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 18,
-            ),
+            style: CustomTheme.textTheme.subtitle1,
           ),
           SizedBox(height: 8),
           Text(
             groupOnCard.funFact,
-            style: TextStyle(color: Colors.white),
+            style: CustomTheme.textTheme.subtitle2,
           ),
           SizedBox(height: 4),
           Text(
             '',
-            style: TextStyle(color: Colors.white),
+            style: CustomTheme.textTheme.subtitle2,
           )
         ],
       ),
@@ -314,7 +310,7 @@ class GroupCardDummy extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.end,
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          buildGroupInfo(snapshot.data!),
+                          Flexible(child: buildGroupInfo(snapshot.data!)),
                         ],
                       ),
                     ),
@@ -371,21 +367,17 @@ class GroupCardDummy extends StatelessWidget {
         children: [
           Text(
             '${groupOnCard.groupName}',
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 18,
-            ),
+            style: CustomTheme.textTheme.subtitle1,
           ),
           SizedBox(height: 8),
           Text(
             groupOnCard.funFact,
-            style: TextStyle(color: Colors.white),
+            style: CustomTheme.textTheme.subtitle2,
           ),
           SizedBox(height: 4),
           Text(
             '',
-            style: TextStyle(color: Colors.white),
+            style: CustomTheme.textTheme.subtitle2,
           )
         ],
       ),
