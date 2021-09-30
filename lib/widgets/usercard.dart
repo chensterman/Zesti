@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import 'package:zesti/models/zestiuser.dart';
 import 'package:zesti/services/database.dart';
@@ -94,16 +95,21 @@ class UserCard extends StatelessWidget {
                               child: Icon(rec ? Icons.send : Icons.check_circle,
                                   color: rec ? Colors.blue : Colors.green,
                                   size: 64.0),
-                              onTap: () async {
-                                if (rec) {
-                                  await DatabaseService(uid: user.uid)
-                                      .outgoingInteraction(
-                                          snapshot.data!.uid, true);
-                                } else {
-                                  await DatabaseService(uid: user.uid)
-                                      .incomingInteraction(
-                                          snapshot.data!.uid, true);
-                                }
+                              onTap: () {
+                                showDialog(
+                                    context: context,
+                                    barrierDismissible: false,
+                                    builder: (context) => sendDialog(
+                                        context,
+                                        rec
+                                            ? "Match request sent to " +
+                                                snapshot.data!.first +
+                                                "!"
+                                            : "You matched with " +
+                                                snapshot.data!.first +
+                                                "!",
+                                        user.uid,
+                                        snapshot.data!.uid));
                               },
                             ),
                           ),
@@ -147,6 +153,35 @@ class UserCard extends StatelessWidget {
           )
         ],
       ),
+    );
+  }
+
+  Widget sendDialog(
+      BuildContext context, String message, String uid, String youid) {
+    return AlertDialog(
+      title: Text(message),
+      content: SingleChildScrollView(
+        child: SizedBox(
+          width: double.infinity,
+          height: 150.0,
+          child: rec
+              ? SvgPicture.asset("assets/phone.svg", semanticsLabel: "Request")
+              : SvgPicture.asset("assets/match.svg", semanticsLabel: "Match"),
+        ),
+      ),
+      actions: <Widget>[
+        TextButton(
+          child: Text("Nice!", style: CustomTheme.textTheme.headline2),
+          onPressed: () async {
+            if (rec) {
+              await DatabaseService(uid: uid).outgoingInteraction(youid, true);
+            } else {
+              await DatabaseService(uid: uid).incomingInteraction(youid, true);
+            }
+            Navigator.of(context).pop();
+          },
+        ),
+      ],
     );
   }
 }

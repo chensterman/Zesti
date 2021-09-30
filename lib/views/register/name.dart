@@ -80,8 +80,8 @@ class _NameState extends State<Name> {
                                       if (val == null || val.isEmpty) {
                                         return "Please enter a last name.";
                                       }
-                                      if (val.length > 50) {
-                                        return "Really sorry - could you shorten your name a bit? :(";
+                                      if (val.length > 140) {
+                                        return "Please enter a shorter bio (140 characters max).";
                                       }
                                     },
                                     onChanged: (val) {

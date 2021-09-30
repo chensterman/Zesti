@@ -97,6 +97,7 @@ class _MatchesState extends State<Matches> {
                     MaterialPageRoute(
                         builder: (context) => Chat(
                             uid: uid,
+                            youid: userRef.id,
                             chatRef: chatRef,
                             name: snapshot.data!.first,
                             profpic: snapshot.data!.profPic)),

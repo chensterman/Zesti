@@ -320,6 +320,12 @@ class DatabaseService {
         .catchError((error) => print("Failed to send message: $error"));
   }
 
+  // Unmatch with a user.
+  Future<void> unmatch(String youid, String chatRef) async {
+    await userCollection.doc(uid).collection("matched").doc(chatRef).delete();
+    await userCollection.doc(youid).collection("matched").doc(chatRef).delete();
+  }
+
   // Helper function for converting a user DocumentReference to a dart map.
   Future<Map<String, dynamic>> _userRefToMap(DocumentReference userRef) async {
     // Get snapshot of user doc reference.
@@ -635,7 +641,7 @@ class DatabaseService {
   }
 
   // Handles when a user attemps to add a user to the group.
-  Future<void> addUserToGroup(String gid, String zestKey) async {
+  Future<String> addUserToGroup(String gid, String zestKey) async {
     // Initialize timestamp for the match.
     DateTime ts = DateTime.now();
 
@@ -644,8 +650,7 @@ class DatabaseService {
         await groupCollection.doc(gid).collection("users").get();
     // Check for a capacity of over 4.
     if (cap.docs.length >= 4) {
-      print("Full group.");
-      return;
+      return "This group is full.";
     }
 
     // Check for the zest-key already present in the group.
@@ -655,8 +660,7 @@ class DatabaseService {
         .where('zest-key', isEqualTo: zestKey)
         .get();
     if (hit.docs.length > 0) {
-      print("User already added.");
-      return;
+      return "This user already exists in the group.";
     }
 
     // Search for the user by unique zest-key.
@@ -679,7 +683,7 @@ class DatabaseService {
       'group-ref': groupCollection.doc(gid),
       'timestamp': ts,
     });
-    print("User added.");
+    return "User added!";
   }
 
   // Handles when a user leaves a particular group.

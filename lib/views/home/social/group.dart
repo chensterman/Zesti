@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:zesti/theme/theme.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:zesti/services/database.dart';
 import 'package:zesti/widgets/formwidgets.dart';
 import 'package:zesti/views/home/social/choose.dart';
@@ -19,7 +20,6 @@ class Group extends StatefulWidget {
 }
 
 class _GroupState extends State<Group> {
-  final _formKey = GlobalKey<FormState>();
   String zestKey = '';
   String groupName = '';
   String groupTagline = '';
@@ -32,7 +32,6 @@ class _GroupState extends State<Group> {
       padding: EdgeInsets.symmetric(
           horizontal: size.width * CustomTheme.paddingMultiplier),
       child: Form(
-        key: _formKey,
         child: Center(
           child: ListView(shrinkWrap: true, children: <Widget>[
             Center(
@@ -57,45 +56,11 @@ class _GroupState extends State<Group> {
                         Padding(
                           padding: const EdgeInsets.symmetric(vertical: 8.0),
                           child: Text(
-                            "Change group tagline:",
-                            style: CustomTheme.textTheme.headline2,
-                          ),
-                        ),
-                        TextFormField(
-                            validator: (val) {
-                              if (val == null || val.isEmpty) {
-                                return "Please enter a group tagline.";
-                              }
-                            },
-                            onChanged: (val) {
-                              setState(() => groupTagline = val);
-                            },
-                            decoration: const InputDecoration(
-                                hintText: "Group Tagline")),
-                        SizedBox(height: 20.0),
-                        RoundedButton(
-                            text: 'Update',
-                            onPressed: () async {
-                              if (_formKey.currentState!.validate()) {
-                                await DatabaseService(uid: user.uid)
-                                    .updateGroupTagline(
-                                        widget.gid, groupTagline);
-                              }
-                            }),
-                        SizedBox(height: 50.0),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 8.0),
-                          child: Text(
                             "Change group name:",
                             style: CustomTheme.textTheme.headline2,
                           ),
                         ),
                         TextFormField(
-                            validator: (val) {
-                              if (val == null || val.isEmpty) {
-                                return "Please enter a group name.";
-                              }
-                            },
                             onChanged: (val) {
                               setState(() => groupName = val);
                             },
@@ -105,9 +70,61 @@ class _GroupState extends State<Group> {
                         RoundedButton(
                             text: 'Update',
                             onPressed: () async {
-                              if (_formKey.currentState!.validate()) {
+                              if (groupName.isEmpty) {
+                                showDialog(
+                                    context: context,
+                                    builder: (context) => errorDialog(
+                                        context, "Please enter a group name."));
+                              } else if (groupName.length > 50) {
+                                showDialog(
+                                    context: context,
+                                    builder: (context) => errorDialog(context,
+                                        "Please enter a shorter name (50 characters max)."));
+                              } else {
                                 await DatabaseService(uid: user.uid)
                                     .updateGroupName(widget.gid, groupName);
+                                showDialog(
+                                    context: context,
+                                    builder: (context) => changeDialog(
+                                        context, "Group name updated!"));
+                              }
+                            }),
+                        SizedBox(height: 50.0),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8.0),
+                          child: Text(
+                            "Change group tagline:",
+                            style: CustomTheme.textTheme.headline2,
+                          ),
+                        ),
+                        TextFormField(
+                            onChanged: (val) {
+                              setState(() => groupTagline = val);
+                            },
+                            decoration: const InputDecoration(
+                                hintText: "Group Tagline")),
+                        SizedBox(height: 20.0),
+                        RoundedButton(
+                            text: 'Update',
+                            onPressed: () async {
+                              if (groupTagline.isEmpty) {
+                                showDialog(
+                                    context: context,
+                                    builder: (context) => errorDialog(context,
+                                        "Please enter a group tagline."));
+                              } else if (groupTagline.length > 140) {
+                                showDialog(
+                                    context: context,
+                                    builder: (context) => errorDialog(context,
+                                        "Please enter a shorter tagline (140 characters max)."));
+                              } else {
+                                await DatabaseService(uid: user.uid)
+                                    .updateGroupTagline(
+                                        widget.gid, groupTagline);
+                                showDialog(
+                                    context: context,
+                                    builder: (context) => changeDialog(
+                                        context, "Group tagline updated!"));
                               }
                             }),
                         SizedBox(height: 50.0),
@@ -119,11 +136,6 @@ class _GroupState extends State<Group> {
                           ),
                         ),
                         TextFormField(
-                            validator: (val) {
-                              if (val == null || val.isEmpty) {
-                                return "Please enter a ZestKey.";
-                              }
-                            },
                             onChanged: (val) {
                               setState(() => zestKey = val);
                             },
@@ -133,20 +145,29 @@ class _GroupState extends State<Group> {
                         RoundedButton(
                             text: 'Add!',
                             onPressed: () async {
-                              await DatabaseService(uid: user.uid)
-                                  .addUserToGroup(widget.gid, zestKey);
+                              if (zestKey.isEmpty) {
+                                showDialog(
+                                    context: context,
+                                    builder: (context) => errorDialog(
+                                        context, "Please enter a ZestKey."));
+                              } else {
+                                String message =
+                                    await DatabaseService(uid: user.uid)
+                                        .addUserToGroup(widget.gid, zestKey);
+                                showDialog(
+                                    context: context,
+                                    builder: (context) =>
+                                        changeDialog(context, message));
+                              }
                             }),
                         SizedBox(height: 20.0),
                         RoundedButton(
                             text: 'Leave Group',
-                            onPressed: () async {
-                              await DatabaseService(uid: user.uid)
-                                  .leaveGroup(widget.gid);
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => Choose()),
-                              );
+                            onPressed: () {
+                              showDialog(
+                                  context: context,
+                                  builder: (context) =>
+                                      leaveConfirmDialog(context, user.uid));
                             }),
                         SizedBox(height: 20.0)
                       ]),
@@ -159,6 +180,81 @@ class _GroupState extends State<Group> {
           ]),
         ),
       ),
+    );
+  }
+
+  Widget errorDialog(BuildContext context, String error) {
+    return AlertDialog(
+      title: Text(error),
+      content: SingleChildScrollView(
+        child: SizedBox(
+          width: double.infinity,
+          height: 150.0,
+          child:
+              SvgPicture.asset("assets/warning.svg", semanticsLabel: "Warning"),
+        ),
+      ),
+      actions: <Widget>[
+        TextButton(
+          child: Text("Ok", style: CustomTheme.textTheme.headline2),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget changeDialog(BuildContext context, String message) {
+    return AlertDialog(
+      title: Text(message),
+      content: SingleChildScrollView(
+        child: SizedBox(
+          width: double.infinity,
+          height: 150.0,
+          child: SvgPicture.asset("assets/name.svg", semanticsLabel: "Name"),
+        ),
+      ),
+      actions: <Widget>[
+        TextButton(
+          child: Text("Ok", style: CustomTheme.textTheme.headline2),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget leaveConfirmDialog(BuildContext context, String uid) {
+    return AlertDialog(
+      title: const Text("Are you sure you want to leave this group?"),
+      content: SingleChildScrollView(
+        child: SizedBox(
+          width: double.infinity,
+          height: 150.0,
+          child:
+              SvgPicture.asset("assets/warning.svg", semanticsLabel: "Warning"),
+        ),
+      ),
+      actions: <Widget>[
+        TextButton(
+          child: Text("Yes", style: CustomTheme.textTheme.headline2),
+          onPressed: () async {
+            await DatabaseService(uid: uid).leaveGroup(widget.gid);
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => Choose()),
+            );
+          },
+        ),
+        TextButton(
+          child: Text("Cancel", style: CustomTheme.textTheme.headline2),
+          onPressed: () async {
+            Navigator.of(context).pop();
+          },
+        ),
+      ],
     );
   }
 }

@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import 'package:zesti/models/zestigroup.dart';
 import 'package:zesti/services/database.dart';
@@ -137,16 +138,22 @@ class GroupCard extends StatelessWidget {
                               child: Icon(rec ? Icons.send : Icons.check_circle,
                                   color: rec ? Colors.blue : Colors.green,
                                   size: 64.0),
-                              onTap: () async {
-                                if (rec) {
-                                  await DatabaseService(uid: user.uid)
-                                      .outgoingGroupInteraction(
-                                          gid, snapshot.data!.gid, true);
-                                } else {
-                                  await DatabaseService(uid: user.uid)
-                                      .incomingGroupInteraction(
-                                          gid, snapshot.data!.gid, true);
-                                }
+                              onTap: () {
+                                showDialog(
+                                    context: context,
+                                    barrierDismissible: false,
+                                    builder: (context) => sendDialog(
+                                        context,
+                                        rec
+                                            ? "Match request sent to " +
+                                                snapshot.data!.groupName +
+                                                "!"
+                                            : "Your group matched with " +
+                                                snapshot.data!.groupName +
+                                                "!",
+                                        user.uid,
+                                        gid,
+                                        snapshot.data!.gid));
                               },
                             ),
                           ),
@@ -213,6 +220,37 @@ class GroupCard extends StatelessWidget {
           )
         ],
       ),
+    );
+  }
+
+  Widget sendDialog(BuildContext context, String message, String uid,
+      String gid, String yougid) {
+    return AlertDialog(
+      title: Text(message),
+      content: SingleChildScrollView(
+        child: SizedBox(
+          width: double.infinity,
+          height: 150.0,
+          child: rec
+              ? SvgPicture.asset("assets/phone.svg", semanticsLabel: "Request")
+              : SvgPicture.asset("assets/match.svg", semanticsLabel: "Match"),
+        ),
+      ),
+      actions: <Widget>[
+        TextButton(
+          child: Text("Nice!", style: CustomTheme.textTheme.headline2),
+          onPressed: () async {
+            if (rec) {
+              await DatabaseService(uid: uid)
+                  .outgoingGroupInteraction(gid, yougid, true);
+            } else {
+              await DatabaseService(uid: uid)
+                  .incomingGroupInteraction(gid, yougid, true);
+            }
+            Navigator.of(context).pop();
+          },
+        ),
+      ],
     );
   }
 }

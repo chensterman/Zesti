@@ -69,6 +69,9 @@ class _CreateGroupState extends State<CreateGroup> {
                                     if (val == null || val.isEmpty) {
                                       return "Please enter a group name.";
                                     }
+                                    if (val.length > 50) {
+                                      return "Please enter a shorter name (50 characters max).";
+                                    }
                                   },
                                   onChanged: (val) {
                                     setState(() => groupName = val);
@@ -89,6 +92,9 @@ class _CreateGroupState extends State<CreateGroup> {
                                     validator: (val) {
                                       if (val == null || val.isEmpty) {
                                         return "Please enter a fun fact.";
+                                      }
+                                      if (val.length > 140) {
+                                        return "Please enter a shorter tagline (140 characters max).";
                                       }
                                     },
                                     onChanged: (val) {

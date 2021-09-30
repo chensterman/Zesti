@@ -1,20 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:zesti/services/database.dart';
 import 'package:zesti/theme/theme.dart';
+import 'package:zesti/views/home/love/matches.dart';
 import 'package:zesti/views/home/redeem.dart';
 
 // Widget displaying the chat page for a specific match.
 class Chat extends StatefulWidget {
   final String uid;
+  final String youid;
   final DocumentReference chatRef;
   final String name;
   final ImageProvider<Object>? profpic;
   Chat({
     Key? key,
     required this.uid,
+    required this.youid,
     required this.chatRef,
     required this.name,
     required this.profpic,
@@ -83,7 +87,17 @@ class _ChatState extends State<Chat> {
         actions: [
           IconButton(
             icon: Icon(Icons.cancel),
-            onPressed: () {},
+            onPressed: () {
+              showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (context) => unmatchDialog(
+                      context,
+                      "Unmatch with " + widget.name + " forever?",
+                      user!.uid,
+                      widget.youid,
+                      widget.chatRef.id));
+            },
             color: Colors.orange[300],
           ),
           Builder(
@@ -98,15 +112,6 @@ class _ChatState extends State<Chat> {
         ],
         title: Row(
           children: [
-            Container(
-              width: 40.0,
-              height: 40.0,
-              alignment: Alignment.center,
-              decoration: new BoxDecoration(
-                image: DecorationImage(
-                    image: AssetImage('assets/test.png'), fit: BoxFit.fill),
-              ),
-            ),
             CircleAvatar(
               radius: 20.0,
               backgroundImage: widget.profpic,
@@ -281,5 +286,36 @@ class _ChatState extends State<Chat> {
     DatabaseService(uid: uid).sendMessage(chatRef, type, content);
     // Reset the text editor controller after message is sent.
     messageText.text = '';
+  }
+
+  Widget unmatchDialog(BuildContext context, String message, String uid,
+      String youid, String chatid) {
+    return AlertDialog(
+      title: Text(message),
+      content: SingleChildScrollView(
+        child: SizedBox(
+          width: double.infinity,
+          height: 150.0,
+          child:
+              SvgPicture.asset("assets/warning.svg", semanticsLabel: "Warning"),
+        ),
+      ),
+      actions: <Widget>[
+        TextButton(
+          child: Text("Yes", style: CustomTheme.textTheme.headline2),
+          onPressed: () async {
+            await DatabaseService(uid: uid).unmatch(youid, chatid);
+            Navigator.pop(context);
+            Navigator.pop(context);
+          },
+        ),
+        TextButton(
+          child: Text("No", style: CustomTheme.textTheme.headline2),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
+      ],
+    );
   }
 }
