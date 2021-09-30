@@ -7,7 +7,7 @@ import 'package:zesti/models/zestiuser.dart';
 import 'package:zesti/services/database.dart';
 import 'package:zesti/theme/theme.dart';
 import 'package:zesti/views/home/home.dart';
-import 'package:zesti/widgets/usercard.dart';
+import 'package:zesti/widgets/previewcard.dart';
 
 // Widget for the profile edit.
 class Profile extends StatefulWidget {
@@ -40,7 +40,7 @@ class _ProfileState extends State<Profile> {
 
   @override
   void initState() {
-    profileInfo = DatabaseService(uid: widget.uid).getProfileInfo();
+    profileInfo = DatabaseService(uid: widget.uid).getEditProfileInfo();
     super.initState();
   }
 
@@ -71,7 +71,7 @@ class _ProfileState extends State<Profile> {
               length: 2,
               child: Scaffold(
                 appBar: AppBar(
-                  backgroundColor: CustomTheme.lightTheme.primaryColor,
+                  backgroundColor: CustomTheme.reallyBrightOrange,
                   title: Text("Your Profile"),
                   bottom: TabBar(
                     tabs: <Widget>[
@@ -100,108 +100,152 @@ class _ProfileState extends State<Profile> {
   Widget edit() {
     Size size = MediaQuery.of(context).size;
     return Scaffold(
-      body: SingleChildScrollView(
+      body: Container(
+        decoration: CustomTheme.mode,
         child: Center(
           child: Container(
-            width: size.width * CustomTheme.containerWidth,
-            padding: const EdgeInsets.all(20),
+            padding: EdgeInsets.symmetric(
+                vertical: size.height * CustomTheme.paddingMultiplier,
+                horizontal: size.width * CustomTheme.paddingMultiplier),
             child: Form(
               key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 64.0),
-                    // FutureBuilder retrieves profile photo from Firebase Storage.
-                    child: FutureBuilder(
-                        future: DatabaseService(uid: widget.uid)
-                            .getProfPic(photoref),
-                        builder: (context,
-                            AsyncSnapshot<ImageProvider<Object>> snapshot) {
-                          // On error.
-                          if (snapshot.hasError) {
-                            return Text(snapshot.error.toString());
-                            // During loading or success.
-                          } else {
-                            profpic = snapshot.data;
-                            return profileImage();
-                          }
-                        }),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 16.0),
-                    child: TextFormField(
-                      validator: (val) {
-                        if (val == null || val.isEmpty) {
-                          return "Please say something at least mildly entertaining.";
-                        }
-                      },
-                      onChanged: (val) {
-                        setState(() => bio = val);
-                      },
-                      decoration: const InputDecoration(labelText: 'Bio'),
-                      initialValue: bio,
-                      maxLines: 3,
+              child: Center(
+                child: ListView(
+                  shrinkWrap: true,
+                  children: <Widget>[
+                    Center(
+                      child: Column(
+                        children: [
+                          Card(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            margin: EdgeInsets.all(8.0),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 32.0, horizontal: 32.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 64.0),
+                                    // FutureBuilder retrieves profile photo from Firebase Storage.
+                                    child: FutureBuilder(
+                                        future: DatabaseService(uid: widget.uid)
+                                            .getPhoto(photoref),
+                                        builder: (context,
+                                            AsyncSnapshot<ImageProvider<Object>>
+                                                snapshot) {
+                                          // On error.
+                                          if (snapshot.hasError) {
+                                            return Text(
+                                                snapshot.error.toString());
+                                            // During loading or success.
+                                          } else {
+                                            profpic = snapshot.data;
+                                            return profileImage();
+                                          }
+                                        }),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 16.0),
+                                    child: TextFormField(
+                                      validator: (val) {
+                                        if (val == null || val.isEmpty) {
+                                          return "Please say something at least mildly entertaining.";
+                                        }
+                                      },
+                                      onChanged: (val) {
+                                        setState(() => bio = val);
+                                      },
+                                      decoration: const InputDecoration(
+                                          labelText: 'Bio'),
+                                      initialValue: bio,
+                                      maxLines: 3,
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 16.0),
+                                    child: TextFormField(
+                                      validator: (val) {
+                                        if (val == null || val.isEmpty) {
+                                          return "Please say something at least mildly entertaining.";
+                                        }
+                                      },
+                                      onChanged: (val) {
+                                        setState(() => bio = val);
+                                      },
+                                      decoration: const InputDecoration(
+                                          labelText: 'Bio'),
+                                      initialValue: bio,
+                                      maxLines: 3,
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 16.0),
+                                    child: TextFormField(
+                                      validator: (val) {
+                                        if (val == null || val.isEmpty) {
+                                          return "Please say something at least mildly entertaining.";
+                                        }
+                                      },
+                                      onChanged: (val) {
+                                        setState(() => bio = val);
+                                      },
+                                      decoration: const InputDecoration(
+                                          labelText: 'Bio'),
+                                      initialValue: bio,
+                                      maxLines: 3,
+                                    ),
+                                  ),
+                                  Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 16.0),
+                                      child: ElevatedButton(
+                                        style: ElevatedButton.styleFrom(
+                                            primary:
+                                                CustomTheme.reallyBrightOrange,
+                                            padding: const EdgeInsets.only(
+                                                left: 30,
+                                                top: 10,
+                                                right: 30,
+                                                bottom: 10),
+                                            shape: new RoundedRectangleBorder(
+                                                borderRadius:
+                                                    new BorderRadius.circular(
+                                                        30.0))),
+                                        onPressed: () async {
+                                          if (_formKey.currentState!
+                                              .validate()) {
+                                            // On form validation, the newly entered field should be updated
+                                            // in the database. STILL NEED IMPLEMENTING - when a using uploads
+                                            // a new profile picture, go delete the old one in Firebase Storage.
+                                            await DatabaseService(
+                                                    uid: widget.uid)
+                                                .updateBio(bio!);
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                  builder: (context) => Home()),
+                                            );
+                                          }
+                                        },
+                                        child: Text("I'm Ready!"),
+                                      )),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 16.0),
-                    child: TextFormField(
-                      validator: (val) {
-                        if (val == null || val.isEmpty) {
-                          return "Please say something at least mildly entertaining.";
-                        }
-                      },
-                      onChanged: (val) {
-                        setState(() => bio = val);
-                      },
-                      decoration: const InputDecoration(labelText: 'Bio'),
-                      initialValue: bio,
-                      maxLines: 3,
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 16.0),
-                    child: TextFormField(
-                      validator: (val) {
-                        if (val == null || val.isEmpty) {
-                          return "Please say something at least mildly entertaining.";
-                        }
-                      },
-                      onChanged: (val) {
-                        setState(() => bio = val);
-                      },
-                      decoration: const InputDecoration(labelText: 'Bio'),
-                      initialValue: bio,
-                      maxLines: 3,
-                    ),
-                  ),
-                  Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 16.0),
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                            primary: CustomTheme.lightTheme.primaryColor,
-                            padding: const EdgeInsets.only(
-                                left: 30, top: 10, right: 30, bottom: 10),
-                            shape: new RoundedRectangleBorder(
-                                borderRadius: new BorderRadius.circular(30.0))),
-                        onPressed: () async {
-                          if (_formKey.currentState!.validate()) {
-                            // On form validation, the newly entered field should be updated
-                            // in the database. STILL NEED IMPLEMENTING - when a using uploads
-                            // a new profile picture, go delete the old one in Firebase Storage.
-                            await DatabaseService(uid: widget.uid)
-                                .updateBio(bio);
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) => Home()),
-                            );
-                          }
-                        },
-                        child: Text("I'm Ready!"),
-                      )),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
@@ -212,34 +256,24 @@ class _ProfileState extends State<Profile> {
 
   // Preview widget.
   Widget preview() {
+    ZestiUser previewUser = ZestiUser(
+        uid: "",
+        first: name.toString(),
+        last: "",
+        bio: bio.toString(),
+        dIdentity: "",
+        dInterest: "",
+        house: house.toString(),
+        age: 21,
+        photoURL: "",
+        year: "",
+        profPic: profpic,
+        zestKey: "");
     return Padding(
-        padding: EdgeInsets.all(16.0),
-        // FutureBuilder to retrieve profile photo from Firebase Storage.
-        child: FutureBuilder(
-            future: DatabaseService(uid: widget.uid).getProfPic(photoref),
-            builder: (context, AsyncSnapshot<ImageProvider<Object>> snapshot) {
-              // On error.
-              if (snapshot.hasError) {
-                return Text(snapshot.error.toString());
-                // On success.
-              } else if (snapshot.connectionState == ConnectionState.done) {
-                profpic = snapshot.data;
-                ZestiUser previewUser = ZestiUser(
-                    uid: "",
-                    first: name.toString(),
-                    last: "",
-                    bio: bio.toString(),
-                    dIdentity: "",
-                    dInterest: "",
-                    house: house.toString(),
-                    age: 21,
-                    profpic: profpic);
-                return UserCard(userOnCard: previewUser, rec: true);
-                // On loading.
-              } else {
-                return Center(child: CircularProgressIndicator());
-              }
-            }));
+      padding: EdgeInsets.all(16.0),
+      // FutureBuilder to retrieve profile photo from Firebase Storage.
+      child: PreviewCard(userOnCard: previewUser, rec: true),
+    );
   }
 
   // Image Picker:

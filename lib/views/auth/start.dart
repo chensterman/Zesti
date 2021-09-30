@@ -13,28 +13,11 @@ class Start extends StatelessWidget {
 
     return Scaffold(
       body: Container(
-        padding: EdgeInsets.symmetric(
-            vertical: size.height * 0.1, horizontal: size.width * 0.1),
-        decoration: BoxDecoration(
-          // Box decoration takes a gradient
-          gradient: LinearGradient(
-            // Where the linear gradient begins and ends
-            begin: Alignment.topRight,
-            end: Alignment.bottomLeft,
-
-            // Add one stop for each color. Stops should increase from 0 to 1
-            stops: [0.3, 0.9],
-            colors: [
-              // Colors are easy thanks to Flutter's Colors class.
-              CustomTheme.lightTheme.primaryColor,
-              Colors.white,
-            ],
-          ),
-        ),
+        decoration: CustomTheme.standard,
         child: Center(
           child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
             SizedBox(
-              width: double.infinity,
+              width: size.width * 0.8,
               height: size.height * 0.4,
               child:
                   SvgPicture.asset("assets/zesti.svg", semanticsLabel: "Zesti"),

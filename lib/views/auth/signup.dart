@@ -29,23 +29,9 @@ class _SignUpState extends State<SignUp> {
     return Scaffold(
       body: Container(
         padding: EdgeInsets.symmetric(
-            vertical: size.height * 0.1, horizontal: size.width * 0.1),
-        decoration: BoxDecoration(
-          // Box decoration takes a gradient
-          gradient: LinearGradient(
-            // Where the linear gradient begins and ends
-            begin: Alignment.topRight,
-            end: Alignment.bottomLeft,
-
-            // Add one stop for each color. Stops should increase from 0 to 1
-            stops: [0.3, 0.9],
-            colors: [
-              // Colors are easy thanks to Flutter's Colors class.
-              CustomTheme.lightTheme.primaryColor,
-              Colors.white,
-            ],
-          ),
-        ),
+            vertical: size.height * CustomTheme.paddingMultiplier,
+            horizontal: size.width * CustomTheme.paddingMultiplier),
+        decoration: CustomTheme.standard,
         child: Form(
           key: _formKey,
           child: Center(
@@ -55,11 +41,7 @@ class _SignUpState extends State<SignUp> {
                 Center(
                   child: Column(
                     children: <Widget>[
-                      Text('Sign Up',
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 32.0,
-                              color: Colors.white)),
+                      Text('Sign Up', style: CustomTheme.textTheme.headline1),
                       SizedBox(height: size.height * 0.05),
                       TextFieldContainer(
                         validator: (val) {
@@ -118,8 +100,8 @@ class _SignUpState extends State<SignUp> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[
                             Text(
-                              'Already Zesti enough ? ',
-                              style: TextStyle(fontSize: 16.0),
+                              'Already Zesti enough? ',
+                              style: CustomTheme.textTheme.bodyText1,
                             ),
                             GestureDetector(
                                 onTap: () {
@@ -129,10 +111,10 @@ class _SignUpState extends State<SignUp> {
                                         builder: (context) => SignIn()),
                                   );
                                 },
-                                child: Text('Login.',
-                                    style: TextStyle(
-                                      color: Colors.orange[900],
-                                    ))),
+                                child: Text(
+                                  'Login.',
+                                  style: CustomTheme.textTheme.bodyText2,
+                                )),
                           ]),
                       Text(
                         error,

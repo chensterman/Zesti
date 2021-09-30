@@ -1,5 +1,4 @@
 // Dart file container various widgets used across the app
-
 import 'package:flutter/material.dart';
 import 'package:zesti/theme/theme.dart';
 
@@ -60,7 +59,7 @@ class RoundedButton extends StatelessWidget {
       width: size.width * 0.6,
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
-            primary: CustomTheme.lightTheme.primaryColor,
+            primary: CustomTheme.reallyBrightOrange,
             padding: EdgeInsets.symmetric(vertical: 20, horizontal: 40),
             shape: new RoundedRectangleBorder(
                 borderRadius: new BorderRadius.circular(30.0))),

@@ -16,80 +16,101 @@ class Interest extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: CustomTheme.lightTheme.primaryColor,
-        elevation: 0.0,
+        backgroundColor: CustomTheme.reallyBrightOrange,
       ),
-      body: Center(
-        child: Container(
-          width: size.width * CustomTheme.containerWidth,
-          padding: const EdgeInsets.all(20),
+      body: Container(
+        decoration: CustomTheme.mode,
+        child: Center(
           child: Container(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0),
-                  child: Text(
-                    "Who would you see?",
-                    style: CustomTheme.lightTheme.textTheme.headline1,
+            padding: EdgeInsets.symmetric(
+                vertical: size.height * CustomTheme.paddingMultiplier,
+                horizontal: size.width * CustomTheme.paddingMultiplier),
+            child: Form(
+              child: Center(
+                child: ListView(shrinkWrap: true, children: <Widget>[
+                  Center(
+                    child: Column(
+                      children: [
+                        Card(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          margin: EdgeInsets.all(8.0),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 32.0, horizontal: 32.0),
+                            child: Column(
+                              children: [
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 8.0),
+                                  child: Text(
+                                    "Who would you see?",
+                                    style: CustomTheme.textTheme.headline2,
+                                  ),
+                                ),
+                                SizedBox(height: 20.0),
+                                RoundedButton(
+                                  text: 'Men',
+                                  onPressed: () async {
+                                    await DatabaseService(uid: user!.uid)
+                                        .updateDatingInterest("man");
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => Info()),
+                                    );
+                                  },
+                                ),
+                                SizedBox(height: 20.0),
+                                RoundedButton(
+                                  text: 'Women',
+                                  onPressed: () async {
+                                    if (user == null) {
+                                      print("Error");
+                                    } else {
+                                      await DatabaseService(uid: user.uid)
+                                          .updateDatingInterest("woman");
+                                    }
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => Info()),
+                                    );
+                                  },
+                                ),
+                                SizedBox(height: 20.0),
+                                RoundedButton(
+                                  text: 'Everyone',
+                                  onPressed: () async {
+                                    if (user == null) {
+                                      print("Error");
+                                    } else {
+                                      await DatabaseService(uid: user.uid)
+                                          .updateDatingInterest("everyone");
+                                    }
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => Info()),
+                                    );
+                                  },
+                                ),
+                                SizedBox(
+                                  width: double.infinity,
+                                  height: size.height * 0.3,
+                                  child: SvgPicture.asset("assets/phone.svg",
+                                      semanticsLabel: "Interest"),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                SizedBox(height: 20.0),
-                RoundedButton(
-                  text: 'Men',
-                  onPressed: () async {
-                    if (user == null) {
-                      print("Error");
-                    } else {
-                      await DatabaseService(uid: user.uid)
-                          .updateDatingInterest("man");
-                    }
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => Info()),
-                    );
-                  },
-                ),
-                SizedBox(height: 20.0),
-                RoundedButton(
-                  text: 'Women',
-                  onPressed: () async {
-                    if (user == null) {
-                      print("Error");
-                    } else {
-                      await DatabaseService(uid: user.uid)
-                          .updateDatingInterest("woman");
-                    }
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => Info()),
-                    );
-                  },
-                ),
-                SizedBox(height: 20.0),
-                RoundedButton(
-                  text: 'Everyone',
-                  onPressed: () async {
-                    if (user == null) {
-                      print("Error");
-                    } else {
-                      await DatabaseService(uid: user.uid)
-                          .updateDatingInterest("everyone");
-                    }
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => Info()),
-                    );
-                  },
-                ),
-                SizedBox(
-                  width: double.infinity,
-                  height: size.height * 0.3,
-                  child: SvgPicture.asset("assets/phone.svg",
-                      semanticsLabel: "Interest"),
-                ),
-              ],
+                ]),
+              ),
             ),
           ),
         ),

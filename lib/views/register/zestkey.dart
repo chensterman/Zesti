@@ -4,19 +4,20 @@ import 'package:provider/provider.dart';
 import 'package:zesti/services/database.dart';
 import 'package:zesti/theme/theme.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:zesti/views/home/home.dart';
 import 'package:zesti/views/register/birthday.dart';
 import 'package:zesti/widgets/formwidgets.dart';
 
 // Widget for name form
-class Name extends StatefulWidget {
+class ZestKey extends StatefulWidget {
   @override
-  _NameState createState() => _NameState();
+  _ZestKeyState createState() => _ZestKeyState();
 }
 
-class _NameState extends State<Name> {
+class _ZestKeyState extends State<ZestKey> {
   final _formKey = GlobalKey<FormState>();
-  String first = '';
-  String last = '';
+  String zestKey = '';
+  bool zestKeyFlag = true;
 
   @override
   Widget build(BuildContext context) {
@@ -55,55 +56,42 @@ class _NameState extends State<Name> {
                                   padding:
                                       const EdgeInsets.symmetric(vertical: 8.0),
                                   child: Text(
-                                    "What's your name?",
+                                    "Finally, choose a ZestKey!",
                                     style: CustomTheme.textTheme.headline2,
                                   ),
                                 ),
                                 TextFormField(
                                   validator: (val) {
                                     if (val == null || val.isEmpty) {
-                                      return "Please enter a first name.";
+                                      return "Please enter a ZestKey.";
                                     }
-                                    if (val.length > 50) {
-                                      return "Really sorry - could you shorten your name a bit? :(";
-                                    }
+                                    if (zestKeyFlag)
+                                      return "This ZestKey is already taken.";
                                   },
                                   onChanged: (val) {
-                                    setState(() => first = val);
+                                    setState(() => zestKey = val);
                                   },
-                                  decoration:
-                                      const InputDecoration(hintText: "First"),
+                                  decoration: const InputDecoration(
+                                      hintText:
+                                          "To get added to blocking groups!"),
                                 ),
                                 SizedBox(height: 20.0),
-                                TextFormField(
-                                    validator: (val) {
-                                      if (val == null || val.isEmpty) {
-                                        return "Please enter a last name.";
-                                      }
-                                      if (val.length > 140) {
-                                        return "Please enter a shorter bio (140 characters max).";
-                                      }
-                                    },
-                                    onChanged: (val) {
-                                      setState(() => last = val);
-                                    },
-                                    decoration: const InputDecoration(
-                                        hintText: "Last")),
-                                SizedBox(height: 20.0),
                                 RoundedButton(
-                                    text: 'Continue',
+                                    text: "I'm Ready!",
                                     onPressed: () async {
+                                      bool tmp =
+                                          await DatabaseService(uid: user!.uid)
+                                              .checkZestKey(zestKey);
+                                      setState(() {
+                                        zestKeyFlag = tmp;
+                                      });
                                       if (_formKey.currentState!.validate()) {
-                                        if (user == null) {
-                                          print("Error");
-                                        } else {
-                                          await DatabaseService(uid: user.uid)
-                                              .updateName(first, last);
-                                        }
+                                        await DatabaseService(uid: user.uid)
+                                            .updateZestKey(zestKey);
                                         Navigator.push(
                                           context,
                                           MaterialPageRoute(
-                                              builder: (context) => Birthday()),
+                                              builder: (context) => Home()),
                                         );
                                       }
                                     }),
@@ -111,7 +99,7 @@ class _NameState extends State<Name> {
                                 SizedBox(
                                   width: double.infinity,
                                   height: size.height * 0.3,
-                                  child: SvgPicture.asset("assets/name.svg",
+                                  child: SvgPicture.asset("assets/zestkey.svg",
                                       semanticsLabel: "Name"),
                                 ),
                               ],

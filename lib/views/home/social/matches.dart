@@ -1,17 +1,19 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:zesti/models/zestiuser.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
+import 'package:zesti/models/zestigroup.dart';
 import 'package:zesti/services/database.dart';
-import 'package:zesti/views/home/love/chat.dart';
 import 'package:zesti/theme/theme.dart';
 import 'package:zesti/widgets/errors.dart';
+import 'package:zesti/widgets/groupavatar.dart';
 
 // Widget displaying the chat page for a specific match.
 class Matches extends StatefulWidget {
-  final String uid;
+  final String gid;
   Matches({
     Key? key,
-    required this.uid,
+    required this.gid,
   }) : super(key: key);
 
   @override
@@ -19,22 +21,14 @@ class Matches extends StatefulWidget {
 }
 
 class _MatchesState extends State<Matches> {
-  // Stream of match information (initialized during initState).
-  Stream<QuerySnapshot>? matches;
-
-  @override
-  void initState() {
-    matches = DatabaseService(uid: widget.uid).getMatches();
-    super.initState();
-  }
-
   @override
   Widget build(BuildContext context) {
+    final user = Provider.of<User?>(context);
     final size = MediaQuery.of(context).size;
     return Container(
         // StreamBuilder to load match stream.
         child: StreamBuilder(
-            stream: matches,
+            stream: DatabaseService(uid: user!.uid).getGroupMatches(widget.gid),
             builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
               QuerySnapshot? tmp = snapshot.data;
               return tmp != null
@@ -61,8 +55,8 @@ class _MatchesState extends State<Matches> {
                         // Remaining indeces used for matchsheet widgets.
                         Map<String, dynamic> data =
                             tmp.docs[index - 1].data() as Map<String, dynamic>;
-                        return matchSheet(
-                            widget.uid, data['chat-ref'], data['user-ref']);
+                        return matchSheet(user.uid, data['chat-ref'],
+                            data['group-ref'], tmp.docs[index - 1].reference);
                       },
                       // A divider widgets is placed in between each matchsheet widget.
                       separatorBuilder: (context, index) =>
@@ -73,35 +67,16 @@ class _MatchesState extends State<Matches> {
             }));
   }
 
-  Widget recentChat(DocumentReference chatRef, DocumentReference userRef) {
-    return StreamBuilder(
-        stream: DatabaseService(uid: widget.uid).getMessages(chatRef),
-        builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
-          QuerySnapshot? tmp = snapshot.data;
-          if (tmp != null) {
-            Map<String, dynamic> data =
-                tmp.docs.first.data() as Map<String, dynamic>;
-            String message = data['content'];
-            return Text(message,
-                style: TextStyle(fontSize: 16),
-                overflow: TextOverflow.ellipsis);
-          } else {
-            return Container();
-          }
-        });
-  }
-
   // To display info about each match you have.
-  Widget matchSheet(
-      String uid, DocumentReference chatRef, DocumentReference userRef) {
+  Widget matchSheet(String uid, DocumentReference chatRef,
+      DocumentReference groupRef, DocumentReference parentGroupRef) {
     // FutureBuilder used to retrieve profile photo of your match.
-    final size = MediaQuery.of(context).size;
     return FutureBuilder(
-        future: DatabaseService(uid: uid).getUserInfo(userRef),
-        builder: (context, AsyncSnapshot<ZestiUser> snapshot) {
+        future: DatabaseService(uid: uid).getGroupInfo(groupRef),
+        builder: (context, AsyncSnapshot<ZestiGroup> snapshot) {
           // On error.
           if (snapshot.hasError) {
-            return Text(snapshot.error.toString());
+            return NotFoundMatchSheet(doc: parentGroupRef);
             // On success.
           } else if (snapshot.connectionState == ConnectionState.done) {
             return Card(
@@ -111,44 +86,35 @@ class _MatchesState extends State<Matches> {
               margin: EdgeInsets.all(8.0),
               child: InkWell(
                 onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => Chat(
-                            uid: uid,
-                            youid: userRef.id,
-                            chatRef: chatRef,
-                            name: snapshot.data!.first,
-                            profpic: snapshot.data!.profPic)),
-                  );
+                  // Navigator.push(
+                  //   context,
+                  //   MaterialPageRoute(
+                  //       builder: (context) => Chat(
+                  //           uid: uid,
+                  //           chatRef: chatRef,
+                  //           name: snapshot.data!.first,
+                  //           profpic: snapshot.data!.profPic)),
+                  // );
                 },
                 // Display match info (user data) on the sheet.
                 child: Container(
                   child: Row(
                     children: [
                       Padding(
-                        padding: const EdgeInsets.all(12.0),
-                        child: CircleAvatar(
-                          radius: 40.0,
-                          backgroundImage: snapshot.data!.profPic,
-                          backgroundColor: Colors.white,
-                        ),
-                      ),
+                          padding: const EdgeInsets.all(12.0),
+                          child: GroupAvatar(
+                              groupPhotos: snapshot.data!.groupPhotos,
+                              radius: 80.0)),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: Container(
-                          width: size.width * 0.5,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(snapshot.data!.first,
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 20)),
-                              SizedBox(height: 10.0),
-                              recentChat(chatRef, userRef),
-                            ],
-                          ),
+                        child: Column(
+                          children: [
+                            Text(snapshot.data!.groupName,
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold, fontSize: 20)),
+                            SizedBox(height: 10.0),
+                            Text('Hi there!', style: TextStyle(fontSize: 16))
+                          ],
                         ),
                       ),
                     ],

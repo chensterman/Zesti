@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:zesti/theme/theme.dart';
-import 'package:provider/provider.dart';
+import 'package:zesti/views/home/home.dart';
+import 'package:zesti/views/home/social/recommendations.dart';
+import 'package:zesti/views/home/social/requests.dart';
+import 'package:zesti/views/home/social/group.dart';
+import 'package:zesti/views/home/social/matches.dart';
 
 // Widget containing swiping, profile management, and matches
 class Social extends StatefulWidget {
-  Social({Key? key}) : super(key: key);
+  final String gid;
+  Social({Key? key, required this.gid}) : super(key: key);
 
   @override
   _SocialState createState() => _SocialState();
@@ -17,50 +22,45 @@ class _SocialState extends State<Social> {
   final FirebaseStorage _storage = FirebaseStorage.instance;
 
   // Inital widget to display
-  int _selectedIndex = 1;
+  int _selectedIndex = 0;
 
   @override
   Widget build(BuildContext context) {
-    final user = Provider.of<User?>(context);
-    if (user == null) {
-      return Text('User Error');
-    }
-
-    Size size = MediaQuery.of(context).size;
     // Widget list for bottom nav bar
     final List<Widget> _widgetSet = <Widget>[
-      Text('Your Group'),
-      Text('Group Recommendations'),
-      Text('Incoming Requests'),
-      Text('Matches'),
+      Group(gid: widget.gid),
+      Recommendations(gid: widget.gid),
+      Requests(gid: widget.gid),
+      Matches(gid: widget.gid),
     ];
 
     // Main page widget (contains nav bar pages as well)
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: CustomTheme.lightTheme.primaryColor,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => Home()),
+          ),
+        ),
+        backgroundColor: CustomTheme.reallyBrightOrange,
         title: Text("Zesti Social"),
       ),
-      body: Center(
-        child: _widgetSet.elementAt(_selectedIndex),
+      body: Container(
+        decoration: CustomTheme.mode,
+        child: Center(
+          child: _widgetSet.elementAt(_selectedIndex),
+        ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        showSelectedLabels: false,
-        showUnselectedLabels: false,
-        iconSize: size.width * 0.08,
-        items: <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-              icon: Icon(Icons.groups), label: "Your Group"),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.hourglass_top), label: "Group Recommendations"),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.mood), label: "Incoming Requests"),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.chat_bubble), label: "Matches"),
+      bottomNavigationBar: CurvedNavigationBar(
+        backgroundColor: CustomTheme.reallyBrightOrange,
+        items: <Widget>[
+          Icon(Icons.groups),
+          Icon(Icons.hourglass_top),
+          Icon(Icons.mood),
+          Icon(Icons.chat_bubble),
         ],
-        currentIndex: _selectedIndex,
-        selectedItemColor: CustomTheme.lightTheme.primaryColor,
-        unselectedItemColor: Colors.grey,
         onTap: _onItemTapped,
       ),
     );
