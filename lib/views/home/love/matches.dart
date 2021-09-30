@@ -21,18 +21,11 @@ class Matches extends StatefulWidget {
 class _MatchesState extends State<Matches> {
   // Stream of match information (initialized during initState).
   Stream<QuerySnapshot>? matches;
-  Stream<QuerySnapshot>? messages;
 
   @override
   void initState() {
     matches = DatabaseService(uid: widget.uid).getMatches();
     super.initState();
-  }
-  
-  String getFirstMessage(QuerySnapshot snapshot) {
-    Map<String, dynamic> data =
-    snapshot.docs.first.data() as Map<String, dynamic>;
-    return data['content'];
   }
 
   @override
@@ -68,7 +61,6 @@ class _MatchesState extends State<Matches> {
                         // Remaining indeces used for matchsheet widgets.
                         Map<String, dynamic> data =
                             tmp.docs[index - 1].data() as Map<String, dynamic>;
-                        messages = DatabaseService(uid: widget.uid).getMessages(data['chat-ref']);
                         return matchSheet(
                             widget.uid, data['chat-ref'], data['user-ref']);
                       },
@@ -82,21 +74,28 @@ class _MatchesState extends State<Matches> {
   }
 
   Widget recentChat(DocumentReference chatRef, DocumentReference userRef) {
-    return StreamBuilder(stream: messages,
-                        builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
-                          QuerySnapshot? tmp = snapshot.data;
-                          return tmp != null
-                              ? Text( getFirstMessage(tmp),
-                                                    style: TextStyle(fontSize: 16),
-                                                    overflow: TextOverflow.ellipsis)
-                              : Container();
-                        });
+    return StreamBuilder(
+        stream: DatabaseService(uid: widget.uid).getMessages(chatRef),
+        builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+          QuerySnapshot? tmp = snapshot.data;
+          if (tmp != null) {
+            Map<String, dynamic> data =
+                tmp.docs.first.data() as Map<String, dynamic>;
+            String message = data['content'];
+            return Text(message,
+                style: TextStyle(fontSize: 16),
+                overflow: TextOverflow.ellipsis);
+          } else {
+            return Container();
+          }
+        });
   }
 
   // To display info about each match you have.
   Widget matchSheet(
       String uid, DocumentReference chatRef, DocumentReference userRef) {
     // FutureBuilder used to retrieve profile photo of your match.
+    final size = MediaQuery.of(context).size;
     return FutureBuilder(
         future: DatabaseService(uid: uid).getUserInfo(userRef),
         builder: (context, AsyncSnapshot<ZestiUser> snapshot) {
@@ -137,15 +136,21 @@ class _MatchesState extends State<Matches> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: Column(
-                                    children: [
-                                      Text(snapshot.data!.first,
-                                          style: TextStyle(
-                                              fontWeight: FontWeight.bold, fontSize: 20)),
-                                      SizedBox(height: 10.0),
-                                      recentChat(chatRef, userRef)
-                          ],
-                        ))
+                        child: Container(
+                          width: size.width * 0.5,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(snapshot.data!.first,
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 20)),
+                              SizedBox(height: 10.0),
+                              recentChat(chatRef, userRef),
+                            ],
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),

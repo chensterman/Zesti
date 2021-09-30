@@ -7,8 +7,8 @@ import 'package:zesti/models/zestiuser.dart';
 import 'package:zesti/services/database.dart';
 import 'package:zesti/theme/theme.dart';
 import 'package:zesti/views/home/home.dart';
-import 'package:zesti/widgets/usercard.dart';
-/*
+import 'package:zesti/widgets/previewcard.dart';
+
 // Widget for the profile edit.
 class Profile extends StatefulWidget {
   final String uid;
@@ -40,7 +40,7 @@ class _ProfileState extends State<Profile> {
 
   @override
   void initState() {
-    profileInfo = DatabaseService(uid: widget.uid).getProfileInfo();
+    profileInfo = DatabaseService(uid: widget.uid).getEditProfileInfo();
     super.initState();
   }
 
@@ -71,7 +71,7 @@ class _ProfileState extends State<Profile> {
               length: 2,
               child: Scaffold(
                 appBar: AppBar(
-                  backgroundColor: CustomTheme.lightTheme.primaryColor,
+                  backgroundColor: CustomTheme.reallyBrightOrange,
                   title: Text("Your Profile"),
                   bottom: TabBar(
                     tabs: <Widget>[
@@ -181,7 +181,7 @@ class _ProfileState extends State<Profile> {
                       padding: const EdgeInsets.symmetric(vertical: 16.0),
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                            primary: CustomTheme.lightTheme.primaryColor,
+                            primary: CustomTheme.reallyBrightOrange,
                             padding: const EdgeInsets.only(
                                 left: 30, top: 10, right: 30, bottom: 10),
                             shape: new RoundedRectangleBorder(
@@ -192,7 +192,7 @@ class _ProfileState extends State<Profile> {
                             // in the database. STILL NEED IMPLEMENTING - when a using uploads
                             // a new profile picture, go delete the old one in Firebase Storage.
                             await DatabaseService(uid: widget.uid)
-                                .updateBio(bio);
+                                .updateBio(bio!);
                             Navigator.push(
                               context,
                               MaterialPageRoute(builder: (context) => Home()),
@@ -221,11 +221,14 @@ class _ProfileState extends State<Profile> {
         dInterest: "",
         house: house.toString(),
         age: 21,
-        photoURL: profpic);
+        photoURL: "",
+        year: "",
+        profPic: profpic,
+        zestKey: "");
     return Padding(
       padding: EdgeInsets.all(16.0),
       // FutureBuilder to retrieve profile photo from Firebase Storage.
-      child: UserCard(userOnCard: previewUser, rec: true),
+      child: PreviewCard(userOnCard: previewUser, rec: true),
     );
   }
 
@@ -336,4 +339,3 @@ class _ProfileState extends State<Profile> {
     );
   }
 }
-*/

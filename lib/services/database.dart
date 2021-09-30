@@ -168,7 +168,7 @@ class DatabaseService {
   }
 
   // Retrieves the stored image from a given reference to Firebase Storage.
-  Future<ImageProvider<Object>> _getPhoto(String? photoURL) async {
+  Future<ImageProvider<Object>> getPhoto(String? photoURL) async {
     ImageProvider<Object> photo;
 
     // Check if user has an uploaded profile picture.
@@ -187,7 +187,7 @@ class DatabaseService {
   }
 
   // Stream to retrieve profile info from the given uid.
-  Stream<DocumentSnapshot> getProfileInfo() {
+  Stream<DocumentSnapshot> getEditProfileInfo() {
     return userCollection.doc(uid).snapshots();
   }
 
@@ -275,7 +275,7 @@ class DatabaseService {
     for (DocumentReference userRef in groupUserRefs) {
       DocumentSnapshot userSnapshot = await userRef.get();
       String photoURL = userSnapshot.get("photo-ref");
-      userPhotos.add(await _getPhoto(photoURL));
+      userPhotos.add(await getPhoto(photoURL));
     }
     return ZestiGroup(
         gid: groupRef.id,
@@ -297,7 +297,7 @@ class DatabaseService {
       dInterest: userInfo['dating-interest'],
       house: userInfo['house'],
       photoURL: userInfo['photo-ref'],
-      profPic: await _getPhoto(userInfo['photo-ref']),
+      profPic: await getPhoto(userInfo['photo-ref']),
       age: userInfo['age'],
       year: userInfo['year'],
       zestKey: userInfo['zest-key'],
@@ -570,6 +570,7 @@ class DatabaseService {
             "user1-ref": userCollection.doc(uid),
             "user2-ref": userCollection.doc(youid),
             "timestamp": ts,
+            "type": "one-on-one",
           })
           .then((value) => print("Chat created."))
           .catchError((error) => print("Failed to create chat: $error"));
