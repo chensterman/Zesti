@@ -21,11 +21,18 @@ class Matches extends StatefulWidget {
 class _MatchesState extends State<Matches> {
   // Stream of match information (initialized during initState).
   Stream<QuerySnapshot>? matches;
+  Stream<QuerySnapshot>? messages;
 
   @override
   void initState() {
     matches = DatabaseService(uid: widget.uid).getMatches();
     super.initState();
+  }
+  
+  String getFirstMessage(QuerySnapshot snapshot) {
+    Map<String, dynamic> data =
+    snapshot.docs.first.data() as Map<String, dynamic>;
+    return data['content'];
   }
 
   @override
@@ -61,6 +68,7 @@ class _MatchesState extends State<Matches> {
                         // Remaining indeces used for matchsheet widgets.
                         Map<String, dynamic> data =
                             tmp.docs[index - 1].data() as Map<String, dynamic>;
+                        messages = DatabaseService(uid: widget.uid).getMessages(data['chat-ref']);
                         return matchSheet(
                             widget.uid, data['chat-ref'], data['user-ref']);
                       },
@@ -71,6 +79,18 @@ class _MatchesState extends State<Matches> {
                   // StreamBuilder loading indicator.
                   : Center(child: CircularProgressIndicator());
             }));
+  }
+
+  Widget recentChat(DocumentReference chatRef, DocumentReference userRef) {
+    return StreamBuilder(stream: messages,
+                        builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                          QuerySnapshot? tmp = snapshot.data;
+                          return tmp != null
+                              ? Text( getFirstMessage(tmp),
+                                                    style: TextStyle(fontSize: 16),
+                                                    overflow: TextOverflow.ellipsis)
+                              : Container();
+                        });
   }
 
   // To display info about each match you have.
@@ -118,15 +138,14 @@ class _MatchesState extends State<Matches> {
                       Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Column(
-                          children: [
-                            Text(snapshot.data!.first,
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold, fontSize: 20)),
-                            SizedBox(height: 10.0),
-                            Text('Hi there!', style: TextStyle(fontSize: 16))
+                                    children: [
+                                      Text(snapshot.data!.first,
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.bold, fontSize: 20)),
+                                      SizedBox(height: 10.0),
+                                      recentChat(chatRef, userRef)
                           ],
-                        ),
-                      ),
+                        ))
                     ],
                   ),
                 ),
