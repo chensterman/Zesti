@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:typed_data';
 import 'dart:math';
 import 'package:uuid/uuid.dart';
@@ -116,10 +117,12 @@ class DatabaseService {
   }
 
   // Update user photo.
-  Future<void> updatePhoto(String storageRef) async {
+  Future<void> updatePhoto(File image) async {
+    String storageRefPut = "profpics/" + uid + "/" + uuid.v4() + ".jpg";
+    await _storage.ref(storageRefPut).putFile(image);
     await userCollection
         .doc(uid)
-        .update({'photo-ref': storageRef})
+        .update({'photo-ref': storageRefPut})
         .then((value) => print("Photo Updated"))
         .catchError((error) => print("Failed to update user: $error"));
   }
