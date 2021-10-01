@@ -54,6 +54,12 @@ class DatabaseService {
         .catchError((error) => print("Failed"));
   }
 
+  //////////////////////////////////////////////////////////////////////////////////////////
+  ////////////////////////////// DATABASE OPERATIONS PERTAINING TO THE CURRENT LOGGED IN USER
+  //////////////////////////////////////////////////////////////////////////////////////////
+
+  /////////////// CURRENT USER - "update" REQUESTS
+
   // Update the account setup:
   //  Determines whether or not user should be should be shown the beginning
   //  of registration or the home page. Basically should set to true after user
@@ -136,13 +142,6 @@ class DatabaseService {
         .catchError((error) => print("Failed to update user: $error"));
   }
 
-  // Check for existing ZestKey.
-  Future<bool> checkZestKey(String zestKey) async {
-    QuerySnapshot sameKey =
-        await userCollection.where('zest-key', isEqualTo: zestKey).get();
-    return sameKey.docs.length == 0 ? false : true;
-  }
-
   // Update user ZestKey.
   Future<void> updateZestKey(String zestKey) async {
     await userCollection
@@ -151,6 +150,58 @@ class DatabaseService {
         .then((value) => print("ZestKey Updated"))
         .catchError((error) => print("Failed to update user: $error"));
   }
+
+  /////////////// CURRENT USER - "list" REQUESTS
+
+  // Check for existing ZestKey.
+  Future<bool> checkZestKey(String zestKey) async {
+    QuerySnapshot sameKey =
+        await userCollection.where('zest-key', isEqualTo: zestKey).get();
+    return sameKey.docs.length == 0 ? false : true;
+  }
+
+  // Stream to retrieve profile info from the given uid.
+  Stream<DocumentSnapshot> getEditProfileInfo() {
+    return userCollection.doc(uid).snapshots();
+  }
+
+  // Stream to retrieve match recommendations (generated with function below).
+  Stream<QuerySnapshot> getRecommendations() {
+    return userCollection
+        .doc(uid)
+        .collection('recommendations')
+        .orderBy('timestamp')
+        .snapshots();
+  }
+
+  // Stream to retrieve incoming match requests.
+  Stream<QuerySnapshot> getIncoming() {
+    return userCollection
+        .doc(uid)
+        .collection('incoming')
+        .orderBy('timestamp')
+        .snapshots();
+  }
+
+  // Stream to retrieve list of matches from the given uid.
+  Stream<QuerySnapshot> getMatches() {
+    return userCollection.doc(uid).collection("matched").snapshots();
+  }
+
+  // Stream to retrieve all group references of a user.
+  Stream<QuerySnapshot> getGroups() {
+    return userCollection
+        .doc(uid)
+        .collection('groups')
+        .orderBy('timestamp', descending: true)
+        .snapshots();
+  }
+
+  //////////////////////////////////////////////////////////////////////////////////////////
+  ////////////////////////////// DATABASE OPERATIONS PERTAINING TO GROUPS
+  //////////////////////////////////////////////////////////////////////////////////////////
+
+  /////////////// GROUP - "update" REQUESTS
 
   // Update group name.
   Future<void> updateGroupName(String gid, String groupName) async {
@@ -170,63 +221,11 @@ class DatabaseService {
         .catchError((error) => print("Failed to update group tagline: $error"));
   }
 
-  // Retrieves the stored image from a given reference to Firebase Storage.
-  Future<ImageProvider<Object>> getPhoto(String? photoURL) async {
-    ImageProvider<Object> photo;
-
-    // Check if user has an uploaded profile picture.
-    // Set profile picture variable to the corresponding case.
-    if (photoURL == null) {
-      photo = AssetImage('assets/profile.jpg');
-    } else {
-      Uint8List? photoData = await _storage.ref().child(photoURL).getData();
-      if (photoData == null) {
-        photo = AssetImage('assets/profile.jpg');
-      } else {
-        photo = MemoryImage(photoData);
-      }
-    }
-    return photo;
-  }
-
-  // Stream to retrieve profile info from the given uid.
-  Stream<DocumentSnapshot> getEditProfileInfo() {
-    return userCollection.doc(uid).snapshots();
-  }
-
-  // Stream to retrieve list of matches from the given uid.
-  Stream<QuerySnapshot> getMatches() {
-    return userCollection.doc(uid).collection("matched").snapshots();
-  }
-
-  // Stream to retrieve list of matches from the given gid.
-  Stream<QuerySnapshot> getGroupMatches(String gid) {
-    return groupCollection.doc(gid).collection("matched").snapshots();
-  }
-
-  // Stream to retrieve match recommendations (generated with function below).
-  Stream<QuerySnapshot> getRecommendations() {
-    return userCollection
-        .doc(uid)
-        .collection('recommendations')
-        .orderBy('timestamp')
-        .snapshots();
-  }
-
   // Stream to retrieve group recommendations (generated with function below).
   Stream<QuerySnapshot> getGroupRecommendations(String gid) {
     return groupCollection
         .doc(gid)
         .collection('recommendations')
-        .orderBy('timestamp')
-        .snapshots();
-  }
-
-  // Stream to retrieve incoming match requests.
-  Stream<QuerySnapshot> getIncoming() {
-    return userCollection
-        .doc(uid)
-        .collection('incoming')
         .orderBy('timestamp')
         .snapshots();
   }
@@ -240,21 +239,9 @@ class DatabaseService {
         .snapshots();
   }
 
-  // Stream to retrieve messages from a given chatid.
-  Stream<QuerySnapshot> getMessages(DocumentReference chatRef) {
-    return chatRef
-        .collection('messages')
-        .orderBy('timestamp', descending: true)
-        .snapshots();
-  }
-
-  // Stream to retrieve all group references of a user.
-  Stream<QuerySnapshot> getGroups() {
-    return userCollection
-        .doc(uid)
-        .collection('groups')
-        .orderBy('timestamp', descending: true)
-        .snapshots();
+  // Stream to retrieve list of matches from the given gid.
+  Stream<QuerySnapshot> getGroupMatches(String gid) {
+    return groupCollection.doc(gid).collection("matched").snapshots();
   }
 
   // Stream to retrieve all users.
@@ -305,6 +292,33 @@ class DatabaseService {
       year: userInfo['year'],
       zestKey: userInfo['zest-key'],
     );
+  }
+
+  // Retrieves the stored image from a given reference to Firebase Storage.
+  Future<ImageProvider<Object>> getPhoto(String? photoURL) async {
+    ImageProvider<Object> photo;
+
+    // Check if user has an uploaded profile picture.
+    // Set profile picture variable to the corresponding case.
+    if (photoURL == null) {
+      photo = AssetImage('assets/profile.jpg');
+    } else {
+      Uint8List? photoData = await _storage.ref().child(photoURL).getData();
+      if (photoData == null) {
+        photo = AssetImage('assets/profile.jpg');
+      } else {
+        photo = MemoryImage(photoData);
+      }
+    }
+    return photo;
+  }
+
+  // Stream to retrieve messages from a given chatid.
+  Stream<QuerySnapshot> getMessages(DocumentReference chatRef) {
+    return chatRef
+        .collection('messages')
+        .orderBy('timestamp', descending: true)
+        .snapshots();
   }
 
   // Send a chat message.

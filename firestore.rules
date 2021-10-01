@@ -1,0 +1,29 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{userId}/{document=**} {
+    	function userBasedRules() {
+        let isAuth = request.auth != null;
+        return isAuth;
+      }
+      allow read, write: if userBasedRules();
+    }
+    
+    match /groups/{groupId}/{document=**} {
+    	function groupBasedRules() {
+        let isAuth = request.auth != null;
+        return isAuth;
+      }
+      allow read, write: if groupBasedRules();
+    }
+    
+    match /chats/{chatId}/{document=**} {
+    	function chatBasedRules(chatId) {
+        let isAuth = request.auth != null;
+        let inMatched = exists(/databases/$(database)/documents/users/$(request.auth.uid)/matched/$(chatId));
+        return isAuth && inMatched;
+      }
+      allow read, write: if chatBasedRules(chatId);
+    }
+  }
+}

@@ -37,6 +37,7 @@ class _ProfileState extends State<Profile> {
   String? dIdentity;
   String? dInterest;
   String? photoref;
+  String zestKey = "";
   dynamic profpic;
 
   // List of Harvard houses
@@ -138,6 +139,7 @@ class _ProfileState extends State<Profile> {
               }
             }
             if (photoref == null) photoref = data['photo-ref'];
+            zestKey = data['zest-key'];
 
             // Tab controller switches between "edit" and "preview" mode.
             return DefaultTabController(
@@ -232,6 +234,25 @@ class _ProfileState extends State<Profile> {
                                           // FutureBuilder retrieves profile photo from Firebase Storage.
                                           child: profileImage(),
                                         ),
+                                  SizedBox(height: 20.0),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 8.0),
+                                    child: Center(
+                                        child: Text(
+                                      "Your ZestKey:",
+                                      style: CustomTheme.textTheme.headline2,
+                                    )),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 8.0),
+                                    child: Center(
+                                        child: Text(
+                                      zestKey,
+                                      style: CustomTheme.textTheme.headline1,
+                                    )),
+                                  ),
                                   SizedBox(height: 20.0),
                                   Padding(
                                     padding: const EdgeInsets.symmetric(
