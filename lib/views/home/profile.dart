@@ -8,6 +8,7 @@ import 'package:zesti/services/database.dart';
 import 'package:zesti/theme/theme.dart';
 import 'package:zesti/views/home/home.dart';
 import 'package:zesti/widgets/previewcard.dart';
+import 'package:zesti/widgets/formwidgets.dart';
 
 // Widget for the profile edit.
 class Profile extends StatefulWidget {
@@ -32,8 +33,67 @@ class _ProfileState extends State<Profile> {
   String? name;
   String? bio;
   String? house;
+  String? year;
+  String? dIdentity;
+  String? dInterest;
   String? photoref;
+  String zestKey = "";
   dynamic profpic;
+
+  // List of Harvard houses
+  List<String> _houseList = [
+    'Apley Court',
+    'Canaday',
+    'Grays',
+    'Greenough',
+    'Hollis',
+    'Holworthy',
+    'Hurlbut',
+    'Lionel',
+    'Mower',
+    'Massachusetts Hall',
+    'Mathews',
+    'Pennypacker',
+    'Stoughton',
+    'Straus',
+    'Thayer',
+    'Weld',
+    'Wigglesworth',
+    'Adams',
+    'Cabot',
+    'Currier',
+    'Dunster',
+    'Eliot',
+    'Kirkland',
+    'Leverett',
+    'Lowell',
+    'Mather',
+    'Pfohozeimer',
+    'Quincy',
+    'Winthrop',
+  ];
+
+  // List of years
+  List<String> _yearList = [
+    '\'22',
+    '\'23',
+    '\'24',
+    '\'25',
+  ];
+
+  // List of identities
+  List<String> _identityList = [
+    'Man',
+    'Woman',
+    'Non-binary',
+  ];
+
+  // List of interests
+  List<String> _interestList = [
+    'Men',
+    'Women',
+    'Everyone',
+  ];
 
   // Stream to retrieve user profile information (initialized during initState).
   Stream<DocumentSnapshot>? profileInfo;
@@ -63,7 +123,23 @@ class _ProfileState extends State<Profile> {
             if (name == null) name = data['first-name'];
             if (bio == null) bio = data['bio'];
             if (house == null) house = data['house'];
+            if (year == null) year = data['year'];
+            if (dIdentity == null) {
+              String tmp = data['dating-identity'];
+              dIdentity = "${tmp[0].toUpperCase()}${tmp.substring(1)}";
+            }
+            if (dInterest == null) {
+              String tmp = data['dating-interest'];
+              if (tmp == 'man') {
+                dInterest = 'Men';
+              } else if (tmp == 'woman') {
+                dInterest = 'Women';
+              } else if (tmp == 'everyone') {
+                dInterest = "${tmp[0].toUpperCase()}${tmp.substring(1)}";
+              }
+            }
             if (photoref == null) photoref = data['photo-ref'];
+            zestKey = data['zest-key'];
 
             // Tab controller switches between "edit" and "preview" mode.
             return DefaultTabController(
@@ -128,115 +204,228 @@ class _ProfileState extends State<Profile> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
+                                  profpic == null
+                                      ? Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 64.0),
+                                          // FutureBuilder retrieves profile photo from Firebase Storage.
+                                          child: FutureBuilder(
+                                              future: DatabaseService(
+                                                      uid: widget.uid)
+                                                  .getPhoto(photoref),
+                                              builder: (context,
+                                                  AsyncSnapshot<
+                                                          ImageProvider<Object>>
+                                                      snapshot) {
+                                                // On error.
+                                                if (snapshot.hasError) {
+                                                  return Text(snapshot.error
+                                                      .toString());
+                                                  // During loading or success.
+                                                } else {
+                                                  profpic = snapshot.data;
+                                                  return profileImage();
+                                                }
+                                              }),
+                                        )
+                                      : Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 64.0),
+                                          // FutureBuilder retrieves profile photo from Firebase Storage.
+                                          child: profileImage(),
+                                        ),
+                                  SizedBox(height: 20.0),
                                   Padding(
                                     padding: const EdgeInsets.symmetric(
-                                        horizontal: 64.0),
-                                    // FutureBuilder retrieves profile photo from Firebase Storage.
-                                    child: FutureBuilder(
-                                        future: DatabaseService(uid: widget.uid)
-                                            .getPhoto(photoref),
-                                        builder: (context,
-                                            AsyncSnapshot<ImageProvider<Object>>
-                                                snapshot) {
-                                          // On error.
-                                          if (snapshot.hasError) {
-                                            return Text(
-                                                snapshot.error.toString());
-                                            // During loading or success.
-                                          } else {
-                                            profpic = snapshot.data;
-                                            return profileImage();
+                                        vertical: 8.0),
+                                    child: Center(
+                                        child: Text(
+                                      "Your ZestKey:",
+                                      style: CustomTheme.textTheme.headline2,
+                                    )),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 8.0),
+                                    child: Center(
+                                        child: Text(
+                                      zestKey,
+                                      style: CustomTheme.textTheme.headline1,
+                                    )),
+                                  ),
+                                  SizedBox(height: 20.0),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 8.0),
+                                    child: Text(
+                                      "Bio:",
+                                      style: CustomTheme.textTheme.headline2,
+                                    ),
+                                  ),
+                                  TextFormField(
+                                    initialValue: bio,
+                                    validator: (val) {
+                                      if (val == null || val.isEmpty) {
+                                        return "Please enter a bio.";
+                                      }
+                                      if (val.length > 140) {
+                                        return "Please enter a shorter bio (140 characters max).";
+                                      }
+                                    },
+                                    onChanged: (val) {
+                                      setState(() => bio = val);
+                                    },
+                                  ),
+                                  SizedBox(height: 20.0),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 8.0),
+                                    child: Text(
+                                      "House:",
+                                      style: CustomTheme.textTheme.headline2,
+                                    ),
+                                  ),
+                                  DropdownButton<String>(
+                                    value: house,
+                                    hint: Text('Select'),
+                                    style: TextStyle(color: Colors.black),
+                                    isExpanded: true,
+                                    items: _houseList.map((val) {
+                                      return DropdownMenuItem(
+                                          value: val, child: Text(val));
+                                    }).toList(),
+                                    onChanged: (String? val) {
+                                      if (val == null) {
+                                        print('Error');
+                                      } else {
+                                        setState(() {
+                                          house = val;
+                                        });
+                                      }
+                                    },
+                                  ),
+                                  SizedBox(height: 20.0),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 8.0),
+                                    child: Text(
+                                      "Year:",
+                                      style: CustomTheme.textTheme.headline2,
+                                    ),
+                                  ),
+                                  SizedBox(height: 20.0),
+                                  DropdownButton<String>(
+                                    value: year,
+                                    hint: Text('Select'),
+                                    style: TextStyle(color: Colors.black),
+                                    isExpanded: true,
+                                    items: _yearList.map((val) {
+                                      return DropdownMenuItem(
+                                          value: val, child: Text(val));
+                                    }).toList(),
+                                    onChanged: (String? val) {
+                                      if (val != null) {
+                                        setState(() {
+                                          year = val;
+                                        });
+                                      }
+                                    },
+                                  ),
+                                  SizedBox(height: 20.0),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 8.0),
+                                    child: Text(
+                                      "Identity:",
+                                      style: CustomTheme.textTheme.headline2,
+                                    ),
+                                  ),
+                                  SizedBox(height: 20.0),
+                                  DropdownButton<String>(
+                                    value: dIdentity,
+                                    hint: Text('Select'),
+                                    style: TextStyle(color: Colors.black),
+                                    isExpanded: true,
+                                    items: _identityList.map((val) {
+                                      return DropdownMenuItem(
+                                          value: val, child: Text(val));
+                                    }).toList(),
+                                    onChanged: (String? val) {
+                                      if (val != null) {
+                                        setState(() {
+                                          dIdentity = val;
+                                        });
+                                      }
+                                    },
+                                  ),
+                                  SizedBox(height: 20.0),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 8.0),
+                                    child: Text(
+                                      "Interest:",
+                                      style: CustomTheme.textTheme.headline2,
+                                    ),
+                                  ),
+                                  SizedBox(height: 20.0),
+                                  DropdownButton<String>(
+                                    value: dInterest,
+                                    hint: Text('Select'),
+                                    style: TextStyle(color: Colors.black),
+                                    isExpanded: true,
+                                    items: _interestList.map((val) {
+                                      return DropdownMenuItem(
+                                          value: val, child: Text(val));
+                                    }).toList(),
+                                    onChanged: (String? val) {
+                                      if (val != null) {
+                                        setState(() {
+                                          dInterest = val;
+                                        });
+                                      }
+                                    },
+                                  ),
+                                  SizedBox(height: 20.0),
+                                  RoundedButton(
+                                      text: 'Update',
+                                      onPressed: () async {
+                                        if (bio != null &&
+                                            house != null &&
+                                            year != null &&
+                                            dIdentity != null &&
+                                            dInterest != null &&
+                                            profpic != null &&
+                                            _formKey.currentState!.validate()) {
+                                          await DatabaseService(uid: widget.uid)
+                                              .updateBio(bio!);
+                                          await DatabaseService(uid: widget.uid)
+                                              .updateHouse(house!);
+                                          await DatabaseService(uid: widget.uid)
+                                              .updateYear(year!);
+                                          await DatabaseService(uid: widget.uid)
+                                              .updateDatingIdentity(
+                                                  dIdentity!.toLowerCase());
+                                          String tmp = "";
+                                          if (dInterest == "Men") {
+                                            tmp = "man";
+                                          } else if (dInterest == "Women") {
+                                            tmp = "woman";
+                                          } else if (dInterest == "Everyone") {
+                                            tmp = "everyone";
                                           }
-                                        }),
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 16.0),
-                                    child: TextFormField(
-                                      validator: (val) {
-                                        if (val == null || val.isEmpty) {
-                                          return "Please say something at least mildly entertaining.";
+                                          await DatabaseService(uid: widget.uid)
+                                              .updateDatingInterest(tmp);
+
+                                          // Update user document with the reference.
+                                          await DatabaseService(uid: widget.uid)
+                                              .updatePhoto(profpic);
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                                builder: (context) => Home()),
+                                          );
                                         }
-                                      },
-                                      onChanged: (val) {
-                                        setState(() => bio = val);
-                                      },
-                                      decoration: const InputDecoration(
-                                          labelText: 'Bio'),
-                                      initialValue: bio,
-                                      maxLines: 3,
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 16.0),
-                                    child: TextFormField(
-                                      validator: (val) {
-                                        if (val == null || val.isEmpty) {
-                                          return "Please say something at least mildly entertaining.";
-                                        }
-                                      },
-                                      onChanged: (val) {
-                                        setState(() => bio = val);
-                                      },
-                                      decoration: const InputDecoration(
-                                          labelText: 'Bio'),
-                                      initialValue: bio,
-                                      maxLines: 3,
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 16.0),
-                                    child: TextFormField(
-                                      validator: (val) {
-                                        if (val == null || val.isEmpty) {
-                                          return "Please say something at least mildly entertaining.";
-                                        }
-                                      },
-                                      onChanged: (val) {
-                                        setState(() => bio = val);
-                                      },
-                                      decoration: const InputDecoration(
-                                          labelText: 'Bio'),
-                                      initialValue: bio,
-                                      maxLines: 3,
-                                    ),
-                                  ),
-                                  Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          vertical: 16.0),
-                                      child: ElevatedButton(
-                                        style: ElevatedButton.styleFrom(
-                                            primary:
-                                                CustomTheme.reallyBrightOrange,
-                                            padding: const EdgeInsets.only(
-                                                left: 30,
-                                                top: 10,
-                                                right: 30,
-                                                bottom: 10),
-                                            shape: new RoundedRectangleBorder(
-                                                borderRadius:
-                                                    new BorderRadius.circular(
-                                                        30.0))),
-                                        onPressed: () async {
-                                          if (_formKey.currentState!
-                                              .validate()) {
-                                            // On form validation, the newly entered field should be updated
-                                            // in the database. STILL NEED IMPLEMENTING - when a using uploads
-                                            // a new profile picture, go delete the old one in Firebase Storage.
-                                            await DatabaseService(
-                                                    uid: widget.uid)
-                                                .updateBio(bio!);
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                  builder: (context) => Home()),
-                                            );
-                                          }
-                                        },
-                                        child: Text("I'm Ready!"),
-                                      )),
+                                      }),
                                 ],
                               ),
                             ),
@@ -256,24 +445,36 @@ class _ProfileState extends State<Profile> {
 
   // Preview widget.
   Widget preview() {
-    ZestiUser previewUser = ZestiUser(
-        uid: "",
-        first: name.toString(),
-        last: "",
-        bio: bio.toString(),
-        dIdentity: "",
-        dInterest: "",
-        house: house.toString(),
-        age: 21,
-        photoURL: "",
-        year: "",
-        profPic: profpic,
-        zestKey: "");
-    return Padding(
-      padding: EdgeInsets.all(16.0),
-      // FutureBuilder to retrieve profile photo from Firebase Storage.
-      child: PreviewCard(userOnCard: previewUser, rec: true),
-    );
+    return FutureBuilder(
+        future: DatabaseService(uid: widget.uid).getPhoto(photoref),
+        builder: (context, AsyncSnapshot<ImageProvider<Object>> snapshot) {
+          // On error.
+          if (snapshot.hasError) {
+            return Text(snapshot.error.toString());
+            // During loading or success.
+          } else if (snapshot.connectionState == ConnectionState.done) {
+            ZestiUser previewUser = ZestiUser(
+                uid: "",
+                first: name.toString(),
+                last: "",
+                bio: bio.toString(),
+                dIdentity: "",
+                dInterest: "",
+                house: house.toString(),
+                age: 21,
+                photoURL: "",
+                year: "",
+                profPic: snapshot.data!,
+                zestKey: "");
+            return Padding(
+              padding: EdgeInsets.all(16.0),
+              // FutureBuilder to retrieve profile photo from Firebase Storage.
+              child: PreviewCard(userOnCard: previewUser, rec: true),
+            );
+          } else {
+            return Center(child: CircularProgressIndicator());
+          }
+        });
   }
 
   // Image Picker:
@@ -305,8 +506,10 @@ class _ProfileState extends State<Profile> {
     // Update the image according to the dynamic imageFile.
     if (profpic == null) {
       bgImage = AssetImage("assets/profile.jpg");
-    } else {
+    } else if (profpic is ImageProvider<Object>) {
       bgImage = profpic;
+    } else {
+      bgImage = FileImage(File(profpic.path));
     }
 
     return Stack(

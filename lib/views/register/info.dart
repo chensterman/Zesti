@@ -22,7 +22,6 @@ class _InfoState extends State<Info> {
   // Image and storage variables.
   dynamic imageFile;
   final ImagePicker _picker = ImagePicker();
-  final FirebaseStorage _storage = FirebaseStorage.instance;
 
   // Mutable bio.
   String bio = '';
@@ -84,7 +83,7 @@ class _InfoState extends State<Info> {
                                 TextFormField(
                                   validator: (val) {
                                     if (val == null || val.isEmpty) {
-                                      return "Please say something at least mildly entertaining.";
+                                      return "Please enter a bio.";
                                     }
                                     if (val.length > 140) {
                                       return "Please enter a shorter bio (140 characters max).";
@@ -118,16 +117,10 @@ class _InfoState extends State<Info> {
                                         if (_formKey.currentState!.validate()) {
                                           // Do not upload if dynamic imageFile is null.
                                           if (imageFile != null) {
-                                            // Upload image and store the reference.
-                                            // Side note: no need to delete previous image from storage,
-                                            // as we assume this will always be the first (and only) time
-                                            // a user sees this page.
-                                            String storageRef =
-                                                await uploadImage(
-                                                    imageFile, user!.uid);
                                             // Update user document with the reference.
-                                            await DatabaseService(uid: user.uid)
-                                                .updatePhoto(storageRef);
+                                            await DatabaseService(
+                                                    uid: user!.uid)
+                                                .updatePhoto(imageFile);
                                           }
                                           // Update user document with bio.
                                           await DatabaseService(uid: user!.uid)
@@ -160,16 +153,6 @@ class _InfoState extends State<Info> {
         ),
       ),
     );
-  }
-
-  // Uploads image:
-  //  Creates unique storage reference (currently using DateTime) and
-  //  stores the image file onto it. Returns the storage reference as
-  //  a string in order to update the user document later.
-  Future<String> uploadImage(File image, String uid) async {
-    String storageRefPut = "profpics/" + DateTime.now().toString() + ".jpg";
-    await _storage.ref(storageRefPut).putFile(image);
-    return storageRefPut;
   }
 
   // Image Picker:
