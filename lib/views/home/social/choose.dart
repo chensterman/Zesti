@@ -139,7 +139,7 @@ class _ChooseState extends State<Choose> {
                     children: [
                       GroupAvatar(
                           radius: 160.0,
-                          groupPhotos: snapshot.data!.groupPhotos),
+                          groupPhotos: snapshot.data!.photoMap.values.toList()),
                       SizedBox(height: 16.0),
                       Text(snapshot.data!.groupName,
                           textAlign: TextAlign.center,

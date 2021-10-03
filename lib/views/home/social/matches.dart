@@ -7,6 +7,7 @@ import 'package:zesti/services/database.dart';
 import 'package:zesti/theme/theme.dart';
 import 'package:zesti/widgets/errors.dart';
 import 'package:zesti/widgets/groupavatar.dart';
+import 'package:zesti/views/home/social/chat.dart';
 
 // Widget displaying the chat page for a specific match.
 class Matches extends StatefulWidget {
@@ -85,16 +86,18 @@ class _MatchesState extends State<Matches> {
               ),
               margin: EdgeInsets.all(8.0),
               child: InkWell(
-                onTap: () {
-                  // Navigator.push(
-                  //   context,
-                  //   MaterialPageRoute(
-                  //       builder: (context) => Chat(
-                  //           uid: uid,
-                  //           chatRef: chatRef,
-                  //           name: snapshot.data!.first,
-                  //           profpic: snapshot.data!.profPic)),
-                  // );
+                onTap: () async {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => Chat(
+                            gid: widget.gid,
+                            yougid: snapshot.data!.gid,
+                            groupName: snapshot.data!.groupName,
+                            chatRef: chatRef,
+                            nameMap: snapshot.data!.nameMap,
+                            photoMap: snapshot.data!.photoMap)),
+                  );
                 },
                 // Display match info (user data) on the sheet.
                 child: Container(
@@ -103,7 +106,8 @@ class _MatchesState extends State<Matches> {
                       Padding(
                           padding: const EdgeInsets.all(12.0),
                           child: GroupAvatar(
-                              groupPhotos: snapshot.data!.groupPhotos,
+                              groupPhotos:
+                                  snapshot.data!.photoMap.values.toList(),
                               radius: 80.0)),
                       Padding(
                         padding: const EdgeInsets.all(8.0),

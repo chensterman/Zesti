@@ -240,8 +240,23 @@ class _ChatState extends State<Chat> {
                 itemBuilder: (context, index) {
                   Map<String, dynamic> data =
                       tmp.docs[index].data() as Map<String, dynamic>;
-                  return chatMessageTile(
-                      data['content'], uid == data['sender-ref'].id);
+                  if (index == 0) {
+                    return chatMessageTile(data['content'],
+                        uid == data['sender-ref'].id, true, false);
+                  } else if (index + 1 == tmp.docs.length) {
+                    return chatMessageTile(data['content'],
+                        uid == data['sender-ref'].id, false, true);
+                  } else {
+                    Map<String, dynamic> dataAbove =
+                        tmp.docs[index - 1].data() as Map<String, dynamic>;
+                    Map<String, dynamic> dataBelow =
+                        tmp.docs[index + 1].data() as Map<String, dynamic>;
+                    return chatMessageTile(
+                        data['content'],
+                        uid == data['sender-ref'].id,
+                        uid == dataAbove['sender-ref'].id,
+                        uid == dataBelow['sender-ref'].id);
+                  }
                 })
             : Center(child: CircularProgressIndicator());
       },
@@ -250,30 +265,54 @@ class _ChatState extends State<Chat> {
 
   // Widget for a message tile.
   //  Parameters include message content and a boolean for if it was sent by the current user.
-  Widget chatMessageTile(String message, bool sendByMe) {
+  Widget chatMessageTile(
+      String message, bool sendByMe, bool bottomChain, bool topChain) {
     return Row(
       mainAxisAlignment:
           sendByMe ? MainAxisAlignment.end : MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        Flexible(
-          child: Container(
-              margin: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(24),
-                  bottomRight:
-                      sendByMe ? Radius.circular(0) : Radius.circular(24),
-                  topRight: Radius.circular(24),
-                  bottomLeft:
-                      sendByMe ? Radius.circular(24) : Radius.circular(0),
-                ),
-                color: sendByMe ? Colors.orange : Colors.grey[350],
+        bottomChain && !sendByMe
+            ? Padding(
+                child: CircleAvatar(
+                    radius: 20.0,
+                    backgroundImage: widget.profpic,
+                    backgroundColor: Colors.white),
+                padding: EdgeInsets.only(left: 8.0, top: 8.0, bottom: 8.0),
+              )
+            : Padding(
+                child: SizedBox(height: 40.0, width: 40.0),
+                padding: EdgeInsets.only(left: 8.0, top: 8.0, bottom: 8.0),
               ),
-              padding: EdgeInsets.all(16),
-              child: Text(
-                message,
-                style: TextStyle(color: Colors.white),
-              )),
+        Flexible(
+          child:
+              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            topChain && !sendByMe
+                ? Padding(
+                    child: Text(widget.name),
+                    padding:
+                        EdgeInsets.only(left: 20.0, top: 16.0, bottom: 8.0),
+                  )
+                : SizedBox.shrink(),
+            Container(
+                margin: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(24),
+                    bottomRight:
+                        sendByMe ? Radius.circular(0) : Radius.circular(24),
+                    topRight: Radius.circular(24),
+                    bottomLeft:
+                        sendByMe ? Radius.circular(24) : Radius.circular(0),
+                  ),
+                  color: sendByMe ? Colors.orange : Colors.grey[350],
+                ),
+                padding: EdgeInsets.all(16),
+                child: Text(
+                  message,
+                  style: TextStyle(color: Colors.white),
+                )),
+          ]),
         ),
       ],
     );
