@@ -593,6 +593,8 @@ class DatabaseService {
           .set({
             "timestamp": ts,
             "type": "one-on-one",
+            "user1-ref": userCollection.doc(uid),
+            "user2-ref": userCollection.doc(youid)
           })
           .then((value) => print("Chat created."))
           .catchError((error) => print("Failed to create chat: $error"));
@@ -902,6 +904,8 @@ class DatabaseService {
           .set({
             "type": "group",
             "timestamp": ts,
+            "group1-ref": groupCollection.doc(gid),
+            "group2-ref": groupCollection.doc(yougid),
           })
           .then((value) => print("Chat created."))
           .catchError((error) => print("Failed to create chat: $error"));
@@ -913,12 +917,12 @@ class DatabaseService {
           await groupCollection.doc(yougid).collection("users").get();
       for (QueryDocumentSnapshot user in users1.docs) {
         chatRef.collection("users").doc(user.id).set({
-          "user-ref": user.reference,
+          "user-ref": userCollection.doc(user.id),
         });
       }
       for (QueryDocumentSnapshot user in users2.docs) {
         chatRef.collection("users").doc(user.id).set({
-          "user-ref": user.reference,
+          "user-ref": userCollection.doc(user.id),
         });
       }
       await groupCollection

@@ -87,6 +87,12 @@ class _MatchesState extends State<Matches> {
               margin: EdgeInsets.all(8.0),
               child: InkWell(
                 onTap: () async {
+                  ZestiGroup currGroup = await DatabaseService(uid: uid)
+                      .getGroupInfo(DatabaseService(uid: uid)
+                          .groupCollection
+                          .doc(widget.gid));
+                  currGroup.nameMap.addAll(snapshot.data!.nameMap);
+                  currGroup.photoMap.addAll(snapshot.data!.photoMap);
                   Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -95,8 +101,8 @@ class _MatchesState extends State<Matches> {
                             yougid: snapshot.data!.gid,
                             groupName: snapshot.data!.groupName,
                             chatRef: chatRef,
-                            nameMap: snapshot.data!.nameMap,
-                            photoMap: snapshot.data!.photoMap)),
+                            nameMap: currGroup.nameMap,
+                            photoMap: currGroup.photoMap)),
                   );
                 },
                 // Display match info (user data) on the sheet.

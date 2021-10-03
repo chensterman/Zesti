@@ -107,7 +107,7 @@ class _ChatState extends State<Chat> {
         title: Row(
           children: [
             GroupAvatar(
-                groupPhotos: widget.photoMap.values.toList(), radius: 80.0),
+                groupPhotos: widget.photoMap.values.toList(), radius: 40.0),
             SizedBox(width: 10.0),
             Text(widget.groupName, style: TextStyle(fontSize: 20))
           ],
@@ -232,22 +232,41 @@ class _ChatState extends State<Chat> {
                 itemBuilder: (context, index) {
                   Map<String, dynamic> data =
                       tmp.docs[index].data() as Map<String, dynamic>;
+                  print(widget.nameMap);
+                  if (index == 0 && index + 1 == tmp.docs.length) {
+                    return chatMessageTile(data['content'], data['sender-ref'],
+                        uid == data['sender-ref'].id, true, true);
+                  }
+
                   if (index == 0) {
-                    return chatMessageTile(data['content'],
-                        uid == data['sender-ref'].id, true, false);
-                  } else if (index + 1 == tmp.docs.length) {
-                    return chatMessageTile(data['content'],
-                        uid == data['sender-ref'].id, false, true);
-                  } else {
                     Map<String, dynamic> dataAbove =
-                        tmp.docs[index - 1].data() as Map<String, dynamic>;
-                    Map<String, dynamic> dataBelow =
                         tmp.docs[index + 1].data() as Map<String, dynamic>;
                     return chatMessageTile(
                         data['content'],
+                        data['sender-ref'],
                         uid == data['sender-ref'].id,
-                        uid == dataAbove['sender-ref'].id,
-                        uid == dataBelow['sender-ref'].id);
+                        true,
+                        data['sender-ref'].id != dataAbove['sender-ref'].id);
+                  } else if (index + 1 == tmp.docs.length) {
+                    Map<String, dynamic> dataBelow =
+                        tmp.docs[index - 1].data() as Map<String, dynamic>;
+                    return chatMessageTile(
+                        data['content'],
+                        data['sender-ref'],
+                        uid == data['sender-ref'].id,
+                        data['sender-ref'].id != dataBelow['sender-ref'].id,
+                        true);
+                  } else {
+                    Map<String, dynamic> dataBelow =
+                        tmp.docs[index - 1].data() as Map<String, dynamic>;
+                    Map<String, dynamic> dataAbove =
+                        tmp.docs[index + 1].data() as Map<String, dynamic>;
+                    return chatMessageTile(
+                        data['content'],
+                        data['sender-ref'],
+                        uid == data['sender-ref'].id,
+                        data['sender-ref'].id != dataBelow['sender-ref'].id,
+                        data['sender-ref'].id != dataAbove['sender-ref'].id);
                   }
                 })
             : Center(child: CircularProgressIndicator());
@@ -257,8 +276,8 @@ class _ChatState extends State<Chat> {
 
   // Widget for a message tile.
   //  Parameters include message content and a boolean for if it was sent by the current user.
-  Widget chatMessageTile(
-      String message, bool sendByMe, bool bottomChain, bool topChain) {
+  Widget chatMessageTile(String message, DocumentReference senderRef,
+      bool sendByMe, bool bottomChain, bool topChain) {
     return Row(
       mainAxisAlignment:
           sendByMe ? MainAxisAlignment.end : MainAxisAlignment.start,
@@ -268,7 +287,7 @@ class _ChatState extends State<Chat> {
             ? Padding(
                 child: CircleAvatar(
                     radius: 20.0,
-                    backgroundImage: widget.profpic,
+                    backgroundImage: widget.photoMap[senderRef],
                     backgroundColor: Colors.white),
                 padding: EdgeInsets.only(left: 8.0, top: 8.0, bottom: 8.0),
               )
@@ -281,9 +300,8 @@ class _ChatState extends State<Chat> {
               Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             topChain && !sendByMe
                 ? Padding(
-                    child: Text(widget.name),
-                    padding:
-                        EdgeInsets.only(left: 20.0, top: 16.0, bottom: 8.0),
+                    child: Text(widget.nameMap[senderRef]!),
+                    padding: EdgeInsets.only(left: 20.0, top: 16.0),
                   )
                 : SizedBox.shrink(),
             Container(
