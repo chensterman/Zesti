@@ -189,6 +189,9 @@ class _GroupState extends State<Group> {
 
   Widget errorDialog(BuildContext context, String error) {
     return AlertDialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
       title: Text(error),
       content: SingleChildScrollView(
         child: SizedBox(
@@ -211,6 +214,9 @@ class _GroupState extends State<Group> {
 
   Widget changeDialog(BuildContext context, String message) {
     return AlertDialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
       title: Text(message),
       content: SingleChildScrollView(
         child: SizedBox(
@@ -232,6 +238,9 @@ class _GroupState extends State<Group> {
 
   Widget leaveConfirmDialog(BuildContext context, String uid) {
     return AlertDialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
       title: const Text("Are you sure you want to leave this group?"),
       content: SingleChildScrollView(
         child: SizedBox(

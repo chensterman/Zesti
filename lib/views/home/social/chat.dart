@@ -5,7 +5,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:zesti/services/database.dart';
 import 'package:zesti/theme/theme.dart';
-import 'package:zesti/views/home/redeem.dart';
+import 'package:zesti/views/home/deals.dart';
 import 'package:zesti/widgets/groupavatar.dart';
 import 'package:zesti/widgets/groupcard.dart';
 
@@ -154,6 +154,7 @@ class _ChatState extends State<Chat> {
                       child: Icon(
                         Icons.send,
                         color: Colors.orange,
+                        size: 48.0,
                       ),
                     )
                   ],

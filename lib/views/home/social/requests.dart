@@ -48,9 +48,13 @@ class _RequestsState extends State<Requests> {
                       // First index reserved for text "INCOMING REQUESTS".
                       if (index == 0) {
                         return Column(children: [
-                          Center(
-                              child: Text('INCOMING REQUESTS',
-                                  style: CustomTheme.textTheme.headline3)),
+                          Container(
+                            margin: EdgeInsets.only(left: 10.0),
+                            width: double.infinity,
+                            child: Text('Incoming Requests',
+                                textAlign: TextAlign.left,
+                                style: CustomTheme.textTheme.headline3),
+                          ),
                           tmp.docs.length == 0
                               ? Empty(
                                   reason:

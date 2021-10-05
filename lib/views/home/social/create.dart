@@ -36,9 +36,6 @@ class _CreateGroupState extends State<CreateGroup> {
         decoration: CustomTheme.mode,
         child: Center(
           child: Container(
-            padding: EdgeInsets.symmetric(
-                vertical: size.height * CustomTheme.paddingMultiplier,
-                horizontal: size.width * CustomTheme.paddingMultiplier),
             child: Form(
               key: _formKey,
               child: Center(
@@ -50,7 +47,7 @@ class _CreateGroupState extends State<CreateGroup> {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20),
                           ),
-                          margin: EdgeInsets.all(8.0),
+                          margin: EdgeInsets.all(32.0),
                           child: Padding(
                             padding: const EdgeInsets.symmetric(
                                 vertical: 32.0, horizontal: 32.0),
@@ -84,14 +81,14 @@ class _CreateGroupState extends State<CreateGroup> {
                                   padding:
                                       const EdgeInsets.symmetric(vertical: 8.0),
                                   child: Text(
-                                    "Enter a fun fact:",
+                                    "Enter a group tagline:",
                                     style: CustomTheme.textTheme.headline2,
                                   ),
                                 ),
                                 TextFormField(
                                     validator: (val) {
                                       if (val == null || val.isEmpty) {
-                                        return "Please enter a fun fact.";
+                                        return "Please enter a group tagline.";
                                       }
                                       if (val.length > 140) {
                                         return "Please enter a shorter tagline (140 characters max).";

@@ -5,7 +5,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:zesti/services/database.dart';
 import 'package:zesti/theme/theme.dart';
-import 'package:zesti/views/home/redeem.dart';
+import 'package:zesti/views/home/deals.dart';
 
 // Widget displaying the chat page for a specific match.
 class Chat extends StatefulWidget {
@@ -141,7 +141,8 @@ class _ChatState extends State<Chat> {
                       },
                       child: Icon(
                         Icons.send,
-                        color: Colors.orange,
+                        color: CustomTheme.reallyBrightOrange,
+                        size: 32.0,
                       ),
                     )
                   ],

@@ -19,13 +19,13 @@ class Empty extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
       ),
-      margin: EdgeInsets.only(top: 16.0, right: 8.0, left: 8.0, bottom: 8.0),
+      margin: EdgeInsets.only(top: 24.0, right: 8.0, left: 8.0, bottom: 8.0),
       child: Padding(
         padding: EdgeInsets.all(16.0),
         child: Column(
           children: [
             Text(reason,
-                textAlign: TextAlign.center,
+                textAlign: TextAlign.left,
                 style: CustomTheme.textTheme.headline2),
             SizedBox(height: 32.0),
             SizedBox(

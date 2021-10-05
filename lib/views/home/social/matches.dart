@@ -42,9 +42,13 @@ class _MatchesState extends State<Matches> {
                         // First index is reserved for text "MATCHES".
                         if (index == 0) {
                           return Column(children: [
-                            Center(
-                                child: Text('MATCHES',
-                                    style: CustomTheme.textTheme.headline3)),
+                            Container(
+                              margin: EdgeInsets.only(left: 10.0),
+                              width: double.infinity,
+                              child: Text('Matches',
+                                  textAlign: TextAlign.left,
+                                  style: CustomTheme.textTheme.headline3),
+                            ),
                             tmp.docs.length == 0
                                 ? Empty(
                                     reason:

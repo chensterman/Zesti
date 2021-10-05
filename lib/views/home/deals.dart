@@ -11,6 +11,7 @@ class Deals extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Size size = MediaQuery.of(context).size;
     return Drawer(
       child: Container(
         decoration: CustomTheme.standard,
@@ -18,12 +19,14 @@ class Deals extends StatelessWidget {
           padding: EdgeInsets.zero,
           children: <Widget>[
             Container(
+              padding: EdgeInsets.all(16.0),
               color: CustomTheme.reallyBrightOrange,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   SizedBox(
-                    height: 150.0,
+                    width: double.infinity,
+                    height: size.height * 0.15,
                     child: SvgPicture.asset("assets/zesti.svg",
                         semanticsLabel: "Zesti"),
                   ),

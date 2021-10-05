@@ -45,8 +45,13 @@ class _RecommendationsState extends State<Recommendations> {
                       if (index == 0) {
                         return Center(
                           child: Column(children: [
-                            Text('RECOMMENDATIONS',
-                                style: CustomTheme.textTheme.headline3),
+                            Container(
+                              margin: EdgeInsets.only(left: 10.0),
+                              width: double.infinity,
+                              child: Text('Recommendations',
+                                  textAlign: TextAlign.left,
+                                  style: CustomTheme.textTheme.headline3),
+                            ),
                             TextButton(
                               child: Text('Generate'),
                               onPressed: () async {
