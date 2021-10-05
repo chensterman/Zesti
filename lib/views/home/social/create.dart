@@ -7,10 +7,8 @@ import 'package:zesti/views/home/social/choose.dart';
 import 'package:zesti/widgets/formwidgets.dart';
 
 class CreateGroup extends StatefulWidget {
-  final String gid;
   CreateGroup({
     Key? key,
-    required this.gid,
   }) : super(key: key);
 
   @override

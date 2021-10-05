@@ -38,9 +38,13 @@ class _GroupState extends State<Group> {
               child: Column(
                 children: [
                   SizedBox(height: size.height * CustomTheme.paddingMultiplier),
-                  Center(
-                      child: Text('YOUR GROUP',
-                          style: CustomTheme.textTheme.headline3)),
+                  Container(
+                    margin: EdgeInsets.only(left: 10.0),
+                    width: double.infinity,
+                    child: Text('Your Group',
+                        textAlign: TextAlign.left,
+                        style: CustomTheme.textTheme.headline3),
+                  ),
                   SizedBox(height: 20.0),
                   GroupCardDummy(
                       groupRef: DatabaseService(uid: user!.uid)
