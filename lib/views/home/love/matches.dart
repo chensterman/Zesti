@@ -73,12 +73,18 @@ class _MatchesState extends State<Matches> {
             }));
   }
 
-  Widget recentChat(DocumentReference chatRef, DocumentReference userRef) {
+  Widget recentChat(DocumentReference chatRef) {
     return StreamBuilder(
         stream: DatabaseService(uid: widget.uid).getMessages(chatRef),
         builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
           QuerySnapshot? tmp = snapshot.data;
           if (tmp != null) {
+            if (tmp.docs.length == 0) {
+              return Text("Send the first messsage!",
+                  style: TextStyle(
+                      fontSize: 16, color: CustomTheme.reallyBrightOrange),
+                  overflow: TextOverflow.ellipsis);
+            }
             Map<String, dynamic> data =
                 tmp.docs.first.data() as Map<String, dynamic>;
             String message = data['content'];
@@ -146,7 +152,7 @@ class _MatchesState extends State<Matches> {
                                       fontWeight: FontWeight.bold,
                                       fontSize: 20)),
                               SizedBox(height: 10.0),
-                              recentChat(chatRef, userRef),
+                              recentChat(chatRef),
                             ],
                           ),
                         ),

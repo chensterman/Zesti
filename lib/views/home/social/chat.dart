@@ -15,7 +15,9 @@ class Chat extends StatefulWidget {
   final DocumentReference chatRef;
   final String groupName;
   final Map<DocumentReference, String> nameMap;
+  final Map<DocumentReference, String> yourGroupMap;
   final Map<DocumentReference, ImageProvider<Object>> photoMap;
+  final Map<DocumentReference, ImageProvider<Object>> youPhotoMap;
   Chat({
     Key? key,
     required this.gid,
@@ -23,7 +25,9 @@ class Chat extends StatefulWidget {
     required this.chatRef,
     required this.groupName,
     required this.nameMap,
+    required this.yourGroupMap,
     required this.photoMap,
+    required this.youPhotoMap,
   }) : super(key: key);
 
   @override
@@ -37,6 +41,7 @@ class _ChatState extends State<Chat> {
   @override
   Widget build(BuildContext context) {
     final user = Provider.of<User?>(context);
+    final size = MediaQuery.of(context).size;
     return Scaffold(
       // endDrawer is the restaurant display for discounts.
       endDrawer: Drawer(
@@ -107,9 +112,15 @@ class _ChatState extends State<Chat> {
         title: Row(
           children: [
             GroupAvatar(
-                groupPhotos: widget.photoMap.values.toList(), radius: 40.0),
+                groupPhotos: widget.youPhotoMap.values.toList(), radius: 40.0),
             SizedBox(width: 10.0),
-            Text(widget.groupName, style: TextStyle(fontSize: 20))
+            Container(
+                width: size.width * 0.4,
+                child: Text(
+                  widget.groupName,
+                  style: TextStyle(fontSize: 20),
+                  overflow: TextOverflow.ellipsis,
+                ))
           ],
         ),
       ),
@@ -149,16 +160,12 @@ class _ChatState extends State<Chat> {
                     ),
                     GestureDetector(
                       onTap: () {
-                        if (user == null) {
-                          print('User Error');
+                        // Check for an empty text editor (don't send empty chats).
+                        if (messageText.text != '') {
+                          sendMessage(user.uid, widget.chatRef, 'text',
+                              messageText.text);
                         } else {
-                          // Check for an empty text editor (don't send empty chats).
-                          if (messageText.text != '') {
-                            sendMessage(user.uid, widget.chatRef, 'text',
-                                messageText.text);
-                          } else {
-                            print('No message content');
-                          }
+                          print('No message content');
                         }
                       },
                       child: Icon(
@@ -278,6 +285,14 @@ class _ChatState extends State<Chat> {
   //  Parameters include message content and a boolean for if it was sent by the current user.
   Widget chatMessageTile(String message, DocumentReference senderRef,
       bool sendByMe, bool bottomChain, bool topChain) {
+    Color? bubbleColor;
+    if (sendByMe) {
+      bubbleColor = Colors.orange;
+    } else if (widget.yourGroupMap[senderRef] != null) {
+      bubbleColor = Colors.yellow[700];
+    } else {
+      bubbleColor = Colors.grey[350];
+    }
     return Row(
       mainAxisAlignment:
           sendByMe ? MainAxisAlignment.end : MainAxisAlignment.start,
@@ -287,7 +302,9 @@ class _ChatState extends State<Chat> {
             ? Padding(
                 child: CircleAvatar(
                     radius: 20.0,
-                    backgroundImage: widget.photoMap[senderRef],
+                    backgroundImage: widget.photoMap[senderRef] == null
+                        ? AssetImage("assets/profile.jpg")
+                        : widget.photoMap[senderRef],
                     backgroundColor: Colors.white),
                 padding: EdgeInsets.only(left: 8.0, top: 8.0, bottom: 8.0),
               )
@@ -295,35 +312,73 @@ class _ChatState extends State<Chat> {
                 child: SizedBox(height: 40.0, width: 40.0),
                 padding: EdgeInsets.only(left: 8.0, top: 8.0, bottom: 8.0),
               ),
-        Flexible(
-          child:
-              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            topChain && !sendByMe
-                ? Padding(
-                    child: Text(widget.nameMap[senderRef]!),
-                    padding: EdgeInsets.only(left: 20.0, top: 16.0),
-                  )
-                : SizedBox.shrink(),
-            Container(
-                margin: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(24),
-                    bottomRight:
-                        sendByMe ? Radius.circular(0) : Radius.circular(24),
-                    topRight: Radius.circular(24),
-                    bottomLeft:
-                        sendByMe ? Radius.circular(24) : Radius.circular(0),
-                  ),
-                  color: sendByMe ? Colors.orange : Colors.grey[350],
-                ),
-                padding: EdgeInsets.all(16),
-                child: Text(
-                  message,
-                  style: TextStyle(color: Colors.white),
-                )),
-          ]),
-        ),
+        widget.nameMap[senderRef] != null
+            ? Flexible(
+                child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      topChain && !sendByMe
+                          ? Padding(
+                              child: Text(widget.nameMap[senderRef]!),
+                              padding: EdgeInsets.only(left: 20.0, top: 16.0),
+                            )
+                          : SizedBox.shrink(),
+                      Container(
+                          margin:
+                              EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(24),
+                              bottomRight: sendByMe
+                                  ? Radius.circular(0)
+                                  : Radius.circular(24),
+                              topRight: Radius.circular(24),
+                              bottomLeft: sendByMe
+                                  ? Radius.circular(24)
+                                  : Radius.circular(0),
+                            ),
+                            color: bubbleColor,
+                          ),
+                          padding: EdgeInsets.all(16),
+                          child: Text(
+                            message,
+                            style: TextStyle(color: Colors.white),
+                          )),
+                    ]),
+              )
+            : Flexible(
+                child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      topChain && !sendByMe
+                          ? Padding(
+                              child: Text("USER HAS LEFT"),
+                              padding: EdgeInsets.only(left: 20.0, top: 16.0),
+                            )
+                          : SizedBox.shrink(),
+                      Container(
+                          margin:
+                              EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(24),
+                              bottomRight: sendByMe
+                                  ? Radius.circular(0)
+                                  : Radius.circular(24),
+                              topRight: Radius.circular(24),
+                              bottomLeft: sendByMe
+                                  ? Radius.circular(24)
+                                  : Radius.circular(0),
+                            ),
+                            color: bubbleColor,
+                          ),
+                          padding: EdgeInsets.all(16),
+                          child: Text(
+                            "(EXPIRED MESSAGE)",
+                            style: TextStyle(color: Colors.white),
+                          )),
+                    ]),
+              )
       ],
     );
   }

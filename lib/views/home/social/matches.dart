@@ -68,10 +68,43 @@ class _MatchesState extends State<Matches> {
             }));
   }
 
+  Widget recentChat(String uid, DocumentReference chatRef) {
+    return StreamBuilder(
+        stream: DatabaseService(uid: uid).getMessages(chatRef),
+        builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+          QuerySnapshot? tmp = snapshot.data;
+          if (tmp != null) {
+            if (tmp.docs.length == 0) {
+              return Text("Send the first messsage!",
+                  style: TextStyle(
+                      fontSize: 16, color: CustomTheme.reallyBrightOrange),
+                  overflow: TextOverflow.ellipsis);
+            }
+            Map<String, dynamic> data =
+                tmp.docs.first.data() as Map<String, dynamic>;
+            String message = data['content'];
+            if (data['sender-ref'].id != uid) {
+              return Text(message,
+                  style: TextStyle(fontSize: 16),
+                  overflow: TextOverflow.ellipsis);
+            } else {
+              return Text(message,
+                  style: TextStyle(
+                      fontSize: 16, color: CustomTheme.reallyBrightOrange),
+                  overflow: TextOverflow.ellipsis);
+            }
+          } else {
+            return Container();
+          }
+        });
+  }
+
   // To display info about each match you have.
   Widget matchSheet(String uid, DocumentReference chatRef,
       DocumentReference groupRef, DocumentReference parentGroupRef) {
     // FutureBuilder used to retrieve profile photo of your match.
+    final user = Provider.of<User?>(context);
+    final size = MediaQuery.of(context).size;
     return FutureBuilder(
         future: DatabaseService(uid: uid).getGroupInfo(groupRef),
         builder: (context, AsyncSnapshot<ZestiGroup> snapshot) {
@@ -91,18 +124,24 @@ class _MatchesState extends State<Matches> {
                       .getGroupInfo(DatabaseService(uid: uid)
                           .groupCollection
                           .doc(widget.gid));
+                  Map<DocumentReference, String> yourGroupMap =
+                      new Map<DocumentReference, String>.from(
+                          currGroup.nameMap);
                   currGroup.nameMap.addAll(snapshot.data!.nameMap);
                   currGroup.photoMap.addAll(snapshot.data!.photoMap);
                   Navigator.push(
                     context,
                     MaterialPageRoute(
                         builder: (context) => Chat(
-                            gid: widget.gid,
-                            yougid: snapshot.data!.gid,
-                            groupName: snapshot.data!.groupName,
-                            chatRef: chatRef,
-                            nameMap: currGroup.nameMap,
-                            photoMap: currGroup.photoMap)),
+                              gid: widget.gid,
+                              yougid: snapshot.data!.gid,
+                              groupName: snapshot.data!.groupName,
+                              chatRef: chatRef,
+                              nameMap: currGroup.nameMap,
+                              photoMap: currGroup.photoMap,
+                              yourGroupMap: yourGroupMap,
+                              youPhotoMap: snapshot.data!.photoMap,
+                            )),
                   );
                 },
                 // Display match info (user data) on the sheet.
@@ -117,14 +156,20 @@ class _MatchesState extends State<Matches> {
                               radius: 80.0)),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: Column(
-                          children: [
-                            Text(snapshot.data!.groupName,
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold, fontSize: 20)),
-                            SizedBox(height: 10.0),
-                            Text('Hi there!', style: TextStyle(fontSize: 16))
-                          ],
+                        child: Container(
+                          width: size.width * 0.5,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(snapshot.data!.groupName,
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 20),
+                                  overflow: TextOverflow.ellipsis),
+                              SizedBox(height: 10.0),
+                              recentChat(user!.uid, chatRef)
+                            ],
+                          ),
                         ),
                       ),
                     ],
