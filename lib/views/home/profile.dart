@@ -104,6 +104,36 @@ class _ProfileState extends State<Profile> {
     super.initState();
   }
 
+  void houseCallback(String? val) {
+    setState(() {
+      house = val;
+    });
+  }
+
+  void yearCallback(String? val) {
+    setState(() {
+      year = val;
+    });
+  }
+
+  void dIdentityCallback(String? val) {
+    setState(() {
+      dIdentity = val;
+    });
+  }
+
+  void dInterestCallback(String? val) {
+    setState(() {
+      dIdentity = val;
+    });
+  }
+
+  void profpicCallback(dynamic val) {
+    setState(() {
+      profpic = val;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     // StreamBuilder to display profile info stream.
@@ -144,6 +174,20 @@ class _ProfileState extends State<Profile> {
             zestKey = data['zest-key'];
 
             // Tab controller switches between "edit" and "preview" mode.
+            TabBar tabBar = TabBar(
+              automaticIndicatorColorAdjustment: false,
+              indicatorColor: CustomTheme.reallyBrightOrange,
+              tabs: <Widget>[
+                Tab(
+                  child: Text("Edit",
+                      style: TextStyle(color: CustomTheme.reallyBrightOrange)),
+                ),
+                Tab(
+                  child: Text("Preview",
+                      style: TextStyle(color: CustomTheme.reallyBrightOrange)),
+                ),
+              ],
+            );
             return DefaultTabController(
               initialIndex: 0,
               length: 2,
@@ -151,15 +195,12 @@ class _ProfileState extends State<Profile> {
                 appBar: AppBar(
                   backgroundColor: CustomTheme.reallyBrightOrange,
                   title: Text("Your Profile"),
-                  bottom: TabBar(
-                    tabs: <Widget>[
-                      Tab(
-                        child: Text("Edit"),
-                      ),
-                      Tab(
-                        child: Text("Preview"),
-                      ),
-                    ],
+                  bottom: PreferredSize(
+                    preferredSize: tabBar.preferredSize,
+                    child: ColoredBox(
+                      color: Colors.white,
+                      child: tabBar,
+                    ),
                   ),
                 ),
                 body: TabBarView(
@@ -222,7 +263,9 @@ class _ProfileState extends State<Profile> {
                                                   // During loading or success.
                                                 } else {
                                                   profpic = snapshot.data;
-                                                  return profileImage();
+                                                  return ImageUpdate(
+                                                      callback: profpicCallback,
+                                                      profpic: profpic);
                                                 }
                                               }),
                                         )
@@ -230,7 +273,9 @@ class _ProfileState extends State<Profile> {
                                           padding: const EdgeInsets.symmetric(
                                               horizontal: 64.0),
                                           // FutureBuilder retrieves profile photo from Firebase Storage.
-                                          child: profileImage(),
+                                          child: ImageUpdate(
+                                              callback: profpicCallback,
+                                              profpic: profpic),
                                         ),
                                   SizedBox(height: 20.0),
                                   Padding(
@@ -283,25 +328,11 @@ class _ProfileState extends State<Profile> {
                                       style: CustomTheme.textTheme.headline2,
                                     ),
                                   ),
-                                  DropdownButton<String>(
-                                    value: house,
-                                    hint: Text('Select'),
-                                    style: TextStyle(color: Colors.black),
-                                    isExpanded: true,
-                                    items: _houseList.map((val) {
-                                      return DropdownMenuItem(
-                                          value: val, child: Text(val));
-                                    }).toList(),
-                                    onChanged: (String? val) {
-                                      if (val == null) {
-                                        print('Error');
-                                      } else {
-                                        setState(() {
-                                          house = val;
-                                        });
-                                      }
-                                    },
-                                  ),
+                                  SizedBox(height: 20.0),
+                                  DropDownField(
+                                      callback: houseCallback,
+                                      initValue: house,
+                                      houseList: _houseList),
                                   SizedBox(height: 20.0),
                                   Padding(
                                     padding: const EdgeInsets.symmetric(
@@ -312,23 +343,10 @@ class _ProfileState extends State<Profile> {
                                     ),
                                   ),
                                   SizedBox(height: 20.0),
-                                  DropdownButton<String>(
-                                    value: year,
-                                    hint: Text('Select'),
-                                    style: TextStyle(color: Colors.black),
-                                    isExpanded: true,
-                                    items: _yearList.map((val) {
-                                      return DropdownMenuItem(
-                                          value: val, child: Text(val));
-                                    }).toList(),
-                                    onChanged: (String? val) {
-                                      if (val != null) {
-                                        setState(() {
-                                          year = val;
-                                        });
-                                      }
-                                    },
-                                  ),
+                                  DropDownField(
+                                      callback: yearCallback,
+                                      initValue: year,
+                                      houseList: _yearList),
                                   SizedBox(height: 20.0),
                                   Padding(
                                     padding: const EdgeInsets.symmetric(
@@ -339,23 +357,10 @@ class _ProfileState extends State<Profile> {
                                     ),
                                   ),
                                   SizedBox(height: 20.0),
-                                  DropdownButton<String>(
-                                    value: dIdentity,
-                                    hint: Text('Select'),
-                                    style: TextStyle(color: Colors.black),
-                                    isExpanded: true,
-                                    items: _identityList.map((val) {
-                                      return DropdownMenuItem(
-                                          value: val, child: Text(val));
-                                    }).toList(),
-                                    onChanged: (String? val) {
-                                      if (val != null) {
-                                        setState(() {
-                                          dIdentity = val;
-                                        });
-                                      }
-                                    },
-                                  ),
+                                  DropDownField(
+                                      callback: dIdentityCallback,
+                                      initValue: dIdentity,
+                                      houseList: _identityList),
                                   SizedBox(height: 20.0),
                                   Padding(
                                     padding: const EdgeInsets.symmetric(
@@ -366,23 +371,10 @@ class _ProfileState extends State<Profile> {
                                     ),
                                   ),
                                   SizedBox(height: 20.0),
-                                  DropdownButton<String>(
-                                    value: dInterest,
-                                    hint: Text('Select'),
-                                    style: TextStyle(color: Colors.black),
-                                    isExpanded: true,
-                                    items: _interestList.map((val) {
-                                      return DropdownMenuItem(
-                                          value: val, child: Text(val));
-                                    }).toList(),
-                                    onChanged: (String? val) {
-                                      if (val != null) {
-                                        setState(() {
-                                          dInterest = val;
-                                        });
-                                      }
-                                    },
-                                  ),
+                                  DropDownField(
+                                      callback: dInterestCallback,
+                                      initValue: dInterest,
+                                      houseList: _interestList),
                                   SizedBox(height: 20.0),
                                   RoundedButton(
                                       text: 'Update',
@@ -488,114 +480,5 @@ class _ProfileState extends State<Profile> {
             return Center(child: CircularProgressIndicator());
           }
         });
-  }
-
-  // Image Picker:
-  //  Sets dynamic Imagefile to an image file if possible.
-  Future<void> pickImage(ImageSource source) async {
-    final selected = await _picker.getImage(source: source);
-
-    setState(() {
-      if (selected == null) {
-        print("Error");
-      } else {
-        File file = File(selected.path);
-        profpic = file;
-      }
-    });
-  }
-
-  // Clears the image:
-  //  Reverts the dynamic ImageFile back to null.
-  void clearImage() {
-    setState(() => profpic = null);
-  }
-
-  // Widget for profile image chooser.
-  Widget profileImage() {
-    // Instantiate the image.
-    ImageProvider<Object>? bgImage;
-
-    // Update the image according to the dynamic imageFile.
-    if (profpic == null) {
-      bgImage = AssetImage("assets/profile.jpg");
-    } else if (profpic is ImageProvider<Object>) {
-      bgImage = profpic;
-    } else {
-      bgImage = FileImage(File(profpic.path));
-    }
-
-    return Stack(
-      children: [
-        CircleAvatar(
-          radius: 80.0,
-          backgroundImage: bgImage,
-          backgroundColor: Colors.white,
-        ),
-        Positioned(
-          bottom: 0.0,
-          right: 4.0,
-          child: InkWell(
-              onTap: () {
-                showModalBottomSheet(
-                    context: context, builder: (builder) => bottomSheet());
-              },
-              child: Icon(
-                Icons.add_circle,
-                color: Colors.green,
-                size: 36.0,
-              )),
-        ),
-        Positioned(
-          top: 2.0,
-          right: 2.0,
-          child: InkWell(
-              onTap: () {
-                clearImage();
-              },
-              child: Icon(
-                Icons.do_not_disturb_on,
-                color: Colors.red,
-                size: 36.0,
-              )),
-        ),
-      ],
-    );
-  }
-
-  // Widget for the image choosing bottom sheet (camera or gallery).
-  Widget bottomSheet() {
-    Size size = MediaQuery.of(context).size;
-    return Container(
-      height: 100.0,
-      width: size.width,
-      margin: EdgeInsets.symmetric(
-        horizontal: 20,
-        vertical: 20,
-      ),
-      child: Column(children: [
-        Text("Choose Profile Photo", style: TextStyle(fontSize: 20)),
-        SizedBox(height: 8.0),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            TextButton.icon(
-              icon: Icon(Icons.camera, color: Colors.grey),
-              onPressed: () {
-                pickImage(ImageSource.camera);
-              },
-              label: Text("Camera", style: TextStyle(color: Colors.grey)),
-            ),
-            TextButton.icon(
-              icon: Icon(Icons.image, color: Colors.grey),
-              onPressed: () {
-                pickImage(ImageSource.gallery);
-              },
-              label: Text("Gallery", style: TextStyle(color: Colors.grey)),
-            ),
-          ],
-        )
-      ]),
-    );
   }
 }

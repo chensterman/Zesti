@@ -1,8 +1,98 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:zesti/services/database.dart';
 import 'package:zesti/theme/theme.dart';
 import 'package:zesti/widgets/formwidgets.dart';
+
+// Widget to redeem discount codes.
+class Deals extends StatelessWidget {
+  Deals({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Drawer(
+      child: Container(
+        decoration: CustomTheme.standard,
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: <Widget>[
+            Container(
+              color: CustomTheme.reallyBrightOrange,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    height: 150.0,
+                    child: SvgPicture.asset("assets/zesti.svg",
+                        semanticsLabel: "Zesti"),
+                  ),
+                  Text(
+                    'Deals',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 36,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            dealCard(context, "assets/amorino.jpg", "AMORINO",
+                "20% off of the Spring and Summer menu!"),
+            dealCard(context, "assets/grendels.jpg", "GRENDEL'S DEN",
+                "Free \$20 gift card for each visit (max 3)!"),
+            dealCard(context, "assets/zinnekens.jpg", "ZINNEKEN'S",
+                "20% off of any purchase!"),
+            dealCard(context, "assets/maharaja.jpg", "THE MAHARAJA",
+                "Anything off of the dessert menu, on the house!"),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Card that displays a specific partner deal.
+  Widget dealCard(BuildContext context, String imagePath, String vendor,
+      String description) {
+    return Card(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+      margin: EdgeInsets.all(16.0),
+      child: InkWell(
+        splashColor: CustomTheme.reallyBrightOrange,
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => Redeem(
+                    imagePath: imagePath,
+                    vendor: vendor,
+                    description: description)),
+          );
+        },
+        child: Padding(
+          padding: EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              CircleAvatar(
+                  radius: 80.0,
+                  backgroundImage: AssetImage(imagePath),
+                  backgroundColor: Colors.white),
+              SizedBox(height: 16.0),
+              Text(vendor,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.orange[900], fontSize: 24.0)),
+              Text(description,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 24.0)),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
 
 // Widget to redeem discount codes.
 class Redeem extends StatefulWidget {

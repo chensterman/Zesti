@@ -45,38 +45,7 @@ class _ChatState extends State<Chat> {
     final size = MediaQuery.of(context).size;
     return Scaffold(
       // endDrawer is the restaurant display for discounts.
-      endDrawer: Drawer(
-        child: Container(
-          decoration: CustomTheme.standard,
-          child: ListView(
-            padding: EdgeInsets.zero,
-            children: <Widget>[
-              DrawerHeader(
-                decoration: BoxDecoration(
-                  color: Colors.orange.shade900,
-                ),
-                child: Center(
-                  child: Text(
-                    'Deals',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 36,
-                    ),
-                  ),
-                ),
-              ),
-              dealCard("assets/amorino.jpg", "AMORINO",
-                  "20% off of the Spring and Summer menu!"),
-              dealCard("assets/grendels.jpg", "GRENDEL'S DEN",
-                  "Free \$20 gift card for each visit (max 3)!"),
-              dealCard("assets/zinnekens.jpg", "ZINNEKEN'S",
-                  "20% off of any purchase!"),
-              dealCard("assets/maharaja.jpg", "THE MAHARAJA",
-                  "Anything off of the dessert menu, on the house!"),
-            ],
-          ),
-        ),
-      ),
+      endDrawer: Deals(),
       appBar: AppBar(
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
@@ -192,47 +161,6 @@ class _ChatState extends State<Chat> {
               ),
             )
           ],
-        ),
-      ),
-    );
-  }
-
-  // Card that displays a specific partner deal.
-  Widget dealCard(String imagePath, String vendor, String description) {
-    return Card(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
-      margin: EdgeInsets.all(16.0),
-      child: InkWell(
-        splashColor: CustomTheme.reallyBrightOrange,
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => Redeem(
-                    imagePath: imagePath,
-                    vendor: vendor,
-                    description: description)),
-          );
-        },
-        child: Padding(
-          padding: EdgeInsets.all(16.0),
-          child: Column(
-            children: [
-              CircleAvatar(
-                  radius: 80.0,
-                  backgroundImage: AssetImage(imagePath),
-                  backgroundColor: Colors.white),
-              SizedBox(height: 16.0),
-              Text(vendor,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.orange[900], fontSize: 24.0)),
-              Text(description,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 24.0)),
-            ],
-          ),
         ),
       ),
     );

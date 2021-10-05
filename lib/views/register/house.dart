@@ -17,7 +17,7 @@ class _HouseState extends State<House> {
   final _formKey = GlobalKey<FormState>();
 
   // List of Harvard houses
-  dynamic _house;
+  String? _house;
   List<String> _houseList = [
     'Apley Court',
     'Canaday',
@@ -51,13 +51,25 @@ class _HouseState extends State<House> {
   ];
 
   // List of years
-  dynamic _year;
+  String? _year;
   List<String> _yearList = [
     '\'22',
     '\'23',
     '\'24',
     '\'25',
   ];
+
+  void houseCallback(String? val) {
+    setState(() {
+      _house = val;
+    });
+  }
+
+  void yearCallback(String? val) {
+    setState(() {
+      _year = val;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -108,23 +120,10 @@ class _HouseState extends State<House> {
                                   ),
                                 ),
                                 SizedBox(height: 20.0),
-                                DropdownButton<String>(
-                                  value: _house,
-                                  hint: Text('Select'),
-                                  style: TextStyle(color: Colors.black),
-                                  isExpanded: true,
-                                  items: _houseList.map((val) {
-                                    return DropdownMenuItem(
-                                        value: val, child: Text(val));
-                                  }).toList(),
-                                  onChanged: (String? val) {
-                                    if (val != null) {
-                                      setState(() {
-                                        _house = val;
-                                      });
-                                    }
-                                  },
-                                ),
+                                DropDownField(
+                                    callback: houseCallback,
+                                    initValue: _house,
+                                    houseList: _houseList),
                                 SizedBox(height: 20.0),
                                 Padding(
                                   padding:
@@ -135,32 +134,19 @@ class _HouseState extends State<House> {
                                   ),
                                 ),
                                 SizedBox(height: 20.0),
-                                DropdownButton<String>(
-                                  value: _year,
-                                  hint: Text('Select'),
-                                  style: TextStyle(color: Colors.black),
-                                  isExpanded: true,
-                                  items: _yearList.map((val) {
-                                    return DropdownMenuItem(
-                                        value: val, child: Text(val));
-                                  }).toList(),
-                                  onChanged: (String? val) {
-                                    if (val != null) {
-                                      setState(() {
-                                        _year = val;
-                                      });
-                                    }
-                                  },
-                                ),
+                                DropDownField(
+                                    callback: yearCallback,
+                                    initValue: _year,
+                                    houseList: _yearList),
                                 SizedBox(height: 20.0),
                                 RoundedButton(
                                     text: 'Continue',
                                     onPressed: () async {
                                       if (_house != null && _year != null) {
                                         await DatabaseService(uid: user!.uid)
-                                            .updateHouse(_house);
+                                            .updateHouse(_house!);
                                         await DatabaseService(uid: user.uid)
-                                            .updateYear(_year);
+                                            .updateYear(_year!);
                                         Navigator.push(
                                           context,
                                           MaterialPageRoute(

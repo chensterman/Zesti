@@ -73,7 +73,7 @@ class Interest extends StatelessWidget {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                          builder: (context) => Info()),
+                                          builder: (context) => House()),
                                     );
                                   },
                                 ),
@@ -90,7 +90,7 @@ class Interest extends StatelessWidget {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                          builder: (context) => Info()),
+                                          builder: (context) => House()),
                                     );
                                   },
                                 ),
