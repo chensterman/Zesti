@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:zesti/services/database.dart';
 import 'package:zesti/theme/theme.dart';
 import 'package:zesti/widgets/formwidgets.dart';
 
@@ -51,26 +53,91 @@ class _RedeemState extends State<Redeem> {
                 Text(widget.description,
                     textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 24.0, fontFamily: 'Hind')),
+                // SizedBox(height: 20.0),
+                // TextFormField(
+                //     validator: (val) {
+                //       if (val == null || val.isEmpty) {
+                //         return "Please enter the correct coupon code.";
+                //       }
+                //     },
+                //     onChanged: (val) {
+                //       setState(() => code = val);
+                //     },
+                //     decoration: const InputDecoration(
+                //         hintText: "Enter staff code here")),
                 SizedBox(height: 20.0),
-                TextFormField(
-                    validator: (val) {
-                      if (val == null || val.isEmpty) {
-                        return "Please enter the correct coupon code.";
-                      }
-                    },
-                    onChanged: (val) {
-                      setState(() => code = val);
-                    },
-                    decoration: const InputDecoration(
-                        hintText: "Enter staff code here")),
-                SizedBox(height: 20.0),
-                RoundedButton(text: 'Redeem', onPressed: () {}),
+                RoundedButton(
+                    text: 'Redeem',
+                    onPressed: () {
+                      showDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (context) => redeemDialog(
+                                context,
+                                "Are you sure? Do not redeem this coupon until you are ready to present it to the restaurant staff. If this coupon has limited uses, proceeding will deplete one use.",
+                              ));
+                    }),
                 SizedBox(height: 20.0),
               ],
             ),
           ),
         ),
       ),
+    );
+  }
+
+  Widget redeemDialog(BuildContext context, String message) {
+    return AlertDialog(
+      title: Text(message),
+      content: SingleChildScrollView(
+        child: SizedBox(
+          width: double.infinity,
+          height: 150.0,
+          child:
+              SvgPicture.asset("assets/warning.svg", semanticsLabel: "Warning"),
+        ),
+      ),
+      actions: <Widget>[
+        TextButton(
+          child: Text("Yes", style: CustomTheme.textTheme.headline2),
+          onPressed: () async {
+            Navigator.pop(context);
+            showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (context) => redeemedDialog(
+                      context,
+                      "You have redeemed the Amorino discount. Please show this to staff and then press 'Done'.",
+                    ));
+          },
+        ),
+        TextButton(
+          child: Text("No", style: CustomTheme.textTheme.headline2),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget redeemedDialog(BuildContext context, String message) {
+    return AlertDialog(
+      title: Text(message),
+      content: SingleChildScrollView(
+        child: CircleAvatar(
+            radius: 120.0,
+            backgroundImage: AssetImage("assets/amorino.jpg"),
+            backgroundColor: Colors.white),
+      ),
+      actions: <Widget>[
+        TextButton(
+          child: Text("Done", style: CustomTheme.textTheme.headline2),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
+      ],
     );
   }
 }

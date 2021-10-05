@@ -7,6 +7,7 @@ import 'package:zesti/services/database.dart';
 import 'package:zesti/theme/theme.dart';
 import 'package:zesti/widgets/errors.dart';
 import 'package:zesti/widgets/groupavatar.dart';
+import 'package:zesti/views/home/social/chat.dart';
 
 // Widget displaying the chat page for a specific match.
 class Matches extends StatefulWidget {
@@ -67,10 +68,43 @@ class _MatchesState extends State<Matches> {
             }));
   }
 
+  Widget recentChat(String uid, DocumentReference chatRef) {
+    return StreamBuilder(
+        stream: DatabaseService(uid: uid).getMessages(chatRef),
+        builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+          QuerySnapshot? tmp = snapshot.data;
+          if (tmp != null) {
+            if (tmp.docs.length == 0) {
+              return Text("Send the first messsage!",
+                  style: TextStyle(
+                      fontSize: 16, color: CustomTheme.reallyBrightOrange),
+                  overflow: TextOverflow.ellipsis);
+            }
+            Map<String, dynamic> data =
+                tmp.docs.first.data() as Map<String, dynamic>;
+            String message = data['content'];
+            if (data['sender-ref'].id != uid) {
+              return Text(message,
+                  style: TextStyle(fontSize: 16),
+                  overflow: TextOverflow.ellipsis);
+            } else {
+              return Text(message,
+                  style: TextStyle(
+                      fontSize: 16, color: CustomTheme.reallyBrightOrange),
+                  overflow: TextOverflow.ellipsis);
+            }
+          } else {
+            return Container();
+          }
+        });
+  }
+
   // To display info about each match you have.
   Widget matchSheet(String uid, DocumentReference chatRef,
       DocumentReference groupRef, DocumentReference parentGroupRef) {
     // FutureBuilder used to retrieve profile photo of your match.
+    final user = Provider.of<User?>(context);
+    final size = MediaQuery.of(context).size;
     return FutureBuilder(
         future: DatabaseService(uid: uid).getGroupInfo(groupRef),
         builder: (context, AsyncSnapshot<ZestiGroup> snapshot) {
@@ -85,16 +119,30 @@ class _MatchesState extends State<Matches> {
               ),
               margin: EdgeInsets.all(8.0),
               child: InkWell(
-                onTap: () {
-                  // Navigator.push(
-                  //   context,
-                  //   MaterialPageRoute(
-                  //       builder: (context) => Chat(
-                  //           uid: uid,
-                  //           chatRef: chatRef,
-                  //           name: snapshot.data!.first,
-                  //           profpic: snapshot.data!.profPic)),
-                  // );
+                onTap: () async {
+                  ZestiGroup currGroup = await DatabaseService(uid: uid)
+                      .getGroupInfo(DatabaseService(uid: uid)
+                          .groupCollection
+                          .doc(widget.gid));
+                  Map<DocumentReference, String> yourGroupMap =
+                      new Map<DocumentReference, String>.from(
+                          currGroup.nameMap);
+                  currGroup.nameMap.addAll(snapshot.data!.nameMap);
+                  currGroup.photoMap.addAll(snapshot.data!.photoMap);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => Chat(
+                              gid: widget.gid,
+                              yougid: snapshot.data!.gid,
+                              groupName: snapshot.data!.groupName,
+                              chatRef: chatRef,
+                              nameMap: currGroup.nameMap,
+                              photoMap: currGroup.photoMap,
+                              yourGroupMap: yourGroupMap,
+                              youPhotoMap: snapshot.data!.photoMap,
+                            )),
+                  );
                 },
                 // Display match info (user data) on the sheet.
                 child: Container(
@@ -103,18 +151,25 @@ class _MatchesState extends State<Matches> {
                       Padding(
                           padding: const EdgeInsets.all(12.0),
                           child: GroupAvatar(
-                              groupPhotos: snapshot.data!.groupPhotos,
+                              groupPhotos:
+                                  snapshot.data!.photoMap.values.toList(),
                               radius: 80.0)),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: Column(
-                          children: [
-                            Text(snapshot.data!.groupName,
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold, fontSize: 20)),
-                            SizedBox(height: 10.0),
-                            Text('Hi there!', style: TextStyle(fontSize: 16))
-                          ],
+                        child: Container(
+                          width: size.width * 0.5,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(snapshot.data!.groupName,
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 20),
+                                  overflow: TextOverflow.ellipsis),
+                              SizedBox(height: 10.0),
+                              recentChat(user!.uid, chatRef)
+                            ],
+                          ),
                         ),
                       ),
                     ],

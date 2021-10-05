@@ -42,11 +42,12 @@ class GroupCard extends StatelessWidget {
           else if (snapshot.connectionState == ConnectionState.done) {
             double height = size.height * 0.7;
             double picHeight = height;
-            if (snapshot.data!.groupPhotos.length > 1) {
+            if (snapshot.data!.photoMap.length > 1) {
               picHeight = picHeight * 0.5;
             }
             List<Widget> widgetList = [];
-            for (ImageProvider<Object> photo in snapshot.data!.groupPhotos) {
+            for (ImageProvider<Object> photo
+                in snapshot.data!.photoMap.values) {
               widgetList.add(_buildAvatar(photo, picHeight));
             }
             return InkWell(
@@ -280,11 +281,12 @@ class GroupCardDummy extends StatelessWidget {
           else if (snapshot.connectionState == ConnectionState.done) {
             double height = size.height * 0.7;
             double picHeight = height;
-            if (snapshot.data!.groupPhotos.length > 1) {
+            if (snapshot.data!.photoMap.length > 1) {
               picHeight = picHeight * 0.5;
             }
             List<Widget> widgetList = [];
-            for (ImageProvider<Object> photo in snapshot.data!.groupPhotos) {
+            for (ImageProvider<Object> photo
+                in snapshot.data!.photoMap.values) {
               widgetList.add(_buildAvatar(photo, picHeight));
             }
             return InkWell(

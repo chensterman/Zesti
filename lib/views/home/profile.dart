@@ -180,9 +180,6 @@ class _ProfileState extends State<Profile> {
         decoration: CustomTheme.mode,
         child: Center(
           child: Container(
-            padding: EdgeInsets.symmetric(
-                vertical: size.height * CustomTheme.paddingMultiplier,
-                horizontal: size.width * CustomTheme.paddingMultiplier),
             child: Form(
               key: _formKey,
               child: Center(
@@ -196,7 +193,7 @@ class _ProfileState extends State<Profile> {
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(20),
                             ),
-                            margin: EdgeInsets.all(8.0),
+                            margin: EdgeInsets.all(32.0),
                             child: Padding(
                               padding: const EdgeInsets.symmetric(
                                   vertical: 32.0, horizontal: 32.0),
@@ -445,6 +442,7 @@ class _ProfileState extends State<Profile> {
 
   // Preview widget.
   Widget preview() {
+    Size size = MediaQuery.of(context).size;
     return FutureBuilder(
         future: DatabaseService(uid: widget.uid).getPhoto(photoref),
         builder: (context, AsyncSnapshot<ImageProvider<Object>> snapshot) {
@@ -466,10 +464,22 @@ class _ProfileState extends State<Profile> {
                 year: "",
                 profPic: snapshot.data!,
                 zestKey: "");
-            return Padding(
-              padding: EdgeInsets.all(16.0),
-              // FutureBuilder to retrieve profile photo from Firebase Storage.
-              child: PreviewCard(userOnCard: previewUser, rec: true),
+            return Scaffold(
+              body: Container(
+                decoration: CustomTheme.mode,
+                child: Center(
+                  child: Container(
+                    padding: EdgeInsets.symmetric(
+                        vertical: size.height * CustomTheme.paddingMultiplier,
+                        horizontal: size.width * CustomTheme.paddingMultiplier),
+                    child: Padding(
+                      padding: EdgeInsets.all(8.0),
+                      // FutureBuilder to retrieve profile photo from Firebase Storage.
+                      child: PreviewCard(userOnCard: previewUser, rec: true),
+                    ),
+                  ),
+                ),
+              ),
             );
           } else {
             return Center(child: CircularProgressIndicator());

@@ -261,17 +261,22 @@ class DatabaseService {
     QuerySnapshot groupUsers = await groupRef.collection("users").get();
     List groupUserRefs =
         groupUsers.docs.map((doc) => doc.get("user-ref")).toList();
-    List userPhotos = [];
+    Map<DocumentReference, String> nameMap = {};
+    Map<DocumentReference, ImageProvider<Object>> photoMap = {};
     for (DocumentReference userRef in groupUserRefs) {
       DocumentSnapshot userSnapshot = await userRef.get();
-      String photoURL = userSnapshot.get("photo-ref");
-      userPhotos.add(await getPhoto(photoURL));
+      ImageProvider<Object> photo =
+          await getPhoto(userSnapshot.get("photo-ref"));
+      String name = await userSnapshot.get("first-name");
+      nameMap[userRef] = name;
+      photoMap[userRef] = photo;
     }
     return ZestiGroup(
         gid: groupRef.id,
         groupName: groupInfo['group-name'],
         funFact: groupInfo['fun-fact'],
-        groupPhotos: userPhotos);
+        nameMap: nameMap,
+        photoMap: photoMap);
   }
 
   // Retrieves all info of a user document including profile picture.
@@ -338,9 +343,19 @@ class DatabaseService {
   }
 
   // Unmatch with a user.
-  Future<void> unmatch(String youid, String chatRef) async {
-    await userCollection.doc(uid).collection("matched").doc(chatRef).delete();
-    await userCollection.doc(youid).collection("matched").doc(chatRef).delete();
+  Future<void> unmatch(String youid, String chatid) async {
+    await userCollection.doc(uid).collection("matched").doc(chatid).delete();
+    await userCollection.doc(youid).collection("matched").doc(chatid).delete();
+  }
+
+  // Unmatch with a group.
+  Future<void> unmatchGroup(String gid, String yougid, String chatid) async {
+    await groupCollection.doc(gid).collection("matched").doc(chatid).delete();
+    await groupCollection
+        .doc(yougid)
+        .collection("matched")
+        .doc(chatid)
+        .delete();
   }
 
   // Helper function for converting a user DocumentReference to a dart map.
@@ -581,16 +596,40 @@ class DatabaseService {
     if (accepted) {
       // Create chat document (generated id is used to identify the match).
       DocumentReference chatRef = chatCollection.doc();
+
+      // Create the chat document of the given match.
       await chatCollection
           .doc(chatRef.id)
           .set({
-            "user1-ref": userCollection.doc(uid),
-            "user2-ref": userCollection.doc(youid),
             "timestamp": ts,
             "type": "one-on-one",
+            "user1-ref": userCollection.doc(uid),
+            "user2-ref": userCollection.doc(youid)
           })
           .then((value) => print("Chat created."))
           .catchError((error) => print("Failed to create chat: $error"));
+
+      // Add to the users collection of the chat document.
+      await chatCollection
+          .doc(chatRef.id)
+          .collection("users")
+          .doc(uid)
+          .set({
+            "user-ref": userCollection.doc(uid),
+          })
+          .then((value) => print("User added."))
+          .catchError((error) => print("Failed to add user: $error"));
+      await chatCollection
+          .doc(chatRef.id)
+          .collection("users")
+          .doc(youid)
+          .set({
+            "user-ref": userCollection.doc(youid),
+          })
+          .then((value) => print("User added."))
+          .catchError((error) => print("Failed to add user: $error"));
+
+      // Update "matched" collection of each user.
       await userCollection
           .doc(uid)
           .collection("matched")
@@ -870,17 +909,32 @@ class DatabaseService {
     if (accepted) {
       // Create chat document (generated id is used to identify the match).
       DocumentReference chatRef = chatCollection.doc();
-      /*
       await chatCollection
           .doc(chatRef.id)
           .set({
-            "user1-ref": userCollection.doc(uid),
-            "user2-ref": userCollection.doc(youid),
+            "type": "group",
             "timestamp": ts,
+            "group1-ref": groupCollection.doc(gid),
+            "group2-ref": groupCollection.doc(yougid),
           })
           .then((value) => print("Chat created."))
           .catchError((error) => print("Failed to create chat: $error"));
-      */
+
+      // Add users of both groups to the chat.
+      QuerySnapshot users1 =
+          await groupCollection.doc(gid).collection("users").get();
+      QuerySnapshot users2 =
+          await groupCollection.doc(yougid).collection("users").get();
+      for (QueryDocumentSnapshot user in users1.docs) {
+        chatRef.collection("users").doc(user.id).set({
+          "user-ref": userCollection.doc(user.id),
+        });
+      }
+      for (QueryDocumentSnapshot user in users2.docs) {
+        chatRef.collection("users").doc(user.id).set({
+          "user-ref": userCollection.doc(user.id),
+        });
+      }
       await groupCollection
           .doc(gid)
           .collection("matched")
