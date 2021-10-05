@@ -5,7 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:zesti/theme/theme.dart';
 import 'package:zesti/services/database.dart';
-import 'package:zesti/views/register/house.dart';
+import 'package:zesti/views/register/name.dart';
 import 'package:zesti/widgets/dialogs.dart';
 
 class NumberLine extends StatelessWidget {
@@ -47,14 +47,12 @@ class _BirthdayState extends State<Birthday> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: CustomTheme.reallyBrightOrange,
+        automaticallyImplyLeading: false,
       ),
       body: Container(
         decoration: CustomTheme.mode,
         child: Center(
           child: Container(
-            padding: EdgeInsets.symmetric(
-                vertical: size.height * CustomTheme.paddingMultiplier,
-                horizontal: size.width * CustomTheme.paddingMultiplier),
             child: Form(
               child: Center(
                 child: ListView(shrinkWrap: true, children: <Widget>[
@@ -65,7 +63,7 @@ class _BirthdayState extends State<Birthday> {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20),
                           ),
-                          margin: EdgeInsets.all(8.0),
+                          margin: EdgeInsets.all(32.0),
                           child: Padding(
                             padding: const EdgeInsets.symmetric(
                                 vertical: 32.0, horizontal: 32.0),
@@ -191,7 +189,7 @@ class _BirthdayState extends State<Birthday> {
                                                     context,
                                                     MaterialPageRoute(
                                                         builder: (context) =>
-                                                            House()),
+                                                            Name()),
                                                   );
                                                 } else {
                                                   showDialog(

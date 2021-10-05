@@ -211,7 +211,7 @@ class GroupCard extends StatelessWidget {
           ),
           SizedBox(height: 8),
           Text(
-            groupOnCard.funFact,
+            groupOnCard.groupTagline,
             style: CustomTheme.textTheme.subtitle2,
           ),
           SizedBox(height: 4),
@@ -411,7 +411,7 @@ class GroupCardDummy extends StatelessWidget {
           ),
           SizedBox(height: 8),
           Text(
-            groupOnCard.funFact,
+            groupOnCard.groupTagline,
             style: CustomTheme.textTheme.subtitle2,
           ),
           SizedBox(height: 4),

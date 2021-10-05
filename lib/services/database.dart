@@ -255,14 +255,24 @@ class DatabaseService {
 
   // Retrieves all info of a group document including user photos.
   Future<ZestiGroup> getGroupInfo(DocumentReference groupRef) async {
+    // Get document snapshot of the group reference.
     DocumentSnapshot groupSnapshot = await groupRef.get();
+
+    // Convert the snapshot into a map.
     Map<String, dynamic> groupInfo =
         groupSnapshot.data() as Map<String, dynamic>;
+
+    // Get query of all users in this group and convert to a list.
     QuerySnapshot groupUsers = await groupRef.collection("users").get();
     List groupUserRefs =
         groupUsers.docs.map((doc) => doc.get("user-ref")).toList();
+
+    // Instantiate the ZestiGroup nameMap.
     Map<DocumentReference, String> nameMap = {};
+    // Instantiate the ZestiGroup photoMap.
     Map<DocumentReference, ImageProvider<Object>> photoMap = {};
+
+    // Add document reference, String/Image pairs into the respective maps.
     for (DocumentReference userRef in groupUserRefs) {
       DocumentSnapshot userSnapshot = await userRef.get();
       ImageProvider<Object> photo =
@@ -271,10 +281,12 @@ class DatabaseService {
       nameMap[userRef] = name;
       photoMap[userRef] = photo;
     }
+
+    // Return a ZestiGroup instance.
     return ZestiGroup(
         gid: groupRef.id,
         groupName: groupInfo['group-name'],
-        funFact: groupInfo['fun-fact'],
+        groupTagline: groupInfo['fun-fact'],
         nameMap: nameMap,
         photoMap: photoMap);
   }

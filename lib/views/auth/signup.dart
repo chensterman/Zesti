@@ -4,23 +4,23 @@ import 'package:zesti/views/auth/signin.dart';
 import 'package:zesti/services/auth.dart';
 import 'package:zesti/widgets/formwidgets.dart';
 
-// Widget for handling account creation
+// Widget for handling account creation.
 class SignUp extends StatefulWidget {
   @override
   _SignUpState createState() => _SignUpState();
 }
 
 class _SignUpState extends State<SignUp> {
-  // Validation of entered values
+  // Validation of entered values.
   final _formKey = GlobalKey<FormState>();
 
-  // States likes these are needed when we pass in the values to Firebase
-  // State of text fields
+  // States likes these are needed when we pass in the values to Firebase.
+  // State of text fields.
   String email = '';
   String password = '';
   String passwordConfirm = '';
 
-  // Error message when email is not valid
+  // Error message when email is not valid.
   String error = '';
 
   @override
@@ -84,10 +84,10 @@ class _SignUpState extends State<SignUp> {
                       RoundedButton(
                           text: 'Sign Up',
                           onPressed: () async {
-                            // Validate form fields
+                            // Validate form fields.
                             if (_formKey.currentState!.validate()) {
-                              // Once validated, auth service creates account
-                              // Then push authentication route
+                              // Once validated, auth service creates account.
+                              // Then push authentication route.
                               await AuthService().signUp(email, password);
                               Navigator.pushReplacementNamed(
                                 context,

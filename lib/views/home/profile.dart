@@ -10,7 +10,7 @@ import 'package:zesti/views/home/home.dart';
 import 'package:zesti/widgets/previewcard.dart';
 import 'package:zesti/widgets/formwidgets.dart';
 
-// Widget for the profile edit.
+// Widget for the profile editing page.
 class Profile extends StatefulWidget {
   final String uid;
   Profile({
@@ -124,10 +124,12 @@ class _ProfileState extends State<Profile> {
             if (bio == null) bio = data['bio'];
             if (house == null) house = data['house'];
             if (year == null) year = data['year'];
+            // Dating identity is a special case where the lowercase word (as stored in Firestore) must have its first letter put in uppercase for UI purposes.
             if (dIdentity == null) {
               String tmp = data['dating-identity'];
               dIdentity = "${tmp[0].toUpperCase()}${tmp.substring(1)}";
             }
+            // Dating interest is a special case where the singular word (as stored in Firestore) must be turned into plural for UI purposes.
             if (dInterest == null) {
               String tmp = data['dating-interest'];
               if (tmp == 'man') {
@@ -174,7 +176,6 @@ class _ProfileState extends State<Profile> {
 
   // Edit mode widget.
   Widget edit() {
-    Size size = MediaQuery.of(context).size;
     return Scaffold(
       body: Container(
         decoration: CustomTheme.mode,
@@ -386,6 +387,7 @@ class _ProfileState extends State<Profile> {
                                   RoundedButton(
                                       text: 'Update',
                                       onPressed: () async {
+                                        // Check for any null (blank) user input and validate the form.
                                         if (bio != null &&
                                             house != null &&
                                             year != null &&
@@ -393,12 +395,14 @@ class _ProfileState extends State<Profile> {
                                             dInterest != null &&
                                             profpic != null &&
                                             _formKey.currentState!.validate()) {
+                                          // Update all info in Firestore.
                                           await DatabaseService(uid: widget.uid)
                                               .updateBio(bio!);
                                           await DatabaseService(uid: widget.uid)
                                               .updateHouse(house!);
                                           await DatabaseService(uid: widget.uid)
                                               .updateYear(year!);
+                                          // Take on dating identity/interest special cases.
                                           await DatabaseService(uid: widget.uid)
                                               .updateDatingIdentity(
                                                   dIdentity!.toLowerCase());
@@ -412,10 +416,9 @@ class _ProfileState extends State<Profile> {
                                           }
                                           await DatabaseService(uid: widget.uid)
                                               .updateDatingInterest(tmp);
-
-                                          // Update user document with the reference.
                                           await DatabaseService(uid: widget.uid)
                                               .updatePhoto(profpic);
+                                          // Navigate back to home page.
                                           Navigator.push(
                                             context,
                                             MaterialPageRoute(

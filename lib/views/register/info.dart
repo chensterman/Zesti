@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import 'package:zesti/services/database.dart';
 import 'package:zesti/theme/theme.dart';
 import 'package:zesti/views/register/zestkey.dart';
+import 'package:zesti/widgets/formwidgets.dart';
 
 // Widget for profile picture upload and bio
 class Info extends StatefulWidget {
@@ -39,9 +40,6 @@ class _InfoState extends State<Info> {
         decoration: CustomTheme.mode,
         child: Center(
           child: Container(
-            padding: EdgeInsets.symmetric(
-                vertical: size.height * CustomTheme.paddingMultiplier,
-                horizontal: size.width * CustomTheme.paddingMultiplier),
             child: Form(
               key: _formKey,
               child: Center(
@@ -53,7 +51,7 @@ class _InfoState extends State<Info> {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20),
                           ),
-                          margin: EdgeInsets.all(8.0),
+                          margin: EdgeInsets.all(32.0),
                           child: Padding(
                             padding: const EdgeInsets.symmetric(
                                 vertical: 32.0, horizontal: 32.0),
@@ -95,50 +93,34 @@ class _InfoState extends State<Info> {
                                   decoration:
                                       const InputDecoration(hintText: "Bio"),
                                 ),
-                                Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 16.0),
-                                    child: ElevatedButton(
-                                      style: ElevatedButton.styleFrom(
-                                          primary:
-                                              CustomTheme.reallyBrightOrange,
-                                          padding: const EdgeInsets.only(
-                                              left: 30,
-                                              top: 10,
-                                              right: 30,
-                                              bottom: 10),
-                                          shape: new RoundedRectangleBorder(
-                                              borderRadius:
-                                                  new BorderRadius.circular(
-                                                      30.0))),
-                                      onPressed: () async {
-                                        // Form validation:
-                                        //  Does nothing if validation is incorrect.
-                                        if (_formKey.currentState!.validate()) {
-                                          // Do not upload if dynamic imageFile is null.
-                                          if (imageFile != null) {
-                                            // Update user document with the reference.
-                                            await DatabaseService(
-                                                    uid: user!.uid)
-                                                .updatePhoto(imageFile);
-                                          }
-                                          // Update user document with bio.
-                                          await DatabaseService(uid: user!.uid)
-                                              .updateBio(bio);
-                                          // Flag account as fully set up
-                                          await DatabaseService(uid: user.uid)
-                                              .updateAccountSetup();
-                                          // Navigate accordingly.
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                                builder: (context) =>
-                                                    ZestKey()),
-                                          );
-                                        }
-                                      },
-                                      child: Text("Continue"),
-                                    )),
+                                SizedBox(height: 20.0),
+                                RoundedButton(
+                                  text: "Continue",
+                                  onPressed: () async {
+                                    // Form validation:
+                                    //  Does nothing if validation is incorrect.
+                                    if (_formKey.currentState!.validate()) {
+                                      // Do not upload if dynamic imageFile is null.
+                                      if (imageFile != null) {
+                                        // Update user document with the reference.
+                                        await DatabaseService(uid: user!.uid)
+                                            .updatePhoto(imageFile);
+                                      }
+                                      // Update user document with bio.
+                                      await DatabaseService(uid: user!.uid)
+                                          .updateBio(bio);
+                                      // Flag account as fully set up
+                                      await DatabaseService(uid: user.uid)
+                                          .updateAccountSetup();
+                                      // Navigate accordingly.
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) => ZestKey()),
+                                      );
+                                    }
+                                  },
+                                )
                               ],
                             ),
                           ),

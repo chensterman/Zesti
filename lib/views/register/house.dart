@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:zesti/services/database.dart';
 import 'package:zesti/theme/theme.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:zesti/views/register/identity.dart';
+import 'package:zesti/views/register/info.dart';
 import 'package:zesti/widgets/formwidgets.dart';
 
 // Widget for the housing form
@@ -118,9 +118,7 @@ class _HouseState extends State<House> {
                                         value: val, child: Text(val));
                                   }).toList(),
                                   onChanged: (String? val) {
-                                    if (val == null) {
-                                      print('Error');
-                                    } else {
+                                    if (val != null) {
                                       setState(() {
                                         _house = val;
                                       });
@@ -166,7 +164,7 @@ class _HouseState extends State<House> {
                                         Navigator.push(
                                           context,
                                           MaterialPageRoute(
-                                              builder: (context) => Identity()),
+                                              builder: (context) => Info()),
                                         );
                                       }
                                     }),

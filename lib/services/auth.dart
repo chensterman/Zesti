@@ -13,24 +13,21 @@ class AuthService {
   }
 
   // Method for signing up.
-  Future<void> signUp(email, password) async {
+  Future<int> signUp(email, password) async {
     try {
       // Obtain User object (FireAuth function).
       UserCredential result = await _auth.createUserWithEmailAndPassword(
           email: email, password: password);
       User? user = result.user;
 
-      // Check for null-user error.
-      if (user == null) {
-        print("Error");
-        return;
-      }
-
       // Store in database.
-      await DatabaseService(uid: user.uid).createUser();
-      print("Signed Up");
+      await DatabaseService(uid: user!.uid).createUser();
+
+      // Return 0 on success.
+      return 0;
     } catch (e) {
-      print(e.toString());
+      // Return 1 on error.
+      return 1;
     }
   }
 
@@ -38,9 +35,10 @@ class AuthService {
   Future<int> signIn(email, password) async {
     try {
       await _auth.signInWithEmailAndPassword(email: email, password: password);
+      // Return 0 on success.
       return 0;
     } catch (e) {
-      print(e.toString());
+      // Return 1 on error.
       return 1;
     }
   }

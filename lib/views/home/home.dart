@@ -8,9 +8,8 @@ import 'package:zesti/views/home/profile.dart';
 import 'package:zesti/views/home/love/love.dart';
 import 'package:zesti/views/home/social/choose.dart';
 
-// Starting page widget
+// Home page of a logged in user.
 class Home extends StatelessWidget {
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     final user = Provider.of<User?>(context);

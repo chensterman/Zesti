@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:zesti/services/database.dart';
 import 'package:zesti/views/auth/start.dart';
 import 'package:zesti/views/home/home.dart';
-import 'package:zesti/views/register/name.dart';
+import 'package:zesti/views/register/birthday.dart';
 
 // AuthWrapper class:
 //  Listens to authentication stream.
@@ -17,7 +17,7 @@ class AuthWrapper extends StatelessWidget {
   Widget build(BuildContext context) {
     final user = Provider.of<User?>(context);
 
-    print("Auth status: $user");
+    // If user is not logged in, display the app start menu.
     if (user == null) {
       return Start();
     } else {
@@ -39,7 +39,7 @@ class AuthWrapper extends StatelessWidget {
             if (test['account-setup']) {
               return Home();
             } else {
-              return Name();
+              return Birthday();
             }
           }
           // Otherwise, return a loading screen
