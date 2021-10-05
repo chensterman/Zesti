@@ -7,6 +7,7 @@ import 'package:zesti/services/database.dart';
 import 'package:zesti/theme/theme.dart';
 import 'package:zesti/views/home/redeem.dart';
 import 'package:zesti/widgets/groupavatar.dart';
+import 'package:zesti/widgets/groupcard.dart';
 
 // Widget displaying the chat page for a specific match.
 class Chat extends StatefulWidget {
@@ -94,7 +95,8 @@ class _ChatState extends State<Chat> {
                       context,
                       "Unmatch with " + widget.groupName + " forever?",
                       user!.uid,
-                      widget.groupName,
+                      widget.gid,
+                      widget.yougid,
                       widget.chatRef.id));
             },
             color: Colors.orange[300],
@@ -109,19 +111,31 @@ class _ChatState extends State<Chat> {
             ),
           ),
         ],
-        title: Row(
-          children: [
-            GroupAvatar(
-                groupPhotos: widget.youPhotoMap.values.toList(), radius: 40.0),
-            SizedBox(width: 10.0),
-            Container(
-                width: size.width * 0.4,
-                child: Text(
-                  widget.groupName,
-                  style: TextStyle(fontSize: 20),
-                  overflow: TextOverflow.ellipsis,
-                ))
-          ],
+        title: InkWell(
+          child: Row(
+            children: [
+              GroupAvatar(
+                  groupPhotos: widget.youPhotoMap.values.toList(),
+                  radius: 40.0),
+              SizedBox(width: 10.0),
+              Container(
+                  width: size.width * 0.4,
+                  child: Text(
+                    widget.groupName,
+                    style: TextStyle(fontSize: 20),
+                    overflow: TextOverflow.ellipsis,
+                  ))
+            ],
+          ),
+          onTap: () {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => GroupUsers(
+                        uid: user!.uid,
+                        gid: widget.yougid,
+                        groupName: widget.groupName)));
+          },
         ),
       ),
       body: Container(
@@ -392,7 +406,7 @@ class _ChatState extends State<Chat> {
   }
 
   Widget unmatchDialog(BuildContext context, String message, String uid,
-      String youid, String chatid) {
+      String gid, String yougid, String chatid) {
     return AlertDialog(
       title: Text(message),
       content: SingleChildScrollView(
@@ -407,7 +421,7 @@ class _ChatState extends State<Chat> {
         TextButton(
           child: Text("Yes", style: CustomTheme.textTheme.headline2),
           onPressed: () async {
-            await DatabaseService(uid: uid).unmatch(youid, chatid);
+            await DatabaseService(uid: uid).unmatchGroup(gid, yougid, chatid);
             Navigator.pop(context);
             Navigator.pop(context);
           },

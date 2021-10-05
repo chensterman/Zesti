@@ -343,9 +343,19 @@ class DatabaseService {
   }
 
   // Unmatch with a user.
-  Future<void> unmatch(String youid, String chatRef) async {
-    await userCollection.doc(uid).collection("matched").doc(chatRef).delete();
-    await userCollection.doc(youid).collection("matched").doc(chatRef).delete();
+  Future<void> unmatch(String youid, String chatid) async {
+    await userCollection.doc(uid).collection("matched").doc(chatid).delete();
+    await userCollection.doc(youid).collection("matched").doc(chatid).delete();
+  }
+
+  // Unmatch with a group.
+  Future<void> unmatchGroup(String gid, String yougid, String chatid) async {
+    await groupCollection.doc(gid).collection("matched").doc(chatid).delete();
+    await groupCollection
+        .doc(yougid)
+        .collection("matched")
+        .doc(chatid)
+        .delete();
   }
 
   // Helper function for converting a user DocumentReference to a dart map.
