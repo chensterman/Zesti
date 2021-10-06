@@ -5,31 +5,169 @@ const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 admin.initializeApp();
 
-// Take the text parameter passed to this HTTP endpoint and insert it into 
-// Firestore under the path /messages/:documentId/original
-exports.addMessage = functions.https.onRequest(async (req, res) => {
-  // Grab the text parameter.
-  const original = req.query.text;
-  // Push the new message into Firestore using the Firebase Admin SDK.
-  const writeResult = await admin.firestore().collection('messages').add({original: original});
-  // Send back a message that we've successfully written the message
-  res.json({result: `Message with ID: ${writeResult.id} added.`});
-});
+const db = admin.firestore();
+const userCollection = db.collection('users');
+const groupCollection = db.collection('groups');
 
-// Listens for new messages added to /messages/:documentId/original and creates an
-// uppercase version of the message to /messages/:documentId/uppercase
-exports.makeUppercase = functions.firestore.document('/messages/{documentId}')
-    .onCreate((snap, context) => {
-      // Grab the current value of what was written to Firestore.
-      const original = snap.data().original;
+async function _userRefToObject(userRef) {
+  var userSnapshot = await userRef.get();
+  var userData = userSnapshot.data();
+  userData['user-ref'] = userRef;
+  return userData;
+}
 
-      // Access the parameter `{documentId}` with `context.params`
-      functions.logger.log('Uppercasing', context.params.documentId, original);
-      
-      const uppercase = original.toUpperCase();
-      
-      // You must return a Promise when performing asynchronous tasks inside a Functions such as
-      // writing to Firestore.
-      // Setting an 'uppercase' field in Firestore document returns a Promise.
-      return snap.ref.set({uppercase}, {merge: true});
+exports.generateRecommendations = functions.pubsub.schedule('every 2 minutes').onRun(async context => {
+  console.log('This will be run every 2 minutes!');
+
+  // Loop through all user documents
+  var collectionQuery = await userCollection.get();
+  collectionQuery.docs.forEach(async function (doc) {
+    
+    var currUser = await _userRefToObject(doc.ref);
+    // Get querying parameters based on user info
+    var queryIdentity = [];
+    var queryInterest = [];
+    switch (currUser["dating-identity"]) {
+      case 'non-binary':
+        {
+          switch (currUser["dating-interest"]) {
+            case 'everyone':
+              {
+                queryIdentity = ['man', 'woman', 'non-binary'];
+                queryInterest = ['everyone'];
+              }
+              break;
+
+            case 'man':
+              {
+                queryIdentity = ['man'];
+                queryInterest = ['everyone'];
+              }
+              break;
+
+            case 'woman':
+              {
+                queryIdentity = ['woman'];
+                queryInterest = ['everyone'];
+              }
+              break;
+          }
+        }
+        break;
+
+      case 'man':
+        {
+          switch (currUser["dating-interest"]) {
+            case 'everyone':
+              {
+                queryIdentity = ['man', 'woman', 'non-binary'];
+                queryInterest = ['man', 'everyone'];
+              }
+              break;
+
+            case 'man':
+              {
+                queryIdentity = ['man'];
+                queryInterest = ['man', 'everyone'];
+              }
+              break;
+
+            case 'woman':
+              {
+                queryIdentity = ['woman'];
+                queryInterest = ['man', 'everyone'];
+              }
+              break;
+          }
+        }
+        break;
+
+      case 'woman':
+        {
+          switch (currUser["dating-interest"]) {
+            case 'everyone':
+              {
+                queryIdentity = ['man', 'woman', 'non-binary'];
+                queryInterest = ['woman', 'everyone'];
+              }
+              break;
+
+            case 'man':
+              {
+                queryIdentity = ['man'];
+                queryInterest = ['woman', 'everyone'];
+              }
+              break;
+
+            case 'woman':
+              {
+                queryIdentity = ['woman'];
+                queryInterest = ['woman', 'everyone'];
+              }
+              break;
+            default:
+              {
+                queryIdentity = ['man'];
+                queryInterest = ['woman'];
+              }
+              break;
+          }
+        }
+        break;
+    }
+
+    var reactionsSnapshot = await doc.ref.collection('outgoing').get();
+    var allReactions = reactionsSnapshot.docs.map(qdoc => qdoc.id);
+    var allUsers = collectionQuery.docs.map(qdoc => qdoc.id);
+    var availableUsers = allUsers.filter(x => !allReactions.includes(x));
+    
+    var snapshot;
+    if (queryIdentity.length == 3) {
+      snapshot = await userCollection
+          .where('dating-interest', 'in', queryInterest)
+          .get();
+    } else {
+      snapshot = await userCollection
+          .where('dating-identity', '==', queryIdentity[0])
+          .where('dating-interest', 'in', queryInterest)
+          .get();
+    }
+
+    var snapshotUserRefs = snapshot.docs.map(qdoc => qdoc.id);
+    var potentialUserRefs = availableUsers.filter(x => snapshotUserRefs.includes(x));
+    var userListMaxLength;
+    if (potentialUserRefs.length < 3) {
+      userListMaxLength = potentialUserRefs.length;
+    } else {
+      userListMaxLength = 3;
+    }
+
+    var potentialSet = new Set(potentialUserRefs);
+    var userList = [];
+    while (userList.length < userListMaxLength) {
+      var potentialArray = Array.from(potentialSet);
+      var selectedUID = potentialArray[Math.floor((Math.random() * potentialArray.length))];
+      potentialSet.delete(selectedUID);
+      userList.push(selectedUID);
+    }
+    
+    // Delete all currently stored recommendations.
+    var recommendations = await doc.ref.collection("recommendations").get();
+    recommendations.docs.forEach(async function (rec) {
+      await rec.ref.delete();
     });
+
+    // Populate recommendations collection with newly generated users.
+    var ts = Date.now();
+    userList.forEach(async function (uid) {
+      await doc.ref
+          .collection("recommendations")
+          .doc(uid)
+          .set({
+        "timestamp": ts,
+        "user-ref": userCollection.doc(uid),
+      });
+    });
+  });
+  return null;
+});

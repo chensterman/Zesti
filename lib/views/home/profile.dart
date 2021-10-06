@@ -179,12 +179,11 @@ class _ProfileState extends State<Profile> {
               indicatorColor: CustomTheme.reallyBrightOrange,
               tabs: <Widget>[
                 Tab(
-                  child: Text("Edit",
-                      style: TextStyle(color: CustomTheme.reallyBrightOrange)),
+                  child: Text("Edit", style: CustomTheme.textTheme.headline3),
                 ),
                 Tab(
-                  child: Text("Preview",
-                      style: TextStyle(color: CustomTheme.reallyBrightOrange)),
+                  child:
+                      Text("Preview", style: CustomTheme.textTheme.headline3),
                 ),
               ],
             );
