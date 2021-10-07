@@ -95,16 +95,19 @@ class _ChatState extends State<Chat> {
           ),
           SizedBox(width: 20.0),
         ],
-        title: Row(
-          children: [
-            CircleAvatar(
-              radius: 20.0,
-              backgroundImage: widget.profpic,
-              backgroundColor: Colors.white,
-            ),
-            SizedBox(width: 10.0),
-            Text(widget.name, style: TextStyle(fontSize: 20))
-          ],
+        title: InkWell(
+          child: Row(
+            children: [
+              CircleAvatar(
+                radius: 20.0,
+                backgroundImage: widget.profpic,
+                backgroundColor: Colors.white,
+              ),
+              SizedBox(width: 10.0),
+              Text(widget.name, style: TextStyle(fontSize: 20)),
+            ],
+          ),
+          onTap: () {},
         ),
       ),
       body: Container(

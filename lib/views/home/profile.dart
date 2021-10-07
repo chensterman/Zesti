@@ -2,13 +2,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:zesti/services/auth.dart';
 import 'package:zesti/models/zestiuser.dart';
 import 'package:zesti/services/database.dart';
 import 'package:zesti/theme/theme.dart';
 import 'package:zesti/views/home/home.dart';
 import 'package:zesti/widgets/previewcard.dart';
 import 'package:zesti/widgets/formwidgets.dart';
-import 'package:zesti/views/home/settings.dart';
 
 // Widget for the profile editing page.
 class Profile extends StatefulWidget {
@@ -197,11 +197,9 @@ class _ProfileState extends State<Profile> {
                   actions: [
                     InkWell(
                         onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => AccountSettings()),
-                          );
+                          showDialog(
+                              context: context,
+                              builder: (context) => accountSettings(context));
                         },
                         child: Container(
                           padding: EdgeInsets.all(4.0),
@@ -500,5 +498,31 @@ class _ProfileState extends State<Profile> {
             return Center(child: CircularProgressIndicator());
           }
         });
+  }
+
+  Widget accountSettings(BuildContext context) {
+    return AlertDialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+      title: Center(child: Text("Account Settings")),
+      content: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 32.0, horizontal: 32.0),
+          child: Column(
+            children: [
+              RoundedButton(
+                  text: 'Logout',
+                  onPressed: () async {
+                    await AuthService().signOut();
+                    Navigator.of(context).popUntil((route) => route.isFirst);
+                  }),
+              SizedBox(height: 20.0),
+              RoundedButton(text: 'Delete Account', onPressed: () async {}),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
