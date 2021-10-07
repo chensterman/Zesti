@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -9,6 +8,7 @@ import 'package:zesti/theme/theme.dart';
 import 'package:zesti/views/home/home.dart';
 import 'package:zesti/widgets/previewcard.dart';
 import 'package:zesti/widgets/formwidgets.dart';
+import 'package:zesti/views/home/settings.dart';
 
 // Widget for the profile editing page.
 class Profile extends StatefulWidget {
@@ -194,6 +194,27 @@ class _ProfileState extends State<Profile> {
                 appBar: AppBar(
                   backgroundColor: CustomTheme.reallyBrightOrange,
                   title: Text("Your Profile"),
+                  actions: [
+                    InkWell(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => AccountSettings()),
+                          );
+                        },
+                        child: Container(
+                          padding: EdgeInsets.all(4.0),
+                          child: Icon(
+                            Icons.settings,
+                            color: CustomTheme.reallyBrightOrange,
+                            size: 26.0,
+                          ),
+                          decoration: BoxDecoration(
+                              color: Colors.white, shape: BoxShape.circle),
+                        )),
+                    SizedBox(width: 20.0),
+                  ],
                   bottom: PreferredSize(
                     preferredSize: tabBar.preferredSize,
                     child: ColoredBox(

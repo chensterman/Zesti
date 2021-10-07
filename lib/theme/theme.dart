@@ -25,7 +25,7 @@ class CustomTheme {
       shadows: <Shadow>[
         Shadow(
           offset: Offset(2.0, 2.0),
-          blurRadius: 3.0,
+          blurRadius: 1.0,
           color: Colors.grey.shade400,
         ),
       ],
@@ -43,7 +43,20 @@ class CustomTheme {
       shadows: <Shadow>[
         Shadow(
           offset: Offset(2.0, 2.0),
-          blurRadius: 3.0,
+          blurRadius: 1.0,
+          color: Colors.grey.shade400,
+        ),
+      ],
+    ),
+    headline4: TextStyle(
+      color: CustomTheme.reallyBrightOrange,
+      fontSize: 30,
+      fontWeight: FontWeight.bold,
+      fontFamily: 'Jost',
+      shadows: <Shadow>[
+        Shadow(
+          offset: Offset(2.0, 2.0),
+          blurRadius: 1.0,
           color: Colors.grey.shade400,
         ),
       ],

@@ -159,7 +159,7 @@ class ImageUpdate extends StatelessWidget {
                     builder: (builder) => bottomSheet(size));
               },
               child: Icon(
-                Icons.add_circle,
+                Icons.add_photo_alternate_rounded,
                 color: Colors.green,
                 size: 36.0,
               )),
