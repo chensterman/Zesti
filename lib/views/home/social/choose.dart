@@ -31,13 +31,6 @@ class _ChooseState extends State<Choose> {
       appBar: AppBar(
         backgroundColor: CustomTheme.reallyBrightOrange,
         title: Text("Group Selection"),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () => Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => Home()),
-          ),
-        ),
         actions: [
           IconButton(
             icon: Icon(Icons.add_circle),

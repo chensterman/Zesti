@@ -37,13 +37,6 @@ class _SocialState extends State<Social> {
     // Main page widget (contains nav bar pages as well)
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () => Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => Home()),
-          ),
-        ),
         backgroundColor: CustomTheme.reallyBrightOrange,
         title: Text("Zesti Social"),
       ),

@@ -735,6 +735,11 @@ class DatabaseService {
     // Search for the user by unique zest-key.
     QuerySnapshot userByZestKey =
         await userCollection.where("zest-key", isEqualTo: zestKey).get();
+
+    // Check if Zestkey exists.
+    if (userByZestKey.docs.length == 0) {
+      return "This user does not exist.";
+    }
     // Get the UID.
     String uidToAdd = userByZestKey.docs[0].id;
     // Add the user info to the group.
@@ -804,9 +809,6 @@ class DatabaseService {
 
     var availableGroups = allGroups.toSet().difference(allReactions.toSet());
     availableGroups = availableGroups.difference([gid].toSet());
-
-    print('available Groups:');
-    print(availableGroups);
 
     // Query based on the given parameters
     QuerySnapshot snapshot =

@@ -104,11 +104,7 @@ class _CreateGroupState extends State<CreateGroup> {
                                       if (_formKey.currentState!.validate()) {
                                         await DatabaseService(uid: user!.uid)
                                             .createGroup(groupName, funFact);
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) => Choose()),
-                                        );
+                                        Navigator.of(context).pop();
                                       }
                                     }),
                               ],
