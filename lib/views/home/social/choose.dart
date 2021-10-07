@@ -32,16 +32,24 @@ class _ChooseState extends State<Choose> {
         backgroundColor: CustomTheme.reallyBrightOrange,
         title: Text("Group Selection"),
         actions: [
-          IconButton(
-            icon: Icon(Icons.add_circle),
-            onPressed: () {
-              showDialog(
-                  context: context,
-                  barrierDismissible: false,
-                  builder: (context) => createDialog(context, groupCount));
-            },
-            color: Colors.white,
-          ),
+          InkWell(
+              onTap: () {
+                showDialog(
+                    context: context,
+                    barrierDismissible: false,
+                    builder: (context) => createDialog(context, groupCount));
+              },
+              child: Container(
+                padding: EdgeInsets.all(4.0),
+                child: Icon(
+                  Icons.add_circle,
+                  color: CustomTheme.reallyBrightOrange,
+                  size: 26.0,
+                ),
+                decoration:
+                    BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+              )),
+          SizedBox(width: 20.0),
         ],
       ),
       body: StreamBuilder(

@@ -49,17 +49,9 @@ class CustomTheme {
       ],
     ),
     headline4: TextStyle(
-      color: CustomTheme.reallyBrightOrange,
+      color: Colors.white,
       fontSize: 30,
-      fontWeight: FontWeight.bold,
       fontFamily: 'Jost',
-      shadows: <Shadow>[
-        Shadow(
-          offset: Offset(2.0, 2.0),
-          blurRadius: 1.0,
-          color: Colors.grey.shade400,
-        ),
-      ],
     ),
     bodyText1: TextStyle(color: Colors.black, fontSize: 16, fontFamily: 'Hind'),
     bodyText2: TextStyle(

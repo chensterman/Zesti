@@ -476,7 +476,7 @@ class _ProfileState extends State<Profile> {
                 house: house.toString(),
                 age: 21,
                 photoURL: "",
-                year: "",
+                year: year.toString(),
                 profPic: snapshot.data!,
                 zestKey: "");
             return Scaffold(

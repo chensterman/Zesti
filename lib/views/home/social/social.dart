@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:zesti/theme/theme.dart';
-import 'package:zesti/views/home/home.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:zesti/views/home/social/recommendations.dart';
 import 'package:zesti/views/home/social/requests.dart';
 import 'package:zesti/views/home/social/group.dart';
@@ -38,7 +38,13 @@ class _SocialState extends State<Social> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: CustomTheme.reallyBrightOrange,
-        title: Text("Zesti Social"),
+        title: SizedBox(
+          height: 50.0,
+          child: SvgPicture.asset(
+            "assets/zesti.svg",
+            alignment: Alignment.centerLeft,
+          ),
+        ),
       ),
       body: Container(
         decoration: CustomTheme.mode,

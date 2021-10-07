@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:zesti/theme/theme.dart';
 import 'package:zesti/views/home/love/matches.dart';
 import 'package:zesti/views/home/love/recommendations.dart';
@@ -33,7 +34,13 @@ class _LoveState extends State<Love> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: CustomTheme.reallyBrightOrange,
-        title: Text("Zesti Love"),
+        title: SizedBox(
+          height: 50.0,
+          child: SvgPicture.asset(
+            "assets/zesti.svg",
+            alignment: Alignment.centerLeft,
+          ),
+        ),
       ),
       body: Container(
         decoration: CustomTheme.mode,

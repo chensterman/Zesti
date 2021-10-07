@@ -2,10 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:zesti/models/zestiuser.dart';
-import 'package:zesti/services/auth.dart';
 import 'package:zesti/services/database.dart';
 import 'package:zesti/theme/theme.dart';
-import 'package:zesti/views/auth/start.dart';
 import 'package:zesti/views/home/profile.dart';
 import 'package:zesti/views/home/love/love.dart';
 import 'package:zesti/views/home/social/choose.dart';
@@ -35,7 +33,7 @@ class Home extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
                         Text("Looking good, " + snapshot.data!.first + "!",
-                            style: CustomTheme.textTheme.headline4),
+                            style: CustomTheme.textTheme.headline1),
                         Stack(
                           children: [
                             CircleAvatar(
@@ -69,7 +67,7 @@ class Home extends StatelessWidget {
                           ],
                         ),
                         Text('Select a Mode',
-                            style: CustomTheme.textTheme.headline4),
+                            style: CustomTheme.textTheme.headline1),
                         Row(
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [

@@ -54,30 +54,46 @@ class _ChatState extends State<Chat> {
         backgroundColor: CustomTheme.reallyBrightOrange,
         elevation: 0.0,
         actions: [
-          IconButton(
-            icon: Icon(Icons.cancel),
-            onPressed: () {
-              showDialog(
-                  context: context,
-                  barrierDismissible: false,
-                  builder: (context) => unmatchDialog(
-                      context,
-                      "Unmatch with " + widget.name + " forever?",
-                      user!.uid,
-                      widget.youid,
-                      widget.chatRef.id));
-            },
-            color: Colors.orange[300],
-          ),
-          Builder(
-            builder: (context) => IconButton(
-              icon: Icon(Icons.fastfood),
-              onPressed: () {
-                Scaffold.of(context).openEndDrawer();
+          InkWell(
+              onTap: () {
+                showDialog(
+                    context: context,
+                    barrierDismissible: false,
+                    builder: (context) => unmatchDialog(
+                        context,
+                        "Unmatch with " + widget.name + " forever?",
+                        user!.uid,
+                        widget.youid,
+                        widget.chatRef.id));
               },
-              color: Colors.white,
-            ),
+              child: Container(
+                padding: EdgeInsets.all(4.0),
+                child: Icon(
+                  Icons.cancel,
+                  color: Colors.redAccent[700],
+                  size: 26.0,
+                ),
+                decoration:
+                    BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+              )),
+          SizedBox(width: 20.0),
+          Builder(
+            builder: (context) => InkWell(
+                onTap: () {
+                  Scaffold.of(context).openEndDrawer();
+                },
+                child: Container(
+                  padding: EdgeInsets.all(5.0),
+                  child: Icon(
+                    Icons.fastfood_rounded,
+                    color: CustomTheme.reallyBrightOrange,
+                    size: 22.0,
+                  ),
+                  decoration: BoxDecoration(
+                      color: Colors.white, shape: BoxShape.circle),
+                )),
           ),
+          SizedBox(width: 20.0),
         ],
         title: Row(
           children: [
