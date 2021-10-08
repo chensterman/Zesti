@@ -7,6 +7,7 @@ import 'package:zesti/theme/theme.dart';
 import 'package:zesti/views/home/profile.dart';
 import 'package:zesti/views/home/love/love.dart';
 import 'package:zesti/views/home/social/choose.dart';
+import 'package:zesti/widgets/loading.dart';
 
 // Home page of a logged in user.
 class Home extends StatefulWidget {
@@ -49,10 +50,22 @@ class _HomeState extends State<Home> {
                             style: CustomTheme.textTheme.headline1),
                         Stack(
                           children: [
-                            CircleAvatar(
-                              radius: 80.0,
-                              backgroundImage: snapshot.data!.profPic,
-                              backgroundColor: Colors.white,
+                            Container(
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                      offset: Offset(2.0, 2.0),
+                                      blurRadius: 5,
+                                      color: Colors.grey.shade700,
+                                      spreadRadius: 5)
+                                ],
+                              ),
+                              child: CircleAvatar(
+                                radius: 80.0,
+                                backgroundImage: snapshot.data!.profPic,
+                                backgroundColor: Colors.white,
+                              ),
                             ),
                             Positioned(
                               bottom: 0.0,
@@ -109,9 +122,7 @@ class _HomeState extends State<Home> {
                       ]);
                   // During loading.
                 } else {
-                  return Center(
-                    child: CustomTheme.loading,
-                  );
+                  return ZestiLoading();
                 }
               }),
         ),

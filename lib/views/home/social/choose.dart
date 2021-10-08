@@ -11,6 +11,7 @@ import 'package:zesti/views/home/social/create.dart';
 import 'package:zesti/views/home/social/social.dart';
 import 'package:zesti/widgets/errors.dart';
 import 'package:zesti/widgets/groupavatar.dart';
+import 'package:zesti/widgets/loading.dart';
 
 class Choose extends StatefulWidget {
   Choose({
@@ -130,8 +131,7 @@ class _ChooseState extends State<Choose> {
                 );
               } else {
                 return Padding(
-                    padding: EdgeInsets.all(100.0),
-                    child: Center(child: CustomTheme.loading));
+                    padding: EdgeInsets.all(100.0), child: ZestiLoading());
               }
             }),
       ),

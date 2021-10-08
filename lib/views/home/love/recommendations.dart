@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:zesti/widgets/errors.dart';
+import 'package:zesti/widgets/loading.dart';
 import 'package:zesti/widgets/usercard.dart';
 import 'package:zesti/theme/theme.dart';
 import 'package:zesti/services/database.dart';
@@ -83,7 +84,7 @@ class _RecommendationsState extends State<Recommendations> {
                         SizedBox(height: 16.0),
                     itemCount: tmp.docs.length + 1)
                 // When StreamBuilder hasn't loaded, show progress indicator.
-                : Center(child: CustomTheme.loading);
+                : ZestiLoading();
           }),
     );
   }

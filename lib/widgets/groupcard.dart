@@ -7,6 +7,7 @@ import 'package:zesti/models/zestigroup.dart';
 import 'package:zesti/services/database.dart';
 import 'package:zesti/theme/theme.dart';
 import 'package:zesti/widgets/errors.dart';
+import 'package:zesti/widgets/loading.dart';
 import 'package:zesti/widgets/usercard.dart';
 
 // Widget displaying user cards to make decisions on.
@@ -185,7 +186,7 @@ class GroupCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(20),
                   color: Colors.white,
                 ),
-                child: Center(child: CustomTheme.loading));
+                child: ZestiLoading());
           }
         });
   }
@@ -389,7 +390,7 @@ class GroupCardDummy extends StatelessWidget {
                   borderRadius: BorderRadius.circular(20),
                   color: Colors.white,
                 ),
-                child: Center(child: CustomTheme.loading));
+                child: ZestiLoading());
           }
         });
   }

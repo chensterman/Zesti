@@ -5,6 +5,7 @@ import 'package:zesti/services/database.dart';
 import 'package:zesti/views/home/love/chat.dart';
 import 'package:zesti/theme/theme.dart';
 import 'package:zesti/widgets/errors.dart';
+import 'package:zesti/widgets/loading.dart';
 
 // Widget displaying the chat page for a specific match.
 class Matches extends StatefulWidget {
@@ -71,7 +72,7 @@ class _MatchesState extends State<Matches> {
                           SizedBox(height: 16.0),
                       itemCount: tmp.docs.length + 1)
                   // StreamBuilder loading indicator.
-                  : Center(child: CustomTheme.loading);
+                  : ZestiLoading();
             }));
   }
 

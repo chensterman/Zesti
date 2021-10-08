@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:zesti/widgets/loading.dart';
 import 'package:zesti/widgets/usercard.dart';
 import 'package:zesti/theme/theme.dart';
 import 'package:zesti/services/database.dart';
@@ -70,7 +71,7 @@ class _RequestsState extends State<Requests> {
                         SizedBox(height: 16.0),
                     itemCount: tmp.docs.length + 1)
                 // While the StreamBuilder is loading, show a progress indicator.
-                : Center(child: CustomTheme.loading);
+                : ZestiLoading();
           }),
     );
   }

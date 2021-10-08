@@ -8,6 +8,7 @@ import 'package:zesti/theme/theme.dart';
 import 'package:zesti/views/home/deals.dart';
 import 'package:zesti/widgets/groupavatar.dart';
 import 'package:zesti/widgets/groupcard.dart';
+import 'package:zesti/widgets/loading.dart';
 
 // Widget displaying the chat page for a specific match.
 class Chat extends StatefulWidget {
@@ -124,13 +125,24 @@ class _ChatState extends State<Chat> {
         ),
       ),
       body: Container(
+        decoration: BoxDecoration(color: CustomTheme.cream),
         child: Stack(
           children: [
             chatMessages(user!.uid),
             Container(
               alignment: Alignment.bottomCenter,
               child: Container(
-                color: Colors.white.withOpacity(0.8),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.5),
+                      spreadRadius: 5,
+                      blurRadius: 7,
+                      offset: Offset(0, 3), // changes position of shadow
+                    ),
+                  ],
+                ),
                 padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                 child: Row(
                   children: [
@@ -192,7 +204,7 @@ class _ChatState extends State<Chat> {
         QuerySnapshot? tmp = snapshot.data;
         return tmp != null
             ? ListView.builder(
-                padding: EdgeInsets.only(bottom: 90, top: 16),
+                padding: EdgeInsets.only(bottom: 100, top: 16),
                 itemCount: tmp.docs.length + 1,
                 reverse: true,
                 itemBuilder: (context, index) {
@@ -236,11 +248,11 @@ class _ChatState extends State<Chat> {
                                     textAlign: TextAlign.center,
                                   ),
                                 ),
-                                SizedBox(height: 50.0),
+                                SizedBox(height: 20.0),
                               ],
                             );
                           } else {
-                            return Center(child: CustomTheme.loading);
+                            return ZestiLoading();
                           }
                         });
                   }
@@ -281,7 +293,7 @@ class _ChatState extends State<Chat> {
                         data['sender-ref'].id != dataAbove['sender-ref'].id);
                   }
                 })
-            : Center(child: CustomTheme.loading);
+            : ZestiLoading();
       },
     );
   }

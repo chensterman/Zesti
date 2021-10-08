@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:zesti/models/zestiuser.dart';
 import 'package:zesti/services/database.dart';
 import 'package:zesti/theme/theme.dart';
+import 'package:zesti/widgets/loading.dart';
 
 // Widget displaying user cards to make decisions on.
 class UserCard extends StatelessWidget {
@@ -130,7 +131,7 @@ class UserCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(20),
                   color: Colors.white,
                 ),
-                child: Center(child: CustomTheme.loading));
+                child: ZestiLoading());
           }
         });
   }
@@ -272,7 +273,7 @@ class UserCardDummy extends StatelessWidget {
                   borderRadius: BorderRadius.circular(20),
                   color: Colors.white,
                 ),
-                child: Center(child: CustomTheme.loading));
+                child: ZestiLoading());
           }
         });
   }
