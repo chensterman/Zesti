@@ -341,6 +341,12 @@ class DatabaseService {
         .snapshots();
   }
 
+  // Retrieves document fields from a given chat reference.
+  Future<Map<String, dynamic>> getChatInfo(DocumentReference chatRef) async {
+    DocumentSnapshot snapshot = await chatRef.get();
+    return snapshot.data() as Map<String, dynamic>;
+  }
+
   // Send a chat message.
   Future<void> sendMessage(
       DocumentReference chatRef, String type, String content) async {

@@ -14,7 +14,7 @@ class Chat extends StatefulWidget {
   final String youid;
   final DocumentReference chatRef;
   final String name;
-  final ImageProvider<Object>? profpic;
+  final ImageProvider<Object> profpic;
   Chat({
     Key? key,
     required this.uid,
@@ -156,16 +156,9 @@ class _ChatState extends State<Chat> {
                     ),
                     GestureDetector(
                       onTap: () {
-                        if (user == null) {
-                          print('User Error');
-                        } else {
-                          // Check for an empty text editor (don't send empty chats).
-                          if (messageText.text != '') {
-                            sendMessage(user.uid, widget.chatRef, 'text',
-                                messageText.text);
-                          } else {
-                            print('No message content');
-                          }
+                        if (messageText.text != '') {
+                          sendMessage(user!.uid, widget.chatRef, 'text',
+                              messageText.text);
                         }
                       },
                       child: Icon(
@@ -194,11 +187,63 @@ class _ChatState extends State<Chat> {
         return tmp != null
             ? ListView.builder(
                 padding: EdgeInsets.only(bottom: 90, top: 16),
-                itemCount: tmp.docs.length,
+                itemCount: tmp.docs.length + 1,
                 reverse: true,
                 itemBuilder: (context, index) {
+                  if (index == tmp.docs.length) {
+                    return FutureBuilder(
+                        future: DatabaseService(uid: uid)
+                            .getChatInfo(widget.chatRef),
+                        builder: (context,
+                            AsyncSnapshot<Map<String, dynamic>> snapshot) {
+                          // On error.
+                          if (snapshot.hasError) {
+                            return Text(snapshot.error.toString());
+                          }
+                          // On success.
+                          else if (snapshot.connectionState ==
+                              ConnectionState.done) {
+                            DateTime ts = snapshot.data!['timestamp'].toDate();
+                            String date = ts.month.toString() +
+                                "/" +
+                                ts.day.toString() +
+                                "/" +
+                                ts.year.toString();
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                CircleAvatar(
+                                    radius: 80.0,
+                                    backgroundImage: widget.profpic,
+                                    backgroundColor: Colors.white),
+                                SizedBox(height: 20.0),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 32.0),
+                                  child: Text(
+                                    "You matched with " +
+                                        widget.name +
+                                        " on " +
+                                        date,
+                                    style: CustomTheme.textTheme.headline3,
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                                SizedBox(height: 50.0),
+                              ],
+                            );
+                          } else {
+                            return CustomTheme.loading;
+                          }
+                        });
+                  }
                   Map<String, dynamic> data =
                       tmp.docs[index].data() as Map<String, dynamic>;
+                  if (index == 0 && index + 1 == tmp.docs.length) {
+                    return chatMessageTile(data['content'],
+                        uid == data['sender-ref'].id, true, true);
+                  }
                   if (index == 0) {
                     return chatMessageTile(data['content'],
                         uid == data['sender-ref'].id, true, false);

@@ -89,12 +89,12 @@ class _MatchesState extends State<Matches> {
             String message = data['content'];
             if (data['sender-ref'].id != uid) {
               return Text(message,
-                  style: TextStyle(fontSize: 16),
+                  style: TextStyle(
+                      fontSize: 16, color: CustomTheme.reallyBrightOrange),
                   overflow: TextOverflow.ellipsis);
             } else {
               return Text(message,
-                  style: TextStyle(
-                      fontSize: 16, color: CustomTheme.reallyBrightOrange),
+                  style: TextStyle(fontSize: 16),
                   overflow: TextOverflow.ellipsis);
             }
           } else {

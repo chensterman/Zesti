@@ -193,17 +193,63 @@ class _ChatState extends State<Chat> {
         return tmp != null
             ? ListView.builder(
                 padding: EdgeInsets.only(bottom: 90, top: 16),
-                itemCount: tmp.docs.length,
+                itemCount: tmp.docs.length + 1,
                 reverse: true,
                 itemBuilder: (context, index) {
+                  if (index == tmp.docs.length) {
+                    return FutureBuilder(
+                        future: DatabaseService(uid: uid)
+                            .getChatInfo(widget.chatRef),
+                        builder: (context,
+                            AsyncSnapshot<Map<String, dynamic>> snapshot) {
+                          // On error.
+                          if (snapshot.hasError) {
+                            return Text(snapshot.error.toString());
+                          }
+                          // On success.
+                          else if (snapshot.connectionState ==
+                              ConnectionState.done) {
+                            DateTime ts = snapshot.data!['timestamp'].toDate();
+                            String date = ts.month.toString() +
+                                "/" +
+                                ts.day.toString() +
+                                "/" +
+                                ts.year.toString();
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                GroupAvatar(
+                                    groupPhotos:
+                                        widget.youPhotoMap.values.toList(),
+                                    radius: 160.0),
+                                SizedBox(height: 20.0),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 32.0),
+                                  child: Text(
+                                    "You matched with " +
+                                        widget.groupName +
+                                        " on " +
+                                        date,
+                                    style: CustomTheme.textTheme.headline3,
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                                SizedBox(height: 50.0),
+                              ],
+                            );
+                          } else {
+                            return Center(child: CustomTheme.loading);
+                          }
+                        });
+                  }
                   Map<String, dynamic> data =
                       tmp.docs[index].data() as Map<String, dynamic>;
-                  print(widget.nameMap);
                   if (index == 0 && index + 1 == tmp.docs.length) {
                     return chatMessageTile(data['content'], data['sender-ref'],
                         uid == data['sender-ref'].id, true, true);
                   }
-
                   if (index == 0) {
                     Map<String, dynamic> dataAbove =
                         tmp.docs[index + 1].data() as Map<String, dynamic>;
