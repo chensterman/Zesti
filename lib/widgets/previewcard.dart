@@ -22,7 +22,7 @@ class PreviewCard extends StatelessWidget {
       height: size.height * 0.7,
       width: size.width * 0.95,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(20),
         // User profile pic on card.
         image: DecorationImage(
           image: userOnCard.profPic,

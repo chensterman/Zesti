@@ -139,7 +139,7 @@ class _EditProfileState extends State<EditProfile> {
     });
   }
 
-  void profpicCallback(dynamic val) {
+  void profpicCallback(File? val) {
     setState(() {
       profpic = val;
     });
@@ -410,48 +410,44 @@ class _EditProfileState extends State<EditProfile> {
   // Preview widget.
   Widget preview() {
     Size size = MediaQuery.of(context).size;
-    return FutureBuilder(
-        future: DatabaseService(uid: widget.user.uid).getPhoto(photoref),
-        builder: (context, AsyncSnapshot<ImageProvider<Object>> snapshot) {
-          // On error.
-          if (snapshot.hasError) {
-            return Text(snapshot.error.toString());
-            // During loading or success.
-          } else if (snapshot.connectionState == ConnectionState.done) {
-            ZestiUser previewUser = ZestiUser(
-                uid: "",
-                first: name.toString(),
-                last: "",
-                bio: bio.toString(),
-                dIdentity: "",
-                dInterest: "",
-                house: house.toString(),
-                age: 21,
-                photoURL: "",
-                year: year.toString(),
-                profPic: snapshot.data!,
-                zestKey: "");
-            return Scaffold(
-              body: Container(
-                decoration: CustomTheme.mode,
-                child: Center(
-                  child: Container(
-                    padding: EdgeInsets.symmetric(
-                        vertical: size.height * CustomTheme.paddingMultiplier,
-                        horizontal: size.width * CustomTheme.paddingMultiplier),
-                    child: Padding(
-                      padding: EdgeInsets.all(8.0),
-                      // FutureBuilder to retrieve profile photo from Firebase Storage.
-                      child: PreviewCard(userOnCard: previewUser, rec: true),
-                    ),
-                  ),
-                ),
-              ),
-            );
-          } else {
-            return Center(child: CustomTheme.loading);
-          }
-        });
+    dynamic tmp;
+    if (profpic == null) {
+      tmp = AssetImage("assets/profile.jpg");
+    } else if (profpic is File) {
+      tmp = FileImage(profpic);
+    } else {
+      tmp = profpic;
+    }
+    ZestiUser previewUser = ZestiUser(
+        uid: "",
+        first: name.toString(),
+        last: "",
+        bio: bio.toString(),
+        dIdentity: "",
+        dInterest: "",
+        house: house.toString(),
+        age: 21,
+        photoURL: "",
+        year: year.toString(),
+        profPic: tmp,
+        zestKey: "");
+    return Scaffold(
+      body: Container(
+        decoration: CustomTheme.mode,
+        child: Center(
+          child: Container(
+            padding: EdgeInsets.symmetric(
+                vertical: size.height * CustomTheme.paddingMultiplier,
+                horizontal: size.width * CustomTheme.paddingMultiplier),
+            child: Padding(
+              padding: EdgeInsets.all(8.0),
+              // FutureBuilder to retrieve profile photo from Firebase Storage.
+              child: PreviewCard(userOnCard: previewUser, rec: true),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   Widget accountSettings(BuildContext context) {
