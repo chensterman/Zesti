@@ -207,7 +207,7 @@ class _ChatState extends State<Chat> {
                         uid == dataBelow['sender-ref'].id);
                   }
                 })
-            : Center(child: CircularProgressIndicator());
+            : Center(child: CustomTheme.loading);
       },
     );
   }

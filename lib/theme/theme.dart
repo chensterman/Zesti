@@ -116,4 +116,10 @@ class CustomTheme {
       ],
     ),
   );
+
+  // Progress indicator.
+  static ProgressIndicator loading = CircularProgressIndicator(
+    color: CustomTheme.reallyBrightOrange,
+    strokeWidth: 1.0,
+  );
 }

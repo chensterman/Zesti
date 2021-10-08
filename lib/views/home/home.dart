@@ -95,7 +95,9 @@ class Home extends StatelessWidget {
                       ]);
                   // During loading.
                 } else {
-                  return CircularProgressIndicator();
+                  return Center(
+                    child: CustomTheme.loading,
+                  );
                 }
               }),
         ),

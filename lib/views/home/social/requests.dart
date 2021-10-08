@@ -74,7 +74,7 @@ class _RequestsState extends State<Requests> {
                         SizedBox(height: 16.0),
                     itemCount: tmp.docs.length + 1)
                 // While the StreamBuilder is loading, show a progress indicator.
-                : Center(child: CircularProgressIndicator());
+                : Center(child: CustomTheme.loading);
           }),
     );
   }

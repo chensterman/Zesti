@@ -495,7 +495,7 @@ class _ProfileState extends State<Profile> {
               ),
             );
           } else {
-            return Center(child: CircularProgressIndicator());
+            return Center(child: CustomTheme.loading);
           }
         });
   }

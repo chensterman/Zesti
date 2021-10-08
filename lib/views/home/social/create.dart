@@ -3,7 +3,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:zesti/theme/theme.dart';
 import 'package:zesti/services/database.dart';
-import 'package:zesti/views/home/social/choose.dart';
 import 'package:zesti/widgets/formwidgets.dart';
 
 class CreateGroup extends StatefulWidget {

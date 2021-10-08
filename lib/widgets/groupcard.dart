@@ -178,7 +178,14 @@ class GroupCard extends StatelessWidget {
           }
           // On loading, return an empty container.
           else {
-            return Container();
+            return Container(
+                height: size.height * 0.7,
+                width: size.width * 0.95,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  color: Colors.white,
+                ),
+                child: Center(child: CustomTheme.loading));
           }
         });
   }
@@ -380,8 +387,9 @@ class GroupCardDummy extends StatelessWidget {
                 width: size.width * 0.95,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(10),
+                  color: Colors.white,
                 ),
-                child: Center(child: CircularProgressIndicator()));
+                child: Center(child: CustomTheme.loading));
           }
         });
   }

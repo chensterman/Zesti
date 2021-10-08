@@ -235,7 +235,7 @@ class _ChatState extends State<Chat> {
                         data['sender-ref'].id != dataAbove['sender-ref'].id);
                   }
                 })
-            : Center(child: CircularProgressIndicator());
+            : Center(child: CustomTheme.loading);
       },
     );
   }

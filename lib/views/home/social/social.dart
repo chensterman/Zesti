@@ -18,9 +18,6 @@ class Social extends StatefulWidget {
 }
 
 class _SocialState extends State<Social> {
-  // Firebase storage instance
-  final FirebaseStorage _storage = FirebaseStorage.instance;
-
   // Inital widget to display
   int _selectedIndex = 0;
 

@@ -68,7 +68,7 @@ class _MatchesState extends State<Matches> {
                           SizedBox(height: 16.0),
                       itemCount: tmp.docs.length + 1)
                   // StreamBuilder loading indicator.
-                  : Center(child: CircularProgressIndicator());
+                  : Center(child: CustomTheme.loading);
             }));
   }
 

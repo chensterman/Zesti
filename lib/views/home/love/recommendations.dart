@@ -83,7 +83,7 @@ class _RecommendationsState extends State<Recommendations> {
                         SizedBox(height: 16.0),
                     itemCount: tmp.docs.length + 1)
                 // When StreamBuilder hasn't loaded, show progress indicator.
-                : Center(child: CircularProgressIndicator());
+                : Center(child: CustomTheme.loading);
           }),
     );
   }

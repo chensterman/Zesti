@@ -131,7 +131,7 @@ class _ChooseState extends State<Choose> {
               } else {
                 return Padding(
                     padding: EdgeInsets.all(100.0),
-                    child: Center(child: CircularProgressIndicator()));
+                    child: Center(child: CustomTheme.loading));
               }
             }),
       ),
