@@ -32,7 +32,7 @@ class PreviewCard extends StatelessWidget {
       child: Container(
         // Box decoraion and gradient.
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(color: Colors.black12, spreadRadius: 0.5),
           ],

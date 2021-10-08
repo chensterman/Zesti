@@ -6,6 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:zesti/services/database.dart';
 import 'package:zesti/theme/theme.dart';
 import 'package:zesti/views/home/deals.dart';
+import 'package:zesti/widgets/usercard.dart';
 
 // Widget displaying the chat page for a specific match.
 class Chat extends StatefulWidget {
@@ -107,7 +108,16 @@ class _ChatState extends State<Chat> {
               Text(widget.name, style: TextStyle(fontSize: 20)),
             ],
           ),
-          onTap: () {},
+          onTap: () {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => UserOverview(
+                        userRef: DatabaseService(uid: user!.uid)
+                            .userCollection
+                            .doc(widget.youid),
+                        name: widget.name)));
+          },
         ),
       ),
       body: Container(

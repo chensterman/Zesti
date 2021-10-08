@@ -36,7 +36,7 @@ class UserCard extends StatelessWidget {
               height: size.height * 0.7,
               width: size.width * 0.95,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(20),
                 // User profile pic on card.
                 image: DecorationImage(
                   image: snapshot.data!.profPic,
@@ -46,7 +46,7 @@ class UserCard extends StatelessWidget {
               child: Container(
                 // Box decoraion and gradient.
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(color: Colors.black12, spreadRadius: 0.5),
                   ],
@@ -127,7 +127,7 @@ class UserCard extends StatelessWidget {
                 height: size.height * 0.7,
                 width: size.width * 0.95,
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(20),
                   color: Colors.white,
                 ),
                 child: Center(child: CustomTheme.loading));
@@ -223,7 +223,7 @@ class UserCardDummy extends StatelessWidget {
               height: size.height * 0.7,
               width: size.width * 0.95,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(20),
                 // User profile pic on card.
                 image: DecorationImage(
                   image: snapshot.data!.profPic,
@@ -233,7 +233,7 @@ class UserCardDummy extends StatelessWidget {
               child: Container(
                 // Box decoraion and gradient.
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(color: Colors.black12, spreadRadius: 0.5),
                   ],
@@ -269,7 +269,7 @@ class UserCardDummy extends StatelessWidget {
                 height: size.height * 0.7,
                 width: size.width * 0.95,
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(20),
                   color: Colors.white,
                 ),
                 child: Center(child: CustomTheme.loading));
@@ -300,6 +300,33 @@ class UserCardDummy extends StatelessWidget {
           )
         ],
       ),
+    );
+  }
+}
+
+class UserOverview extends StatelessWidget {
+  final DocumentReference userRef;
+  final String name;
+  UserOverview({
+    Key? key,
+    required this.userRef,
+    required this.name,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: CustomTheme.reallyBrightOrange,
+        title: Text(name),
+      ),
+      body: Container(
+          width: size.width,
+          height: size.height,
+          decoration: CustomTheme.mode,
+          padding: EdgeInsets.all(16.0),
+          child: UserCardDummy(userRef: userRef)),
     );
   }
 }

@@ -9,7 +9,20 @@ import 'package:zesti/views/home/love/love.dart';
 import 'package:zesti/views/home/social/choose.dart';
 
 // Home page of a logged in user.
-class Home extends StatelessWidget {
+class Home extends StatefulWidget {
+  Home({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  _HomeState createState() => _HomeState();
+}
+
+class _HomeState extends State<Home> {
+  void resetCallback() {
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     final user = Provider.of<User?>(context);
@@ -49,8 +62,9 @@ class Home extends StatelessWidget {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                          builder: (context) =>
-                                              Profile(uid: user.uid)),
+                                          builder: (context) => EditProfile(
+                                              callback: resetCallback,
+                                              user: snapshot.data!)),
                                     );
                                   },
                                   child: Container(

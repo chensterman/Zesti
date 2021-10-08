@@ -55,12 +55,12 @@ class GroupCard extends StatelessWidget {
                 height: height,
                 width: size.width * 0.95,
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(20),
                 ),
                 child: Stack(
                   children: [
                     ClipRRect(
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(20),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: <Widget>[
@@ -90,7 +90,7 @@ class GroupCard extends StatelessWidget {
                     Container(
                       // Box decoraion and gradient.
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(20),
                         boxShadow: [
                           BoxShadow(color: Colors.black12, spreadRadius: 0.5),
                         ],
@@ -182,7 +182,7 @@ class GroupCard extends StatelessWidget {
                 height: size.height * 0.7,
                 width: size.width * 0.95,
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(20),
                   color: Colors.white,
                 ),
                 child: Center(child: CustomTheme.loading));
@@ -304,12 +304,12 @@ class GroupCardDummy extends StatelessWidget {
                 height: height,
                 width: size.width * 0.95,
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(20),
                 ),
                 child: Stack(
                   children: [
                     ClipRRect(
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(20),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: <Widget>[
@@ -339,7 +339,7 @@ class GroupCardDummy extends StatelessWidget {
                     Container(
                       // Box decoraion and gradient.
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(20),
                         boxShadow: [
                           BoxShadow(color: Colors.black12, spreadRadius: 0.5),
                         ],
@@ -386,7 +386,7 @@ class GroupCardDummy extends StatelessWidget {
                 height: size.height * 0.7,
                 width: size.width * 0.95,
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(20),
                   color: Colors.white,
                 ),
                 child: Center(child: CustomTheme.loading));

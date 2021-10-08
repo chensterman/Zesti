@@ -123,14 +123,22 @@ class DatabaseService {
   }
 
   // Update user photo.
-  Future<void> updatePhoto(File image) async {
-    String storageRefPut = "profpics/" + uid + "/" + uuid.v4() + ".jpg";
-    await _storage.ref(storageRefPut).putFile(image);
-    await userCollection
-        .doc(uid)
-        .update({'photo-ref': storageRefPut})
-        .then((value) => print("Photo Updated"))
-        .catchError((error) => print("Failed to update user: $error"));
+  Future<void> updatePhoto(File? image) async {
+    if (image == null) {
+      await userCollection
+          .doc(uid)
+          .update({'photo-ref': null})
+          .then((value) => print("Photo Updated"))
+          .catchError((error) => print("Failed to update user: $error"));
+    } else {
+      String storageRefPut = "profpics/" + uid + "/" + uuid.v4() + ".jpg";
+      await _storage.ref(storageRefPut).putFile(image);
+      await userCollection
+          .doc(uid)
+          .update({'photo-ref': storageRefPut})
+          .then((value) => print("Photo Updated"))
+          .catchError((error) => print("Failed to update user: $error"));
+    }
   }
 
   // Update user bio.
@@ -158,11 +166,6 @@ class DatabaseService {
     QuerySnapshot sameKey =
         await userCollection.where('zest-key', isEqualTo: zestKey).get();
     return sameKey.docs.length == 0 ? false : true;
-  }
-
-  // Stream to retrieve profile info from the given uid.
-  Stream<DocumentSnapshot> getEditProfileInfo() {
-    return userCollection.doc(uid).snapshots();
   }
 
   // Stream to retrieve match recommendations (generated with function below).

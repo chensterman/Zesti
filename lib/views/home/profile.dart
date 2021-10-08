@@ -1,44 +1,31 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:zesti/services/auth.dart';
 import 'package:zesti/models/zestiuser.dart';
 import 'package:zesti/services/database.dart';
 import 'package:zesti/theme/theme.dart';
-import 'package:zesti/views/home/home.dart';
 import 'package:zesti/widgets/previewcard.dart';
 import 'package:zesti/widgets/formwidgets.dart';
 
 // Widget for the profile editing page.
-class Profile extends StatefulWidget {
-  final String uid;
-  Profile({
+class EditProfile extends StatefulWidget {
+  final Function callback;
+  final ZestiUser user;
+  EditProfile({
     Key? key,
-    required this.uid,
+    required this.callback,
+    required this.user,
   }) : super(key: key);
 
   @override
-  _ProfileState createState() => _ProfileState();
+  _EditProfileState createState() => _EditProfileState();
 }
 
-class _ProfileState extends State<Profile> {
+class _EditProfileState extends State<EditProfile> {
   // Form widget key.
   final _formKey = GlobalKey<FormState>();
-
-  // Image picker tool.
-  final ImagePicker _picker = ImagePicker();
-
-  // User data to retrieve and display.
-  String? name;
-  String? bio;
-  String? house;
-  String? year;
-  String? dIdentity;
-  String? dInterest;
-  String? photoref;
-  String zestKey = "";
-  dynamic profpic;
 
   // List of Harvard houses
   List<String> _houseList = [
@@ -95,13 +82,37 @@ class _ProfileState extends State<Profile> {
     'Everyone',
   ];
 
-  // Stream to retrieve user profile information (initialized during initState).
-  Stream<DocumentSnapshot>? profileInfo;
+  // User data to retrieve and display.
+  String? name;
+  String? bio;
+  String? house;
+  String? year;
+  String? dIdentity;
+  String? dInterest;
+  String? photoref;
+  String zestKey = "";
+  dynamic profpic;
 
   @override
   void initState() {
-    profileInfo = DatabaseService(uid: widget.uid).getEditProfileInfo();
     super.initState();
+    name = widget.user.first;
+    bio = widget.user.bio;
+    house = widget.user.house;
+    year = widget.user.year;
+    String tmp = widget.user.dIdentity;
+    dIdentity = "${tmp[0].toUpperCase()}${tmp.substring(1)}";
+    tmp = widget.user.dInterest;
+    if (tmp == 'man') {
+      dInterest = 'Men';
+    } else if (tmp == 'woman') {
+      dInterest = 'Women';
+    } else if (tmp == 'everyone') {
+      dInterest = "${tmp[0].toUpperCase()}${tmp.substring(1)}";
+    }
+    photoref = widget.user.photoURL;
+    zestKey = widget.user.zestKey;
+    profpic = widget.user.profPic;
   }
 
   void houseCallback(String? val) {
@@ -137,100 +148,60 @@ class _ProfileState extends State<Profile> {
   @override
   Widget build(BuildContext context) {
     // StreamBuilder to display profile info stream.
-    return StreamBuilder(
-        stream: profileInfo,
-        builder: (context, AsyncSnapshot<DocumentSnapshot> snapshot) {
-          DocumentSnapshot? tmp = snapshot.data;
-          // On loading.
-          if (tmp == null) {
-            return Center(child: CircularProgressIndicator());
-            // On loaded.
-          } else {
-            // Convert snapshot into dart map.
-            Map<String, dynamic> data = tmp.data() as Map<String, dynamic>;
-
-            // Check for null input parameters and replace them with the newly loaded data.
-            if (name == null) name = data['first-name'];
-            if (bio == null) bio = data['bio'];
-            if (house == null) house = data['house'];
-            if (year == null) year = data['year'];
-            // Dating identity is a special case where the lowercase word (as stored in Firestore) must have its first letter put in uppercase for UI purposes.
-            if (dIdentity == null) {
-              String tmp = data['dating-identity'];
-              dIdentity = "${tmp[0].toUpperCase()}${tmp.substring(1)}";
-            }
-            // Dating interest is a special case where the singular word (as stored in Firestore) must be turned into plural for UI purposes.
-            if (dInterest == null) {
-              String tmp = data['dating-interest'];
-              if (tmp == 'man') {
-                dInterest = 'Men';
-              } else if (tmp == 'woman') {
-                dInterest = 'Women';
-              } else if (tmp == 'everyone') {
-                dInterest = "${tmp[0].toUpperCase()}${tmp.substring(1)}";
-              }
-            }
-            if (photoref == null) photoref = data['photo-ref'];
-            zestKey = data['zest-key'];
-
-            // Tab controller switches between "edit" and "preview" mode.
-            TabBar tabBar = TabBar(
-              automaticIndicatorColorAdjustment: false,
-              indicatorColor: CustomTheme.reallyBrightOrange,
-              tabs: <Widget>[
-                Tab(
-                  child: Text("Edit", style: CustomTheme.textTheme.headline3),
-                ),
-                Tab(
-                  child:
-                      Text("Preview", style: CustomTheme.textTheme.headline3),
-                ),
-              ],
-            );
-            return DefaultTabController(
-              initialIndex: 0,
-              length: 2,
-              child: Scaffold(
-                appBar: AppBar(
-                  backgroundColor: CustomTheme.reallyBrightOrange,
-                  title: Text("Your Profile"),
-                  actions: [
-                    InkWell(
-                        onTap: () {
-                          showDialog(
-                              context: context,
-                              builder: (context) => accountSettings(context));
-                        },
-                        child: Container(
-                          padding: EdgeInsets.all(4.0),
-                          child: Icon(
-                            Icons.settings,
-                            color: CustomTheme.reallyBrightOrange,
-                            size: 26.0,
-                          ),
-                          decoration: BoxDecoration(
-                              color: Colors.white, shape: BoxShape.circle),
-                        )),
-                    SizedBox(width: 20.0),
-                  ],
-                  bottom: PreferredSize(
-                    preferredSize: tabBar.preferredSize,
-                    child: ColoredBox(
-                      color: Colors.white,
-                      child: tabBar,
-                    ),
+    TabBar tabBar = TabBar(
+      automaticIndicatorColorAdjustment: false,
+      indicatorColor: CustomTheme.reallyBrightOrange,
+      tabs: <Widget>[
+        Tab(
+          child: Text("Edit", style: CustomTheme.textTheme.headline3),
+        ),
+        Tab(
+          child: Text("Preview", style: CustomTheme.textTheme.headline3),
+        ),
+      ],
+    );
+    return DefaultTabController(
+      initialIndex: 0,
+      length: 2,
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: CustomTheme.reallyBrightOrange,
+          title: Text("Your Profile"),
+          actions: [
+            InkWell(
+                onTap: () {
+                  showDialog(
+                      context: context,
+                      builder: (context) => accountSettings(context));
+                },
+                child: Container(
+                  padding: EdgeInsets.all(4.0),
+                  child: Icon(
+                    Icons.settings,
+                    color: CustomTheme.reallyBrightOrange,
+                    size: 26.0,
                   ),
-                ),
-                body: TabBarView(
-                  children: <Widget>[
-                    edit(),
-                    preview(),
-                  ],
-                ),
-              ),
-            );
-          }
-        });
+                  decoration: BoxDecoration(
+                      color: Colors.white, shape: BoxShape.circle),
+                )),
+            SizedBox(width: 20.0),
+          ],
+          bottom: PreferredSize(
+            preferredSize: tabBar.preferredSize,
+            child: ColoredBox(
+              color: Colors.white,
+              child: tabBar,
+            ),
+          ),
+        ),
+        body: TabBarView(
+          children: <Widget>[
+            edit(),
+            preview(),
+          ],
+        ),
+      ),
+    );
   }
 
   // Edit mode widget.
@@ -261,40 +232,14 @@ class _ProfileState extends State<Profile> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  profpic == null
-                                      ? Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 64.0),
-                                          // FutureBuilder retrieves profile photo from Firebase Storage.
-                                          child: FutureBuilder(
-                                              future: DatabaseService(
-                                                      uid: widget.uid)
-                                                  .getPhoto(photoref),
-                                              builder: (context,
-                                                  AsyncSnapshot<
-                                                          ImageProvider<Object>>
-                                                      snapshot) {
-                                                // On error.
-                                                if (snapshot.hasError) {
-                                                  return Text(snapshot.error
-                                                      .toString());
-                                                  // During loading or success.
-                                                } else {
-                                                  profpic = snapshot.data;
-                                                  return ImageUpdate(
-                                                      callback: profpicCallback,
-                                                      profpic: profpic);
-                                                }
-                                              }),
-                                        )
-                                      : Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 64.0),
-                                          // FutureBuilder retrieves profile photo from Firebase Storage.
-                                          child: ImageUpdate(
-                                              callback: profpicCallback,
-                                              profpic: profpic),
-                                        ),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 64.0),
+                                    // FutureBuilder retrieves profile photo from Firebase Storage.
+                                    child: ImageUpdate(
+                                        callback: profpicCallback,
+                                        profpic: profpic),
+                                  ),
                                   SizedBox(height: 20.0),
                                   Padding(
                                     padding: const EdgeInsets.symmetric(
@@ -403,17 +348,20 @@ class _ProfileState extends State<Profile> {
                                             year != null &&
                                             dIdentity != null &&
                                             dInterest != null &&
-                                            profpic != null &&
                                             _formKey.currentState!.validate()) {
                                           // Update all info in Firestore.
-                                          await DatabaseService(uid: widget.uid)
+                                          await DatabaseService(
+                                                  uid: widget.user.uid)
                                               .updateBio(bio!);
-                                          await DatabaseService(uid: widget.uid)
+                                          await DatabaseService(
+                                                  uid: widget.user.uid)
                                               .updateHouse(house!);
-                                          await DatabaseService(uid: widget.uid)
+                                          await DatabaseService(
+                                                  uid: widget.user.uid)
                                               .updateYear(year!);
                                           // Take on dating identity/interest special cases.
-                                          await DatabaseService(uid: widget.uid)
+                                          await DatabaseService(
+                                                  uid: widget.user.uid)
                                               .updateDatingIdentity(
                                                   dIdentity!.toLowerCase());
                                           String tmp = "";
@@ -424,16 +372,22 @@ class _ProfileState extends State<Profile> {
                                           } else if (dInterest == "Everyone") {
                                             tmp = "everyone";
                                           }
-                                          await DatabaseService(uid: widget.uid)
+                                          await DatabaseService(
+                                                  uid: widget.user.uid)
                                               .updateDatingInterest(tmp);
-                                          await DatabaseService(uid: widget.uid)
-                                              .updatePhoto(profpic);
+                                          if (profpic is File ||
+                                              profpic == null) {
+                                            await DatabaseService(
+                                                    uid: widget.user.uid)
+                                                .updatePhoto(profpic);
+                                          }
                                           // Navigate back to home page.
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                                builder: (context) => Home()),
-                                          );
+                                          Navigator.of(context).pop();
+                                          widget.callback();
+                                          showDialog(
+                                              context: context,
+                                              builder: (context) =>
+                                                  updateConfirmDialog(context));
                                         }
                                       }),
                                 ],
@@ -457,7 +411,7 @@ class _ProfileState extends State<Profile> {
   Widget preview() {
     Size size = MediaQuery.of(context).size;
     return FutureBuilder(
-        future: DatabaseService(uid: widget.uid).getPhoto(photoref),
+        future: DatabaseService(uid: widget.user.uid).getPhoto(photoref),
         builder: (context, AsyncSnapshot<ImageProvider<Object>> snapshot) {
           // On error.
           if (snapshot.hasError) {
@@ -523,6 +477,30 @@ class _ProfileState extends State<Profile> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget updateConfirmDialog(BuildContext context) {
+    return AlertDialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+      title: const Text("Your profile has been updated."),
+      content: SingleChildScrollView(
+        child: SizedBox(
+          width: double.infinity,
+          height: 150.0,
+          child: SvgPicture.asset("assets/name.svg"),
+        ),
+      ),
+      actions: <Widget>[
+        TextButton(
+          child: Text("Ok", style: CustomTheme.textTheme.headline3),
+          onPressed: () async {
+            Navigator.of(context).pop();
+          },
+        ),
+      ],
     );
   }
 }
