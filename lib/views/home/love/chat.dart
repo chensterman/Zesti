@@ -345,6 +345,9 @@ class _ChatState extends State<Chat> {
   Widget unmatchDialog(BuildContext context, String message, String uid,
       String youid, String chatid) {
     return AlertDialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
       title: Text(message),
       content: SingleChildScrollView(
         child: SizedBox(

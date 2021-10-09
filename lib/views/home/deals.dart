@@ -181,6 +181,9 @@ class _RedeemState extends State<Redeem> {
 
   Widget redeemDialog(BuildContext context, String message) {
     return AlertDialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
       title: Text(message),
       content: SingleChildScrollView(
         child: SizedBox(
@@ -216,6 +219,9 @@ class _RedeemState extends State<Redeem> {
 
   Widget redeemedDialog(BuildContext context, String message) {
     return AlertDialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
       title: Text(message),
       content: SingleChildScrollView(
         child: CircleAvatar(

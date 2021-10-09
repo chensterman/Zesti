@@ -411,6 +411,9 @@ class _ChatState extends State<Chat> {
   Widget unmatchDialog(BuildContext context, String message, String uid,
       String gid, String yougid, String chatid) {
     return AlertDialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
       title: Text(message),
       content: SingleChildScrollView(
         child: SizedBox(
@@ -422,7 +425,7 @@ class _ChatState extends State<Chat> {
       ),
       actions: <Widget>[
         TextButton(
-          child: Text("Yes", style: CustomTheme.textTheme.headline2),
+          child: Text("Yes", style: CustomTheme.textTheme.headline1),
           onPressed: () async {
             await DatabaseService(uid: uid).unmatchGroup(gid, yougid, chatid);
             Navigator.pop(context);

@@ -339,57 +339,61 @@ class _EditProfileState extends State<EditProfile> {
                                       initValue: dInterest,
                                       houseList: _interestList),
                                   SizedBox(height: 20.0),
-                                  RoundedButton(
-                                      text: 'Update',
-                                      onPressed: () async {
-                                        // Check for any null (blank) user input and validate the form.
-                                        if (bio != null &&
-                                            house != null &&
-                                            year != null &&
-                                            dIdentity != null &&
-                                            dInterest != null &&
-                                            _formKey.currentState!.validate()) {
-                                          // Update all info in Firestore.
-                                          await DatabaseService(
-                                                  uid: widget.user.uid)
-                                              .updateBio(bio!);
-                                          await DatabaseService(
-                                                  uid: widget.user.uid)
-                                              .updateHouse(house!);
-                                          await DatabaseService(
-                                                  uid: widget.user.uid)
-                                              .updateYear(year!);
-                                          // Take on dating identity/interest special cases.
-                                          await DatabaseService(
-                                                  uid: widget.user.uid)
-                                              .updateDatingIdentity(
-                                                  dIdentity!.toLowerCase());
-                                          String tmp = "";
-                                          if (dInterest == "Men") {
-                                            tmp = "man";
-                                          } else if (dInterest == "Women") {
-                                            tmp = "woman";
-                                          } else if (dInterest == "Everyone") {
-                                            tmp = "everyone";
-                                          }
-                                          await DatabaseService(
-                                                  uid: widget.user.uid)
-                                              .updateDatingInterest(tmp);
-                                          if (profpic is File ||
-                                              profpic == null) {
-                                            await DatabaseService(
-                                                    uid: widget.user.uid)
-                                                .updatePhoto(profpic);
-                                          }
-                                          // Navigate back to home page.
-                                          Navigator.of(context).pop();
-                                          widget.callback();
-                                          showDialog(
-                                              context: context,
-                                              builder: (context) =>
-                                                  updateConfirmDialog(context));
-                                        }
-                                      }),
+                                  Center(
+                                      child: RoundedButton(
+                                          text: 'Update',
+                                          onPressed: () async {
+                                            // Check for any null (blank) user input and validate the form.
+                                            if (bio != null &&
+                                                house != null &&
+                                                year != null &&
+                                                dIdentity != null &&
+                                                dInterest != null &&
+                                                _formKey.currentState!
+                                                    .validate()) {
+                                              // Update all info in Firestore.
+                                              await DatabaseService(
+                                                      uid: widget.user.uid)
+                                                  .updateBio(bio!);
+                                              await DatabaseService(
+                                                      uid: widget.user.uid)
+                                                  .updateHouse(house!);
+                                              await DatabaseService(
+                                                      uid: widget.user.uid)
+                                                  .updateYear(year!);
+                                              // Take on dating identity/interest special cases.
+                                              await DatabaseService(
+                                                      uid: widget.user.uid)
+                                                  .updateDatingIdentity(
+                                                      dIdentity!.toLowerCase());
+                                              String tmp = "";
+                                              if (dInterest == "Men") {
+                                                tmp = "man";
+                                              } else if (dInterest == "Women") {
+                                                tmp = "woman";
+                                              } else if (dInterest ==
+                                                  "Everyone") {
+                                                tmp = "everyone";
+                                              }
+                                              await DatabaseService(
+                                                      uid: widget.user.uid)
+                                                  .updateDatingInterest(tmp);
+                                              if (profpic is File ||
+                                                  profpic == null) {
+                                                await DatabaseService(
+                                                        uid: widget.user.uid)
+                                                    .updatePhoto(profpic);
+                                              }
+                                              // Navigate back to home page.
+                                              Navigator.of(context).pop();
+                                              widget.callback();
+                                              showDialog(
+                                                  context: context,
+                                                  builder: (context) =>
+                                                      updateConfirmDialog(
+                                                          context));
+                                            }
+                                          })),
                                 ],
                               ),
                             ),

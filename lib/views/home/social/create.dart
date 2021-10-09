@@ -22,7 +22,6 @@ class _CreateGroupState extends State<CreateGroup> {
   @override
   Widget build(BuildContext context) {
     final user = Provider.of<User?>(context);
-    Size size = MediaQuery.of(context).size;
 
     return Scaffold(
       appBar: AppBar(
@@ -95,7 +94,7 @@ class _CreateGroupState extends State<CreateGroup> {
                                       setState(() => funFact = val);
                                     },
                                     decoration: const InputDecoration(
-                                        hintText: "Fun Fact")),
+                                        hintText: "Tagline")),
                                 SizedBox(height: 20.0),
                                 RoundedButton(
                                     text: 'Continue',

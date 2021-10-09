@@ -104,7 +104,9 @@ class DropDownField extends StatelessWidget {
         style: TextStyle(color: Colors.black),
         isExpanded: true,
         items: houseList.map((val) {
-          return DropdownMenuItem(value: val, child: Text(val));
+          return DropdownMenuItem(
+              value: val,
+              child: Text(val, style: CustomTheme.textTheme.headline5));
         }).toList(),
         onChanged: (String? val) {
           this.callback(val);
