@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:zesti/models/zestiuser.dart';
 import 'package:zesti/services/database.dart';
 import 'package:zesti/theme/theme.dart';
@@ -87,8 +88,9 @@ class _HomeState extends State<Home> {
                                       size: 36.0,
                                     ),
                                     decoration: BoxDecoration(
-                                        color: Colors.white,
-                                        shape: BoxShape.circle),
+                                      color: Colors.white,
+                                      shape: BoxShape.circle,
+                                    ),
                                   )),
                             ),
                           ],
@@ -98,26 +100,108 @@ class _HomeState extends State<Home> {
                         Row(
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
-                              TextButton(
-                                child: Text('Love'),
-                                onPressed: () async {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) => Love()),
-                                  );
-                                },
-                              ),
-                              TextButton(
-                                child: Text('Social'),
-                                onPressed: () async {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) => Choose()),
-                                  );
-                                },
-                              ),
+                              InkWell(
+                                  onTap: () async {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => Love()),
+                                    );
+                                  },
+                                  child: Column(
+                                    children: [
+                                      Container(
+                                        child: SizedBox(
+                                          width: 100.0,
+                                          height: 100.0,
+                                          child: SvgPicture.asset(
+                                              "assets/Solo.svg"),
+                                        ),
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          boxShadow: [
+                                            BoxShadow(
+                                                blurRadius: 5,
+                                                color: Colors.grey.shade700,
+                                                spreadRadius: -2)
+                                          ],
+                                        ),
+                                      ),
+                                      Container(
+                                        width: 100.0,
+                                        padding: EdgeInsets.all(8.0),
+                                        child: Center(
+                                            child: Align(
+                                                alignment: Alignment.center,
+                                                child: Text("Solo",
+                                                    style: CustomTheme
+                                                        .textTheme.headline3))),
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius:
+                                              BorderRadius.circular(20),
+                                          boxShadow: [
+                                            BoxShadow(
+                                                offset: Offset(3.0, 3.0),
+                                                blurRadius: 5,
+                                                color: Colors.grey.shade700,
+                                                spreadRadius: 3)
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  )),
+                              InkWell(
+                                  onTap: () async {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => Choose()),
+                                    );
+                                  },
+                                  child: Column(
+                                    children: [
+                                      Container(
+                                        child: SizedBox(
+                                          width: 100.0,
+                                          height: 100.0,
+                                          child: SvgPicture.asset(
+                                              "assets/Group.svg"),
+                                        ),
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          boxShadow: [
+                                            BoxShadow(
+                                                blurRadius: 5,
+                                                color: Colors.grey.shade700,
+                                                spreadRadius: -2)
+                                          ],
+                                        ),
+                                      ),
+                                      Container(
+                                        width: 100.0,
+                                        padding: EdgeInsets.all(8.0),
+                                        child: Center(
+                                            child: Align(
+                                                alignment: Alignment.center,
+                                                child: Text("Group",
+                                                    style: CustomTheme
+                                                        .textTheme.headline3))),
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius:
+                                              BorderRadius.circular(20),
+                                          boxShadow: [
+                                            BoxShadow(
+                                                offset: Offset(3.0, 3.0),
+                                                blurRadius: 5,
+                                                color: Colors.grey.shade700,
+                                                spreadRadius: 3)
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  )),
                             ]),
                       ]);
                   // During loading.

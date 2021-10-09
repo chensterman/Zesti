@@ -48,7 +48,7 @@ class ZestiLogo extends StatefulWidget {
 /// AnimationControllers can be created with `vsync: this` because of TickerProviderStateMixin.
 class _ZestiLogoState extends State<ZestiLogo> with TickerProviderStateMixin {
   late final AnimationController _controller = AnimationController(
-    duration: const Duration(seconds: 5),
+    duration: const Duration(seconds: 2),
     vsync: this,
   )..repeat(reverse: true);
 

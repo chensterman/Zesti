@@ -1,5 +1,6 @@
 import "package:flutter/material.dart";
 import 'package:zesti/theme/theme.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:zesti/views/auth/signup.dart';
 import 'package:zesti/services/auth.dart';
 import 'package:zesti/widgets/formwidgets.dart';
@@ -20,6 +21,12 @@ class _SignInState extends State<SignIn> {
 
   // Error message when email is not valid.
   String error = '';
+
+  void errorCallback() {
+    String error = "Sign in error. The username or password is invalid.";
+    showDialog(
+        context: context, builder: (context) => errorDialog(context, error));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -70,17 +77,14 @@ class _SignInState extends State<SignIn> {
                             // Validate all form fields.
                             if (_formKey.currentState!.validate()) {
                               // Get login status.
-                              int status =
-                                  await AuthService().signIn(email, password);
+                              int status = await AuthService()
+                                  .signIn(email, password, errorCallback);
                               // On success, push the authentication route.
                               if (status == 0) {
                                 Navigator.pushReplacementNamed(
                                   context,
                                   '/auth',
                                 );
-                                // On failure, send the error message.
-                              } else {
-                                print('Incorrect Login');
                               }
                             }
                           }),
@@ -115,6 +119,31 @@ class _SignInState extends State<SignIn> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget errorDialog(BuildContext context, String error) {
+    return AlertDialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+      title: Text(error),
+      content: SingleChildScrollView(
+        child: SizedBox(
+          width: double.infinity,
+          height: 150.0,
+          child:
+              SvgPicture.asset("assets/warning.svg", semanticsLabel: "Warning"),
+        ),
+      ),
+      actions: <Widget>[
+        TextButton(
+          child: Text("Ok", style: CustomTheme.textTheme.headline2),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
+      ],
     );
   }
 }

@@ -281,10 +281,8 @@ class _GroupState extends State<Group> {
           child: Text("Yes", style: CustomTheme.textTheme.headline2),
           onPressed: () async {
             await DatabaseService(uid: uid).leaveGroup(widget.gid);
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => Choose()),
-            );
+            Navigator.of(context).pop();
+            Navigator.of(context).pop();
           },
         ),
         TextButton(

@@ -13,7 +13,8 @@ class AuthService {
   }
 
   // Method for signing up.
-  Future<int> signUp(email, password) async {
+  Future<int> signUp(
+      String email, String password, Function errorCallback) async {
     try {
       // Obtain User object (FireAuth function).
       UserCredential result = await _auth.createUserWithEmailAndPassword(
@@ -26,18 +27,23 @@ class AuthService {
       // Return 0 on success.
       return 0;
     } catch (e) {
+      // Run the callback function to display the error.
+      errorCallback();
       // Return 1 on error.
       return 1;
     }
   }
 
   // Method for singing in (returns status as int).
-  Future<int> signIn(email, password) async {
+  Future<int> signIn(
+      String email, String password, Function errorCallback) async {
     try {
       await _auth.signInWithEmailAndPassword(email: email, password: password);
       // Return 0 on success.
       return 0;
-    } catch (e) {
+    } catch (error) {
+      // Run the callback function to display the error.
+      errorCallback();
       // Return 1 on error.
       return 1;
     }

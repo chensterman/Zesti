@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:zesti/theme/theme.dart';
 import 'package:zesti/views/auth/signin.dart';
 import 'package:zesti/services/auth.dart';
@@ -22,6 +23,12 @@ class _SignUpState extends State<SignUp> {
 
   // Error message when email is not valid.
   String error = '';
+
+  void errorCallback() {
+    String error = "Sign up error. This email may already be registered.";
+    showDialog(
+        context: context, builder: (context) => errorDialog(context, error));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -88,11 +95,15 @@ class _SignUpState extends State<SignUp> {
                             if (_formKey.currentState!.validate()) {
                               // Once validated, auth service creates account.
                               // Then push authentication route.
-                              await AuthService().signUp(email, password);
-                              Navigator.pushReplacementNamed(
-                                context,
-                                '/auth',
-                              );
+                              int status = await AuthService()
+                                  .signUp(email, password, errorCallback);
+                              // On success, push the authentication route.
+                              if (status == 0) {
+                                Navigator.pushReplacementNamed(
+                                  context,
+                                  '/auth',
+                                );
+                              }
                             }
                           }),
                       SizedBox(height: size.height * 0.01),
@@ -128,6 +139,31 @@ class _SignUpState extends State<SignUp> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget errorDialog(BuildContext context, String error) {
+    return AlertDialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+      title: Text(error),
+      content: SingleChildScrollView(
+        child: SizedBox(
+          width: double.infinity,
+          height: 150.0,
+          child:
+              SvgPicture.asset("assets/warning.svg", semanticsLabel: "Warning"),
+        ),
+      ),
+      actions: <Widget>[
+        TextButton(
+          child: Text("Ok", style: CustomTheme.textTheme.headline2),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
+      ],
     );
   }
 }
