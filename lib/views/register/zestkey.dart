@@ -52,7 +52,7 @@ class _ZestKeyState extends State<ZestKey> {
                                   padding:
                                       const EdgeInsets.symmetric(vertical: 8.0),
                                   child: Text(
-                                    "Finally, choose a ZestKey!",
+                                    "Finally, choose a ZestKey! This is how other users will add you to groups.",
                                     style: CustomTheme.textTheme.headline2,
                                   ),
                                 ),
@@ -68,8 +68,7 @@ class _ZestKeyState extends State<ZestKey> {
                                     setState(() => zestKey = val);
                                   },
                                   decoration: const InputDecoration(
-                                      hintText:
-                                          "To get added to blocking groups!"),
+                                      hintText: "A unique username"),
                                 ),
                                 SizedBox(height: 20.0),
                                 RoundedButton(
@@ -91,13 +90,12 @@ class _ZestKeyState extends State<ZestKey> {
                                         );
                                       }
                                     }),
-                                SizedBox(height: 20.0),
+                                SizedBox(height: 50.0),
                                 SizedBox(
-                                  width: double.infinity,
-                                  height: size.height * 0.3,
-                                  child: SvgPicture.asset("assets/zestkey.svg",
-                                      semanticsLabel: "Name"),
-                                ),
+                                    width: double.infinity,
+                                    height: size.height * 0.3,
+                                    child:
+                                        SvgPicture.asset("assets/zestkey.svg")),
                               ],
                             ),
                           ),

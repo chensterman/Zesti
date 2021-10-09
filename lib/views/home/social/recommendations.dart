@@ -53,13 +53,13 @@ class _RecommendationsState extends State<Recommendations> {
                                   textAlign: TextAlign.left,
                                   style: CustomTheme.textTheme.headline3),
                             ),
-                            TextButton(
-                              child: Text('Generate'),
-                              onPressed: () async {
-                                await DatabaseService(uid: user.uid)
-                                    .generateGroupRecommendations(widget.gid);
-                              },
-                            ),
+                            // TextButton(
+                            //   child: Text('Generate'),
+                            //   onPressed: () async {
+                            //     await DatabaseService(uid: user.uid)
+                            //         .generateGroupRecommendations(widget.gid);
+                            //   },
+                            // ),
                             tmp.docs.length == 0
                                 ? Empty(
                                     reason:

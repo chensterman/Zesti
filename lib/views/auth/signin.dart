@@ -23,7 +23,7 @@ class _SignInState extends State<SignIn> {
   String error = '';
 
   void errorCallback() {
-    String error = "Sign in error. The username or password is invalid.";
+    String error = "Sign in error. The email or password is invalid.";
     showDialog(
         context: context, builder: (context) => errorDialog(context, error));
   }

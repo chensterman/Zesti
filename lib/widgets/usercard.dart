@@ -149,16 +149,16 @@ class UserCard extends StatelessWidget {
             '${userOnCard.first}, ${userOnCard.year}',
             style: CustomTheme.textTheme.subtitle1,
           ),
+          Text(
+            '${userOnCard.house} House',
+            style: CustomTheme.textTheme.subtitle2,
+          ),
           SizedBox(height: 8),
           Text(
             userOnCard.bio,
             style: CustomTheme.textTheme.subtitle2,
           ),
           SizedBox(height: 4),
-          Text(
-            '${userOnCard.house} House',
-            style: CustomTheme.textTheme.subtitle2,
-          )
         ],
       ),
     );
@@ -289,16 +289,16 @@ class UserCardDummy extends StatelessWidget {
         children: [
           Text('${userOnCard.first}, ${userOnCard.year}',
               style: CustomTheme.textTheme.subtitle1),
+          Text(
+            '${userOnCard.house} House',
+            style: CustomTheme.textTheme.subtitle2,
+          ),
           SizedBox(height: 8),
           Text(
             userOnCard.bio,
             style: CustomTheme.textTheme.subtitle2,
           ),
           SizedBox(height: 4),
-          Text(
-            '${userOnCard.house} House',
-            style: CustomTheme.textTheme.subtitle2,
-          )
         ],
       ),
     );
