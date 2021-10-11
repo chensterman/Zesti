@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'dart:typed_data';
-import 'dart:math';
 import 'package:uuid/uuid.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -392,6 +391,7 @@ class DatabaseService {
     return mapData;
   }
 
+/*
   // Generates random match recommendations based on dating identity and interest.
   Future<void> generateRecommendations() async {
     // Get current user info
@@ -559,6 +559,7 @@ class DatabaseService {
       });
     }
   }
+*/
 
   // Handles the interactions a user conducts on a recommended match.
   Future<void> outgoingInteraction(String youid, bool requested) async {
@@ -805,6 +806,7 @@ class DatabaseService {
     return mapData;
   }
 
+/*
   Future<void> generateGroupRecommendations(String gid) async {
     // Get snapshot of all users the user reacted (liked or disliked) to. Convert
     // to list and subtract from list of all users
@@ -868,6 +870,7 @@ class DatabaseService {
       });
     }
   }
+*/
 
   // Handles the interactions a user conducts on a recommended match.
   Future<void> outgoingGroupInteraction(

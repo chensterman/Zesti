@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:zesti/services/database.dart';
-import 'package:zesti/theme/theme.dart';
 import 'package:zesti/views/auth/start.dart';
 import 'package:zesti/views/home/home.dart';
 import 'package:zesti/views/register/birthday.dart';

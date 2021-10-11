@@ -54,8 +54,9 @@ class _SignUpState extends State<SignUp> {
                         validator: (val) {
                           if (val == null || val.isEmpty) {
                             return 'Please enter an email';
-                          } else if (!val.endsWith('.edu')) {
-                            return 'Email must be .edu';
+                          } else if (!val.endsWith('college.harvard.edu') &&
+                              val != "admin@test.edu") {
+                            return 'Email must be Harvard College.';
                           }
                         },
                         onChanged: (val) {

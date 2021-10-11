@@ -120,9 +120,10 @@ exports.generateRecommendations = functions.pubsub.schedule('every 2 minutes').o
     var allReactions = reactionsSnapshot.docs.map(qdoc => qdoc.id);
     var allUsers = collectionQuery.docs.map(qdoc => qdoc.id);
     var availableUsers = allUsers.filter(x => !allReactions.includes(x));
+    var availableUsers = availableUsers.filter(x => x != doc.id);
     
     var snapshot;
-    if (queryIdentity.length == 3) {
+    if (queryIdentity.length > 1) {
       snapshot = await userCollection
           .where('dating-interest', 'in', queryInterest)
           .get();
@@ -136,10 +137,10 @@ exports.generateRecommendations = functions.pubsub.schedule('every 2 minutes').o
     var snapshotUserRefs = snapshot.docs.map(qdoc => qdoc.id);
     var potentialUserRefs = availableUsers.filter(x => snapshotUserRefs.includes(x));
     var userListMaxLength;
-    if (potentialUserRefs.length < 3) {
+    if (potentialUserRefs.length < 5) {
       userListMaxLength = potentialUserRefs.length;
     } else {
-      userListMaxLength = 3;
+      userListMaxLength = 5;
     }
 
     var potentialSet = new Set(potentialUserRefs);
@@ -158,7 +159,7 @@ exports.generateRecommendations = functions.pubsub.schedule('every 2 minutes').o
     });
 
     // Populate recommendations collection with newly generated users.
-    var ts = Date.now();
+    var ts = admin.firestore.Timestamp.now();
     userList.forEach(async function (uid) {
       await doc.ref
           .collection("recommendations")
@@ -166,6 +167,67 @@ exports.generateRecommendations = functions.pubsub.schedule('every 2 minutes').o
           .set({
         "timestamp": ts,
         "user-ref": userCollection.doc(uid),
+      });
+    });
+  });
+
+  // Loop through all group documents
+  var collectionQuery = await groupCollection.get();
+  collectionQuery.docs.forEach(async function (doc) {
+    var reactionsSnapshot =
+        await doc.ref.collection("outgoing").get();
+    var allReactions =
+        reactionsSnapshot.docs.map(qdoc => qdoc.id);
+
+    var groupsSnapshot = await groupCollection.get();
+    var allGroups = groupsSnapshot.docs.map(qdoc => qdoc.id);
+
+    var availableGroups = allGroups.filter(x => !allReactions.includes(x));
+    availableGroups = availableGroups.filter(x => x != doc.id);
+
+    // Query based on the given parameters
+    var snapshot =
+        await groupCollection.where('user-count', '>', 1).get();
+
+    // Create a list of potential recommendations
+    var snapshotGIDs = snapshot.docs.map(qdoc => qdoc.id);
+
+    var potentialGIDs =
+        availableGroups.filter(x => snapshotGIDs.includes(x));
+
+    // Randomly pick from potentialUIDs. Max 3 picks, unless there are less than
+    // 3 potenialUIDs
+    var groupListMaxLength;
+    if (potentialGIDs.length < 5) {
+      groupListMaxLength = potentialGIDs.length;
+    } else {
+      groupListMaxLength = 5;
+    }
+
+    var potentialSet = new Set(potentialGIDs);
+    var groupList = [];
+    while (groupList.length < groupListMaxLength) {
+      var potentialArray = Array.from(potentialSet);
+      var selectedGID = potentialArray[Math.floor((Math.random() * potentialArray.length))];
+      potentialSet.delete(selectedGID);
+      groupList.push(selectedGID);
+    }
+
+    // Delete all currently stored recommendations.
+    var recommendations = await doc.ref.collection("recommendations").get();
+    recommendations.docs.forEach(async function (rec) {
+      await rec.ref.delete();
+    });
+    
+    // Populate recommendations collection with newly generated groups.
+    var ts = admin.firestore.Timestamp.now();
+    groupList.forEach(async function (gid) {
+      await doc.ref
+          .collection("recommendations")
+          .doc(gid)
+          .set({
+        "timestamp": ts,
+        "group-ref": groupCollection.doc(gid),
       });
     });
   });
