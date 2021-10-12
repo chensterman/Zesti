@@ -170,7 +170,11 @@ exports.generateRecommendations = functions.pubsub.schedule('every 2 minutes').o
       });
     });
   });
+  return null;
+});
 
+
+exports.generateGroupRecommendations = functions.pubsub.schedule('every 2 minutes').onRun(async context => {
   // Loop through all group documents
   var collectionQuery = await groupCollection.get();
   collectionQuery.docs.forEach(async function (doc) {
@@ -231,5 +235,4 @@ exports.generateRecommendations = functions.pubsub.schedule('every 2 minutes').o
       });
     });
   });
-  return null;
 });
