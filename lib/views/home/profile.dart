@@ -1,7 +1,9 @@
 import 'dart:io';
+import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:zesti/services/auth.dart';
 import 'package:zesti/models/zestiuser.dart';
 import 'package:zesti/services/database.dart';
@@ -455,6 +457,7 @@ class _EditProfileState extends State<EditProfile> {
   }
 
   Widget accountSettings(BuildContext context) {
+    final user = Provider.of<User?>(context);
     return AlertDialog(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
@@ -466,17 +469,95 @@ class _EditProfileState extends State<EditProfile> {
           child: Column(
             children: [
               RoundedButton(
+                  text: 'Reset Password',
+                  onPressed: () async {
+                    showDialog(
+                        context: context,
+                        builder: (context) =>
+                            resetConfirmDialog(context, user!.email!));
+                  }),
+              SizedBox(height: 20.0),
+              RoundedButton(
+                  text: 'Delete Account',
+                  onPressed: () async {
+                    showDialog(
+                        context: context,
+                        builder: (context) => deleteConfirmDialog(context));
+                  }),
+              SizedBox(height: 50.0),
+              RoundedButton(
                   text: 'Logout',
                   onPressed: () async {
                     await AuthService().signOut();
                     Navigator.of(context).popUntil((route) => route.isFirst);
                   }),
-              SizedBox(height: 20.0),
-              RoundedButton(text: 'Delete Account', onPressed: () async {}),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  Widget resetConfirmDialog(BuildContext context, String email) {
+    return AlertDialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+      title: Text("Send a password reset email to " + email + "?"),
+      content: SingleChildScrollView(
+        child: SizedBox(
+          width: double.infinity,
+          height: 150.0,
+          child: SvgPicture.asset("assets/name.svg"),
+        ),
+      ),
+      actions: <Widget>[
+        TextButton(
+          child: Text("Yes", style: CustomTheme.textTheme.headline1),
+          onPressed: () async {
+            await AuthService().resetPassword(email);
+            Navigator.of(context).pop();
+          },
+        ),
+        TextButton(
+          child: Text("No", style: CustomTheme.textTheme.headline2),
+          onPressed: () async {
+            Navigator.of(context).pop();
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget deleteConfirmDialog(BuildContext context) {
+    return AlertDialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+      title: const Text("Are you sure? All of your info will be erased."),
+      content: SingleChildScrollView(
+        child: SizedBox(
+          width: double.infinity,
+          height: 150.0,
+          child: SvgPicture.asset("assets/warning.svg"),
+        ),
+      ),
+      actions: <Widget>[
+        TextButton(
+          child: Text("Yes", style: CustomTheme.textTheme.headline1),
+          onPressed: () async {
+            await AuthService().signOut();
+            await AuthService().deleteUser();
+            Navigator.of(context).popUntil((route) => route.isFirst);
+          },
+        ),
+        TextButton(
+          child: Text("No", style: CustomTheme.textTheme.headline2),
+          onPressed: () async {
+            Navigator.of(context).pop();
+          },
+        ),
+      ],
     );
   }
 

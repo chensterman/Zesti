@@ -31,7 +31,23 @@ class DatabaseService {
   // Random id generator.
   final uuid = Uuid();
 
-  // Creater user:
+  // Delete user.
+  Future<void> deleteUser() async {
+    QuerySnapshot allMatched =
+        await userCollection.doc(uid).collection("matched").get();
+    for (QueryDocumentSnapshot doc in allMatched.docs) {
+      Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+      await unmatch(data['user-ref'].id, doc.id);
+    }
+    QuerySnapshot allGroups =
+        await userCollection.doc(uid).collection("groups").get();
+    for (QueryDocumentSnapshot doc in allGroups.docs) {
+      await leaveGroup(doc.id);
+    }
+    await userCollection.doc(uid).delete();
+  }
+
+  // Create user:
   //  Add user document to 'users' and initialize fields.
   Future<void> createUser() async {
     await userCollection
@@ -378,6 +394,7 @@ class DatabaseService {
         .delete();
   }
 
+/*
   // Helper function for converting a user DocumentReference to a dart map.
   Future<Map<String, dynamic>> _userRefToMap(DocumentReference userRef) async {
     // Get snapshot of user doc reference.
@@ -391,7 +408,7 @@ class DatabaseService {
     return mapData;
   }
 
-/*
+
   // Generates random match recommendations based on dating identity and interest.
   Future<void> generateRecommendations() async {
     // Get current user info
@@ -780,9 +797,14 @@ class DatabaseService {
     QuerySnapshot cap =
         await groupCollection.doc(gid).collection("users").get();
     if (cap.docs.length <= 0) {
+      QuerySnapshot allMatched =
+          await groupCollection.doc(gid).collection("matched").get();
+      for (QueryDocumentSnapshot doc in allMatched.docs) {
+        Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+        await unmatchGroup(gid, data["group-ref"].id, doc.id);
+      }
       // Delete the group if there are no users left in it.
       await groupCollection.doc(gid).delete();
-      print("Permanently deleting this group.");
       return;
     } else {
       // Otherwise just decrement the group user count.

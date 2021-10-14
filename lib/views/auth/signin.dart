@@ -18,9 +18,7 @@ class _SignInState extends State<SignIn> {
   // State of text fields.
   String email = '';
   String password = '';
-
-  // Error message when email is not valid.
-  String error = '';
+  String resetEmail = '';
 
   void errorCallback() {
     String error = "Sign in error. The email or password is invalid.";
@@ -88,29 +86,42 @@ class _SignInState extends State<SignIn> {
                               }
                             }
                           }),
-                      SizedBox(height: size.height * 0.01),
+                      SizedBox(height: size.height * 0.02),
                       Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            Text(
-                              'Need an account ? ',
-                              style: CustomTheme.textTheme.bodyText1,
-                            ),
-                            GestureDetector(
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) => SignUp()),
-                                  );
-                                },
-                                child: Text('Sign Up.',
-                                    style: CustomTheme.textTheme.bodyText2)),
-                          ]),
-                      Text(
-                        error,
-                        style: TextStyle(color: Colors.red, fontSize: 14.0),
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          Text(
+                            'Need an account? ',
+                            style: CustomTheme.textTheme.bodyText1,
+                          ),
+                          GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => SignUp()),
+                                );
+                              },
+                              child: Text('Sign Up.',
+                                  style: CustomTheme.textTheme.bodyText2)),
+                        ],
                       ),
+                      SizedBox(height: size.height * 0.02),
+                      GestureDetector(
+                          onTap: () {
+                            showDialog(
+                                context: context,
+                                builder: (context) =>
+                                    resetConfirmDialog(context));
+                          },
+                          child: Text(
+                            'Forgot password?',
+                            style: TextStyle(
+                                color: CustomTheme.reallyBrightOrange,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'Hind'),
+                          )),
                     ],
                   ),
                 ),
@@ -119,6 +130,39 @@ class _SignInState extends State<SignIn> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget resetConfirmDialog(BuildContext context) {
+    return AlertDialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+      title:
+          Text("A password reset email will be sent to the email you provide."),
+      content: SingleChildScrollView(
+        child: TextFormField(
+          onChanged: (val) {
+            setState(() => resetEmail = val);
+          },
+          decoration: const InputDecoration(hintText: "Email"),
+        ),
+      ),
+      actions: <Widget>[
+        TextButton(
+          child: Text("Send", style: CustomTheme.textTheme.headline1),
+          onPressed: () async {
+            await AuthService().resetPassword(resetEmail);
+            Navigator.of(context).pop();
+          },
+        ),
+        TextButton(
+          child: Text("Cancel", style: CustomTheme.textTheme.headline2),
+          onPressed: () async {
+            Navigator.of(context).pop();
+          },
+        ),
+      ],
     );
   }
 

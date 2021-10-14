@@ -6,15 +6,18 @@ import 'package:provider/provider.dart';
 import 'package:zesti/models/zestiuser.dart';
 import 'package:zesti/services/database.dart';
 import 'package:zesti/theme/theme.dart';
+import 'package:zesti/widgets/errors.dart';
 import 'package:zesti/widgets/loading.dart';
 
 // Widget displaying user cards to make decisions on.
 class UserCard extends StatelessWidget {
   final DocumentReference userRef;
+  final DocumentReference parentUserRef;
   final bool rec;
 
   UserCard({
     required this.userRef,
+    required this.parentUserRef,
     required this.rec,
     Key? key,
   }) : super(key: key);
@@ -29,7 +32,9 @@ class UserCard extends StatelessWidget {
         builder: (context, AsyncSnapshot<ZestiUser> snapshot) {
           // On error.
           if (snapshot.hasError) {
-            return Text(snapshot.error.toString());
+            return NotFound(
+                reason: "This user account has been deleted :(",
+                doc: parentUserRef);
           }
           // On success.
           else if (snapshot.connectionState == ConnectionState.done) {

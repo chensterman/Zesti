@@ -65,7 +65,10 @@ class _RequestsState extends State<Requests> {
                       }
                       Map<String, dynamic> data =
                           tmp.docs[index - 1].data() as Map<String, dynamic>;
-                      return UserCard(userRef: data['user-ref'], rec: false);
+                      return UserCard(
+                          userRef: data['user-ref'],
+                          parentUserRef: tmp.docs[index - 1].reference,
+                          rec: false);
                     },
                     separatorBuilder: (context, index) =>
                         SizedBox(height: 16.0),

@@ -107,7 +107,7 @@ class _SignUpState extends State<SignUp> {
                               }
                             }
                           }),
-                      SizedBox(height: size.height * 0.01),
+                      SizedBox(height: size.height * 0.02),
                       Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[

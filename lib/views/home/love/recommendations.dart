@@ -77,7 +77,10 @@ class _RecommendationsState extends State<Recommendations> {
                       // Other indeces used to populate user cards in the ListView.
                       Map<String, dynamic> data =
                           tmp.docs[index - 1].data() as Map<String, dynamic>;
-                      return UserCard(userRef: data['user-ref'], rec: true);
+                      return UserCard(
+                          userRef: data['user-ref'],
+                          parentUserRef: tmp.docs[index - 1].reference,
+                          rec: true);
                     },
                     // SizedBox used as separated between user cards.
                     separatorBuilder: (context, index) =>

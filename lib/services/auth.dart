@@ -53,4 +53,16 @@ class AuthService {
   Future<void> signOut() async {
     await _auth.signOut();
   }
+
+  // Method for deleting a user.
+  Future<void> deleteUser() async {
+    User currUser = _auth.currentUser!;
+    await DatabaseService(uid: currUser.uid).deleteUser();
+    await _auth.currentUser!.delete();
+  }
+
+  // Method for sending password reset email.
+  Future<void> resetPassword(String email) async {
+    await _auth.sendPasswordResetEmail(email: email);
+  }
 }

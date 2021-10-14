@@ -6,7 +6,6 @@ import 'package:zesti/services/database.dart';
 import 'package:zesti/views/auth/start.dart';
 import 'package:zesti/views/auth/verify.dart';
 import 'package:zesti/views/home/home.dart';
-import 'package:zesti/views/register/birthday.dart';
 import 'package:zesti/widgets/loading.dart';
 
 // AuthWrapper class:
@@ -36,9 +35,9 @@ class AuthWrapper extends StatelessWidget {
           // On success, check for account setup boolen. Conditionally return
           // homepage or beginning of registration.
           else if (snapshot.connectionState == ConnectionState.done) {
-            dynamic test = snapshot.data?.data();
+            dynamic userData = snapshot.data?.data();
             // Check if user already setup account (finished all registration forms)
-            if (test['account-setup']) {
+            if (userData['account-setup']) {
               return Home();
             } else {
               return VerifyScreen();
