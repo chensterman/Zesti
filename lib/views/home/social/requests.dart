@@ -59,7 +59,7 @@ class _RequestsState extends State<Requests> {
                           tmp.docs.length == 0
                               ? Empty(
                                   reason:
-                                      "No incoming requests  at the moment, but maybe later!")
+                                      "No incoming requests at the moment, but maybe later!")
                               : Container(),
                         ]);
                       }

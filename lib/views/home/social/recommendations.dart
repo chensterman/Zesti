@@ -63,7 +63,7 @@ class _RecommendationsState extends State<Recommendations> {
                             tmp.docs.length == 0
                                 ? Empty(
                                     reason:
-                                        "You've ran out of recommendations for the week! Make sure your group has more than one member!")
+                                        "Check back next week for new recs! Make sure your group has at least two members!")
                                 : Container(),
                           ]),
                         );

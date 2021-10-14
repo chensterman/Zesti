@@ -59,6 +59,7 @@ class AuthService {
     User currUser = _auth.currentUser!;
     await DatabaseService(uid: currUser.uid).deleteUser();
     await _auth.currentUser!.delete();
+    await _auth.signOut();
   }
 
   // Method for sending password reset email.

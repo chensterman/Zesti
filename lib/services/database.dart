@@ -33,17 +33,20 @@ class DatabaseService {
 
   // Delete user.
   Future<void> deleteUser() async {
+    // Loop through all matches and unmatch with the other user.
     QuerySnapshot allMatched =
         await userCollection.doc(uid).collection("matched").get();
     for (QueryDocumentSnapshot doc in allMatched.docs) {
       Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
       await unmatch(data['user-ref'].id, doc.id);
     }
+    // Loop through all groups and leave each one.
     QuerySnapshot allGroups =
         await userCollection.doc(uid).collection("groups").get();
     for (QueryDocumentSnapshot doc in allGroups.docs) {
       await leaveGroup(doc.id);
     }
+    // Delete the user document.
     await userCollection.doc(uid).delete();
   }
 

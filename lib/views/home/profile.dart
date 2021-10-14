@@ -546,7 +546,6 @@ class _EditProfileState extends State<EditProfile> {
         TextButton(
           child: Text("Yes", style: CustomTheme.textTheme.headline1),
           onPressed: () async {
-            await AuthService().signOut();
             await AuthService().deleteUser();
             Navigator.of(context).popUntil((route) => route.isFirst);
           },

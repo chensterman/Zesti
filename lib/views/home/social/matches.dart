@@ -51,9 +51,7 @@ class _MatchesState extends State<Matches> {
                                   style: CustomTheme.textTheme.headline3),
                             ),
                             tmp.docs.length == 0
-                                ? Empty(
-                                    reason:
-                                        "No matches  at the moment, but keep trying! For the discounts!")
+                                ? Empty(reason: "No matches at the moment!")
                                 : Container(),
                           ]);
                         }
