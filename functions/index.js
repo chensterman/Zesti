@@ -117,7 +117,15 @@ exports.generateRecommendations = functions.pubsub.schedule('every 2 minutes').o
     }
 
     var reactionsSnapshot = await doc.ref.collection('outgoing').get();
-    var allReactions = reactionsSnapshot.docs.map(qdoc => qdoc.id);
+    var allReactions = reactionsSnapshot.docs.map(function (qdoc) {
+      var data = qdoc.data();
+      if (data['user-ref'].exists) {
+        return qdoc.id;
+      } else {
+        await qdoc.delete();
+        return "deleted";
+      }
+    });
     var allUsers = collectionQuery.docs.map(qdoc => qdoc.id);
     var availableUsers = allUsers.filter(x => !allReactions.includes(x));
     var availableUsers = availableUsers.filter(x => x != doc.id);
@@ -181,7 +189,15 @@ exports.generateGroupRecommendations = functions.pubsub.schedule('every 2 minute
     var reactionsSnapshot =
         await doc.ref.collection("outgoing").get();
     var allReactions =
-        reactionsSnapshot.docs.map(qdoc => qdoc.id);
+        reactionsSnapshot.docs.map(function (qdoc) {
+          var data = qdoc.data();
+          if (data['group-ref'].exists) {
+            return qdoc.id;
+          } else {
+            await qdoc.delete();
+            return "deleted";
+          }
+        });
 
     var groupsSnapshot = await groupCollection.get();
     var allGroups = groupsSnapshot.docs.map(qdoc => qdoc.id);
