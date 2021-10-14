@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:zesti/services/database.dart';
 import 'package:zesti/views/auth/start.dart';
+import 'package:zesti/views/auth/verify.dart';
 import 'package:zesti/views/home/home.dart';
 import 'package:zesti/views/register/birthday.dart';
 import 'package:zesti/widgets/loading.dart';
@@ -40,7 +41,7 @@ class AuthWrapper extends StatelessWidget {
             if (test['account-setup']) {
               return Home();
             } else {
-              return Birthday();
+              return VerifyScreen();
             }
           }
           // Otherwise, return a loading screen
