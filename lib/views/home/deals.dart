@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:zesti/services/database.dart';
 import 'package:zesti/theme/theme.dart';
 import 'package:zesti/widgets/formwidgets.dart';
+import 'package:zesti/widgets/loading.dart';
 
 // Widget to redeem discount codes.
 class Deals extends StatelessWidget {
@@ -11,44 +16,57 @@ class Deals extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Size size = MediaQuery.of(context).size;
+    final size = MediaQuery.of(context).size;
+    final user = Provider.of<User?>(context);
     return Drawer(
       child: Container(
         decoration: CustomTheme.standard,
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: <Widget>[
-            Container(
-              padding: EdgeInsets.all(16.0),
-              color: CustomTheme.reallyBrightOrange,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  SizedBox(
-                    width: double.infinity,
-                    height: size.height * 0.15,
-                    child: SvgPicture.asset("assets/zesti.svg",
-                        semanticsLabel: "Zesti"),
-                  ),
-                  Text(
-                    'Deals',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 36,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            dealCard(context, "assets/amorino.jpg", "AMORINO",
-                "20% off of the Spring and Summer menu!"),
-            dealCard(context, "assets/grendels.jpg", "GRENDEL'S DEN",
-                "Free \$20 gift card for each visit (max 3)!"),
-            dealCard(context, "assets/zinnekens.jpg", "ZINNEKEN'S",
-                "20% off of any purchase!"),
-            dealCard(context, "assets/maharaja.jpg", "THE MAHARAJA",
-                "Anything off of the dessert menu, on the house!"),
-          ],
+        // StreamBuilder to load match stream.
+        child: StreamBuilder(
+          stream: DatabaseService(uid: user!.uid).getPartners(),
+          builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+            QuerySnapshot? tmp = snapshot.data;
+            return tmp != null
+                ? ListView.separated(
+                    itemBuilder: (context, index) {
+                      // First index is reserved for text "MATCHES".
+                      if (index == 0) {
+                        return Container(
+                          padding: EdgeInsets.all(16.0),
+                          color: CustomTheme.reallyBrightOrange,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              SizedBox(
+                                width: double.infinity,
+                                height: size.height * 0.15,
+                                child: SvgPicture.asset("assets/zesti.svg",
+                                    semanticsLabel: "Zesti"),
+                              ),
+                              Text(
+                                'Deals',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 36,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }
+
+                      // Remaining indeces used for matchsheet widgets.
+                      Map<String, dynamic> data =
+                          tmp.docs[index - 1].data() as Map<String, dynamic>;
+                      return dealCard(context, data['photo-ref'], data['name'],
+                          data['description']);
+                    },
+                    // A divider widgets is placed in between each matchsheet widget.
+                    separatorBuilder: (context, index) => SizedBox(height: 8.0),
+                    itemCount: tmp.docs.length + 1)
+                // StreamBuilder loading indicator.
+                : ZestiLoading();
+          },
         ),
       ),
     );
@@ -57,6 +75,8 @@ class Deals extends StatelessWidget {
   // Card that displays a specific partner deal.
   Widget dealCard(BuildContext context, String imagePath, String vendor,
       String description) {
+    final user = Provider.of<User?>(context);
+    ImageProvider<Object> partnerPic = AssetImage("assets/profile.jpg");
     return Card(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
@@ -69,7 +89,7 @@ class Deals extends StatelessWidget {
             context,
             MaterialPageRoute(
                 builder: (context) => Redeem(
-                    imagePath: imagePath,
+                    partnerPic: partnerPic,
                     vendor: vendor,
                     description: description)),
           );
@@ -78,10 +98,27 @@ class Deals extends StatelessWidget {
           padding: EdgeInsets.all(16.0),
           child: Column(
             children: [
-              CircleAvatar(
-                  radius: 80.0,
-                  backgroundImage: AssetImage(imagePath),
-                  backgroundColor: Colors.white),
+              FutureBuilder(
+                  future: DatabaseService(uid: user!.uid).getPhoto(imagePath),
+                  builder:
+                      (context, AsyncSnapshot<ImageProvider<Object>> snapshot) {
+                    // On error.
+                    if (snapshot.hasError) {
+                      return Text(snapshot.hasError.toString());
+                      // On success.
+                    } else if (snapshot.connectionState ==
+                        ConnectionState.done) {
+                      partnerPic = snapshot.data!;
+                      return CircleAvatar(
+                        radius: 80.0,
+                        backgroundImage: snapshot.data!,
+                        backgroundColor: Colors.white,
+                      );
+                      // On loading, return an empty container.
+                    } else {
+                      return ZestiLoading();
+                    }
+                  }),
               SizedBox(height: 16.0),
               Text(vendor,
                   textAlign: TextAlign.center,
@@ -99,12 +136,12 @@ class Deals extends StatelessWidget {
 
 // Widget to redeem discount codes.
 class Redeem extends StatefulWidget {
-  final String imagePath;
+  final ImageProvider<Object> partnerPic;
   final String vendor;
   final String description;
   Redeem({
     Key? key,
-    required this.imagePath,
+    required this.partnerPic,
     required this.vendor,
     required this.description,
   }) : super(key: key);
@@ -137,7 +174,7 @@ class _RedeemState extends State<Redeem> {
               children: [
                 CircleAvatar(
                     radius: 80.0,
-                    backgroundImage: AssetImage(widget.imagePath),
+                    backgroundImage: widget.partnerPic,
                     backgroundColor: Colors.white),
                 SizedBox(height: 20.0),
                 Text(widget.vendor,

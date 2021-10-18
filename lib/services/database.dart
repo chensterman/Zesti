@@ -28,6 +28,10 @@ class DatabaseService {
   final CollectionReference chatCollection =
       FirebaseFirestore.instance.collection('chats');
 
+  // Access to 'partners' collection.
+  final CollectionReference partnerCollection =
+      FirebaseFirestore.instance.collection('partners');
+
   // Random id generator.
   final uuid = Uuid();
 
@@ -1019,5 +1023,10 @@ class DatabaseService {
         .then((value) => print("Incoming request deleted."))
         .catchError(
             (error) => print("Failed to delete incoming request: $error"));
+  }
+
+  // Stream to retrieve all partner info.
+  Stream<QuerySnapshot> getPartners() {
+    return partnerCollection.where('available', isEqualTo: true).snapshots();
   }
 }
