@@ -1029,4 +1029,28 @@ class DatabaseService {
   Stream<QuerySnapshot> getPartners() {
     return partnerCollection.where('available', isEqualTo: true).snapshots();
   }
+
+  Future<void> redeemMetrics(String partnerid) async {
+    await partnerCollection
+        .doc(partnerid)
+        .update({'count': FieldValue.increment(1)});
+    DocumentSnapshot test = await userCollection
+        .doc(uid)
+        .collection('metrics')
+        .doc(partnerid)
+        .get();
+    if (test.exists) {
+      await userCollection
+          .doc(uid)
+          .collection('metrics')
+          .doc(partnerid)
+          .update({'count': FieldValue.increment(1)});
+    } else {
+      await userCollection
+          .doc(uid)
+          .collection('metrics')
+          .doc(partnerid)
+          .set({'count': 1});
+    }
+  }
 }

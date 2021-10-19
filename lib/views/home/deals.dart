@@ -58,8 +58,8 @@ class Deals extends StatelessWidget {
                       // Remaining indeces used for matchsheet widgets.
                       Map<String, dynamic> data =
                           tmp.docs[index - 1].data() as Map<String, dynamic>;
-                      return dealCard(context, data['photo-ref'], data['name'],
-                          data['description']);
+                      return dealCard(context, tmp.docs[index - 1].id,
+                          data['photo-ref'], data['name'], data['description']);
                     },
                     // A divider widgets is placed in between each matchsheet widget.
                     separatorBuilder: (context, index) => SizedBox(height: 8.0),
@@ -73,8 +73,8 @@ class Deals extends StatelessWidget {
   }
 
   // Card that displays a specific partner deal.
-  Widget dealCard(BuildContext context, String imagePath, String vendor,
-      String description) {
+  Widget dealCard(BuildContext context, String partnerid, String imagePath,
+      String vendor, String description) {
     final user = Provider.of<User?>(context);
     ImageProvider<Object> partnerPic = AssetImage("assets/profile.jpg");
     return Card(
@@ -89,6 +89,7 @@ class Deals extends StatelessWidget {
             context,
             MaterialPageRoute(
                 builder: (context) => Redeem(
+                    partnerid: partnerid,
                     partnerPic: partnerPic,
                     vendor: vendor,
                     description: description)),
@@ -136,11 +137,13 @@ class Deals extends StatelessWidget {
 
 // Widget to redeem discount codes.
 class Redeem extends StatefulWidget {
+  final String partnerid;
   final ImageProvider<Object> partnerPic;
   final String vendor;
   final String description;
   Redeem({
     Key? key,
+    required this.partnerid,
     required this.partnerPic,
     required this.vendor,
     required this.description,
@@ -183,18 +186,6 @@ class _RedeemState extends State<Redeem> {
                 Text(widget.description,
                     textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 24.0, fontFamily: 'Hind')),
-                // SizedBox(height: 20.0),
-                // TextFormField(
-                //     validator: (val) {
-                //       if (val == null || val.isEmpty) {
-                //         return "Please enter the correct coupon code.";
-                //       }
-                //     },
-                //     onChanged: (val) {
-                //       setState(() => code = val);
-                //     },
-                //     decoration: const InputDecoration(
-                //         hintText: "Enter staff code here")),
                 SizedBox(height: 20.0),
                 RoundedButton(
                     text: 'Redeem',
@@ -204,7 +195,9 @@ class _RedeemState extends State<Redeem> {
                           barrierDismissible: false,
                           builder: (context) => redeemDialog(
                                 context,
+                                widget.partnerid,
                                 "Are you sure? Do not redeem this coupon until you are ready to present it to the restaurant staff. If this coupon has limited uses, proceeding will deplete one use.",
+                                widget.vendor,
                               ));
                     }),
                 SizedBox(height: 20.0),
@@ -216,7 +209,9 @@ class _RedeemState extends State<Redeem> {
     );
   }
 
-  Widget redeemDialog(BuildContext context, String message) {
+  Widget redeemDialog(
+      BuildContext context, String partnerid, String message, String vendor) {
+    final user = Provider.of<User?>(context);
     return AlertDialog(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
@@ -235,6 +230,7 @@ class _RedeemState extends State<Redeem> {
           child: Text("Yes", style: CustomTheme.textTheme.headline2),
           onPressed: () async {
             Navigator.pop(context);
+            DatabaseService(uid: user!.uid).redeemMetrics(partnerid);
             showDialog(
                 context: context,
                 barrierDismissible: false,
