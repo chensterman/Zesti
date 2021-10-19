@@ -1,16 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:zesti/services/auth.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:zesti/models/zestiuser.dart';
+import 'package:zesti/services/database.dart';
 import 'package:zesti/theme/theme.dart';
-import 'package:zesti/views/auth/start.dart';
 import 'package:zesti/views/home/profile.dart';
 import 'package:zesti/views/home/love/love.dart';
 import 'package:zesti/views/home/social/choose.dart';
+import 'package:zesti/widgets/loading.dart';
 
-// Starting page widget
-class Home extends StatelessWidget {
-  // This widget is the root of your application.
+// Home page of a logged in user.
+class Home extends StatefulWidget {
+  Home({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  _HomeState createState() => _HomeState();
+}
+
+class _HomeState extends State<Home> {
+  void resetCallback() {
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     final user = Provider.of<User?>(context);
@@ -21,66 +35,180 @@ class Home extends StatelessWidget {
             vertical: size.height * 0.1, horizontal: size.width * 0.1),
         decoration: CustomTheme.standard,
         child: Center(
-          child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                Text('Looking good, asdf!',
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 32.0,
-                        color: Colors.white)),
-                Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      TextButton(
-                        child: Text('Edit Profile'),
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => Profile(uid: user!.uid)),
-                          );
-                        },
-                      ),
-                      TextButton(
-                        child: Text('Logout'),
-                        onPressed: () async {
-                          await AuthService().signOut();
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => Start()),
-                          );
-                        },
-                      )
-                    ]),
-                Text('Select a Mode',
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 32.0,
-                        color: Colors.white)),
-                Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      TextButton(
-                        child: Text('Love'),
-                        onPressed: () async {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => Love()),
-                          );
-                        },
-                      ),
-                      TextButton(
-                        child: Text('Social'),
-                        onPressed: () async {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => Choose()),
-                          );
-                        },
-                      ),
-                    ]),
-              ]),
+          child: FutureBuilder(
+              future: DatabaseService(uid: user!.uid).getUserInfo(
+                  DatabaseService(uid: user.uid).userCollection.doc(user.uid)),
+              builder: (context, AsyncSnapshot<ZestiUser> snapshot) {
+                // On error.
+                if (snapshot.hasError) {
+                  return Text(snapshot.error.toString());
+                  // On success.
+                } else if (snapshot.connectionState == ConnectionState.done) {
+                  return Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        Text("Looking good, " + snapshot.data!.first + "!",
+                            style: CustomTheme.textTheme.headline1),
+                        Stack(
+                          children: [
+                            Container(
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                      offset: Offset(2.0, 2.0),
+                                      blurRadius: 5,
+                                      color: Colors.grey.shade700,
+                                      spreadRadius: 5)
+                                ],
+                              ),
+                              child: CircleAvatar(
+                                radius: 80.0,
+                                backgroundImage: snapshot.data!.profPic,
+                                backgroundColor: Colors.white,
+                              ),
+                            ),
+                            Positioned(
+                              bottom: 0.0,
+                              right: 1.0,
+                              child: InkWell(
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => EditProfile(
+                                              callback: resetCallback,
+                                              user: snapshot.data!)),
+                                    );
+                                  },
+                                  child: Container(
+                                    child: Icon(
+                                      Icons.account_circle,
+                                      color: CustomTheme.reallyBrightOrange,
+                                      size: 36.0,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      shape: BoxShape.circle,
+                                    ),
+                                  )),
+                            ),
+                          ],
+                        ),
+                        Text('Select a Mode',
+                            style: CustomTheme.textTheme.headline1),
+                        Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              InkWell(
+                                  onTap: () async {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => Love()),
+                                    );
+                                  },
+                                  child: Column(
+                                    children: [
+                                      Container(
+                                        child: SizedBox(
+                                          width: 100.0,
+                                          height: 100.0,
+                                          child: SvgPicture.asset(
+                                              "assets/Solo.svg"),
+                                        ),
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          boxShadow: [
+                                            BoxShadow(
+                                                blurRadius: 5,
+                                                color: Colors.grey.shade700,
+                                                spreadRadius: -2)
+                                          ],
+                                        ),
+                                      ),
+                                      Container(
+                                        width: 100.0,
+                                        padding: EdgeInsets.all(8.0),
+                                        child: Center(
+                                            child: Align(
+                                                alignment: Alignment.center,
+                                                child: Text("Solo",
+                                                    style: CustomTheme
+                                                        .textTheme.headline3))),
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius:
+                                              BorderRadius.circular(20),
+                                          boxShadow: [
+                                            BoxShadow(
+                                                offset: Offset(3.0, 3.0),
+                                                blurRadius: 5,
+                                                color: Colors.grey.shade700,
+                                                spreadRadius: 3)
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  )),
+                              InkWell(
+                                  onTap: () async {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => Choose()),
+                                    );
+                                  },
+                                  child: Column(
+                                    children: [
+                                      Container(
+                                        child: SizedBox(
+                                          width: 100.0,
+                                          height: 100.0,
+                                          child: SvgPicture.asset(
+                                              "assets/Group.svg"),
+                                        ),
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          boxShadow: [
+                                            BoxShadow(
+                                                blurRadius: 5,
+                                                color: Colors.grey.shade700,
+                                                spreadRadius: -2)
+                                          ],
+                                        ),
+                                      ),
+                                      Container(
+                                        width: 100.0,
+                                        padding: EdgeInsets.all(8.0),
+                                        child: Center(
+                                            child: Align(
+                                                alignment: Alignment.center,
+                                                child: Text("Group",
+                                                    style: CustomTheme
+                                                        .textTheme.headline3))),
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius:
+                                              BorderRadius.circular(20),
+                                          boxShadow: [
+                                            BoxShadow(
+                                                offset: Offset(3.0, 3.0),
+                                                blurRadius: 5,
+                                                color: Colors.grey.shade700,
+                                                spreadRadius: 3)
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  )),
+                            ]),
+                      ]);
+                  // During loading.
+                } else {
+                  return ZestiLoading();
+                }
+              }),
         ),
       ),
     );

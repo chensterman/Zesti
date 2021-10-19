@@ -5,8 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:zesti/theme/theme.dart';
 import 'package:zesti/services/database.dart';
-import 'package:zesti/views/register/house.dart';
-import 'package:zesti/widgets/dialogs.dart';
+import 'package:zesti/views/register/name.dart';
 
 class NumberLine extends StatelessWidget {
   NumberLine({@required this.width, @required this.text});
@@ -47,14 +46,12 @@ class _BirthdayState extends State<Birthday> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: CustomTheme.reallyBrightOrange,
+        automaticallyImplyLeading: false,
       ),
       body: Container(
         decoration: CustomTheme.mode,
         child: Center(
           child: Container(
-            padding: EdgeInsets.symmetric(
-                vertical: size.height * CustomTheme.paddingMultiplier,
-                horizontal: size.width * CustomTheme.paddingMultiplier),
             child: Form(
               child: Center(
                 child: ListView(shrinkWrap: true, children: <Widget>[
@@ -65,7 +62,7 @@ class _BirthdayState extends State<Birthday> {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20),
                           ),
-                          margin: EdgeInsets.all(8.0),
+                          margin: EdgeInsets.all(32.0),
                           child: Padding(
                             padding: const EdgeInsets.symmetric(
                                 vertical: 32.0, horizontal: 32.0),
@@ -191,7 +188,7 @@ class _BirthdayState extends State<Birthday> {
                                                     context,
                                                     MaterialPageRoute(
                                                         builder: (context) =>
-                                                            House()),
+                                                            Name()),
                                                   );
                                                 } else {
                                                   showDialog(
@@ -225,6 +222,31 @@ class _BirthdayState extends State<Birthday> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget ageDialog(context) {
+    return AlertDialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+      title: const Text('You must be 18 years or older to proceed.'),
+      content: SingleChildScrollView(
+        child: SizedBox(
+          width: double.infinity,
+          height: 150.0,
+          child:
+              SvgPicture.asset("assets/warning.svg", semanticsLabel: "Warning"),
+        ),
+      ),
+      actions: <Widget>[
+        TextButton(
+          child: Text("Ok", style: CustomTheme.textTheme.headline2),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
+      ],
     );
   }
 }

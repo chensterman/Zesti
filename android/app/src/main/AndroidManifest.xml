@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.zesti">
    <application
-        android:label="zesti"
+        android:label="Zesti"
         android:usesCleartextTraffic="true" 
         android:icon="@mipmap/ic_launcher"> <!-- FOR HTTP REQUESTS -->
         <activity

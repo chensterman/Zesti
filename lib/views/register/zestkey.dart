@@ -5,7 +5,6 @@ import 'package:zesti/services/database.dart';
 import 'package:zesti/theme/theme.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:zesti/views/home/home.dart';
-import 'package:zesti/views/register/birthday.dart';
 import 'package:zesti/widgets/formwidgets.dart';
 
 // Widget for name form
@@ -32,9 +31,6 @@ class _ZestKeyState extends State<ZestKey> {
         decoration: CustomTheme.mode,
         child: Center(
           child: Container(
-            padding: EdgeInsets.symmetric(
-                vertical: size.height * CustomTheme.paddingMultiplier,
-                horizontal: size.width * CustomTheme.paddingMultiplier),
             child: Form(
               key: _formKey,
               child: Center(
@@ -46,7 +42,7 @@ class _ZestKeyState extends State<ZestKey> {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20),
                           ),
-                          margin: EdgeInsets.all(8.0),
+                          margin: EdgeInsets.all(32.0),
                           child: Padding(
                             padding: const EdgeInsets.symmetric(
                                 vertical: 32.0, horizontal: 32.0),
@@ -56,7 +52,7 @@ class _ZestKeyState extends State<ZestKey> {
                                   padding:
                                       const EdgeInsets.symmetric(vertical: 8.0),
                                   child: Text(
-                                    "Finally, choose a ZestKey!",
+                                    "Finally, choose a ZestKey! This is how other users will add you to groups.",
                                     style: CustomTheme.textTheme.headline2,
                                   ),
                                 ),
@@ -72,8 +68,7 @@ class _ZestKeyState extends State<ZestKey> {
                                     setState(() => zestKey = val);
                                   },
                                   decoration: const InputDecoration(
-                                      hintText:
-                                          "To get added to blocking groups!"),
+                                      hintText: "A unique username"),
                                 ),
                                 SizedBox(height: 20.0),
                                 RoundedButton(
@@ -95,13 +90,12 @@ class _ZestKeyState extends State<ZestKey> {
                                         );
                                       }
                                     }),
-                                SizedBox(height: 20.0),
+                                SizedBox(height: 50.0),
                                 SizedBox(
-                                  width: double.infinity,
-                                  height: size.height * 0.3,
-                                  child: SvgPicture.asset("assets/zestkey.svg",
-                                      semanticsLabel: "Name"),
-                                ),
+                                    width: double.infinity,
+                                    height: size.height * 0.3,
+                                    child:
+                                        SvgPicture.asset("assets/zestkey.svg")),
                               ],
                             ),
                           ),

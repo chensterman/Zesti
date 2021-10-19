@@ -4,6 +4,7 @@ import 'package:zesti/services/database.dart';
 import 'package:zesti/widgets/errors.dart';
 import 'package:zesti/widgets/groupcard.dart';
 import 'package:zesti/theme/theme.dart';
+import 'package:zesti/widgets/loading.dart';
 
 // Displays list of incoming match requests.
 class Requests extends StatefulWidget {
@@ -48,13 +49,17 @@ class _RequestsState extends State<Requests> {
                       // First index reserved for text "INCOMING REQUESTS".
                       if (index == 0) {
                         return Column(children: [
-                          Center(
-                              child: Text('INCOMING REQUESTS',
-                                  style: CustomTheme.textTheme.headline3)),
+                          Container(
+                            margin: EdgeInsets.only(left: 10.0),
+                            width: double.infinity,
+                            child: Text('Incoming Requests',
+                                textAlign: TextAlign.left,
+                                style: CustomTheme.textTheme.headline3),
+                          ),
                           tmp.docs.length == 0
                               ? Empty(
                                   reason:
-                                      "No incoming requests  at the moment, but maybe later!")
+                                      "No incoming requests at the moment, but maybe later!")
                               : Container(),
                         ]);
                       }
@@ -70,7 +75,7 @@ class _RequestsState extends State<Requests> {
                         SizedBox(height: 16.0),
                     itemCount: tmp.docs.length + 1)
                 // While the StreamBuilder is loading, show a progress indicator.
-                : Center(child: CircularProgressIndicator());
+                : ZestiLoading();
           }),
     );
   }

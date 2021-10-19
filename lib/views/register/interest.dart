@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:zesti/services/database.dart';
 import 'package:zesti/theme/theme.dart';
+import 'package:zesti/views/register/house.dart';
 import 'package:zesti/views/register/info.dart';
 import 'package:zesti/widgets/formwidgets.dart';
 
@@ -22,9 +23,6 @@ class Interest extends StatelessWidget {
         decoration: CustomTheme.mode,
         child: Center(
           child: Container(
-            padding: EdgeInsets.symmetric(
-                vertical: size.height * CustomTheme.paddingMultiplier,
-                horizontal: size.width * CustomTheme.paddingMultiplier),
             child: Form(
               child: Center(
                 child: ListView(shrinkWrap: true, children: <Widget>[
@@ -35,7 +33,7 @@ class Interest extends StatelessWidget {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20),
                           ),
-                          margin: EdgeInsets.all(8.0),
+                          margin: EdgeInsets.all(32.0),
                           child: Padding(
                             padding: const EdgeInsets.symmetric(
                                 vertical: 32.0, horizontal: 32.0),
@@ -45,7 +43,7 @@ class Interest extends StatelessWidget {
                                   padding:
                                       const EdgeInsets.symmetric(vertical: 8.0),
                                   child: Text(
-                                    "Who would you see?",
+                                    "Who do you want to see?",
                                     style: CustomTheme.textTheme.headline2,
                                   ),
                                 ),
@@ -58,7 +56,7 @@ class Interest extends StatelessWidget {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                          builder: (context) => Info()),
+                                          builder: (context) => House()),
                                     );
                                   },
                                 ),
@@ -75,7 +73,7 @@ class Interest extends StatelessWidget {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                          builder: (context) => Info()),
+                                          builder: (context) => House()),
                                     );
                                   },
                                 ),
@@ -92,7 +90,7 @@ class Interest extends StatelessWidget {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                          builder: (context) => Info()),
+                                          builder: (context) => House()),
                                     );
                                   },
                                 ),

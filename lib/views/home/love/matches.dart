@@ -5,6 +5,7 @@ import 'package:zesti/services/database.dart';
 import 'package:zesti/views/home/love/chat.dart';
 import 'package:zesti/theme/theme.dart';
 import 'package:zesti/widgets/errors.dart';
+import 'package:zesti/widgets/loading.dart';
 
 // Widget displaying the chat page for a specific match.
 class Matches extends StatefulWidget {
@@ -47,13 +48,15 @@ class _MatchesState extends State<Matches> {
                         // First index is reserved for text "MATCHES".
                         if (index == 0) {
                           return Column(children: [
-                            Center(
-                                child: Text('MATCHES',
-                                    style: CustomTheme.textTheme.headline3)),
+                            Container(
+                              margin: EdgeInsets.only(left: 10.0),
+                              width: double.infinity,
+                              child: Text('Matches',
+                                  textAlign: TextAlign.left,
+                                  style: CustomTheme.textTheme.headline3),
+                            ),
                             tmp.docs.length == 0
-                                ? Empty(
-                                    reason:
-                                        "No matches  at the moment, but keep trying! For the discounts!")
+                                ? Empty(reason: "No matches at the moment!")
                                 : Container(),
                           ]);
                         }
@@ -69,13 +72,13 @@ class _MatchesState extends State<Matches> {
                           SizedBox(height: 16.0),
                       itemCount: tmp.docs.length + 1)
                   // StreamBuilder loading indicator.
-                  : Center(child: CircularProgressIndicator());
+                  : ZestiLoading();
             }));
   }
 
-  Widget recentChat(DocumentReference chatRef) {
+  Widget recentChat(String uid, DocumentReference chatRef) {
     return StreamBuilder(
-        stream: DatabaseService(uid: widget.uid).getMessages(chatRef),
+        stream: DatabaseService(uid: uid).getMessages(chatRef),
         builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
           QuerySnapshot? tmp = snapshot.data;
           if (tmp != null) {
@@ -88,9 +91,16 @@ class _MatchesState extends State<Matches> {
             Map<String, dynamic> data =
                 tmp.docs.first.data() as Map<String, dynamic>;
             String message = data['content'];
-            return Text(message,
-                style: TextStyle(fontSize: 16),
-                overflow: TextOverflow.ellipsis);
+            if (data['sender-ref'].id != uid) {
+              return Text(message,
+                  style: TextStyle(
+                      fontSize: 16, color: CustomTheme.reallyBrightOrange),
+                  overflow: TextOverflow.ellipsis);
+            } else {
+              return Text(message,
+                  style: TextStyle(fontSize: 16),
+                  overflow: TextOverflow.ellipsis);
+            }
           } else {
             return Container();
           }
@@ -152,7 +162,7 @@ class _MatchesState extends State<Matches> {
                                       fontWeight: FontWeight.bold,
                                       fontSize: 20)),
                               SizedBox(height: 10.0),
-                              recentChat(chatRef),
+                              recentChat(widget.uid, chatRef),
                             ],
                           ),
                         ),

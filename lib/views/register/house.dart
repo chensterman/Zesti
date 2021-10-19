@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:zesti/services/database.dart';
 import 'package:zesti/theme/theme.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:zesti/views/register/identity.dart';
+import 'package:zesti/views/register/info.dart';
 import 'package:zesti/widgets/formwidgets.dart';
 
 // Widget for the housing form
@@ -17,7 +17,7 @@ class _HouseState extends State<House> {
   final _formKey = GlobalKey<FormState>();
 
   // List of Harvard houses
-  dynamic _house;
+  String? _house;
   List<String> _houseList = [
     'Apley Court',
     'Canaday',
@@ -51,13 +51,25 @@ class _HouseState extends State<House> {
   ];
 
   // List of years
-  dynamic _year;
+  String? _year;
   List<String> _yearList = [
     '\'22',
     '\'23',
     '\'24',
     '\'25',
   ];
+
+  void houseCallback(String? val) {
+    setState(() {
+      _house = val;
+    });
+  }
+
+  void yearCallback(String? val) {
+    setState(() {
+      _year = val;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -72,9 +84,6 @@ class _HouseState extends State<House> {
         decoration: CustomTheme.mode,
         child: Center(
           child: Container(
-            padding: EdgeInsets.symmetric(
-                vertical: size.height * CustomTheme.paddingMultiplier,
-                horizontal: size.width * CustomTheme.paddingMultiplier),
             child: Form(
               key: _formKey,
               child: Center(
@@ -86,7 +95,7 @@ class _HouseState extends State<House> {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20),
                           ),
-                          margin: EdgeInsets.all(8.0),
+                          margin: EdgeInsets.all(32.0),
                           child: Padding(
                             padding: const EdgeInsets.symmetric(
                                 vertical: 32.0, horizontal: 32.0),
@@ -108,25 +117,10 @@ class _HouseState extends State<House> {
                                   ),
                                 ),
                                 SizedBox(height: 20.0),
-                                DropdownButton<String>(
-                                  value: _house,
-                                  hint: Text('Select'),
-                                  style: TextStyle(color: Colors.black),
-                                  isExpanded: true,
-                                  items: _houseList.map((val) {
-                                    return DropdownMenuItem(
-                                        value: val, child: Text(val));
-                                  }).toList(),
-                                  onChanged: (String? val) {
-                                    if (val == null) {
-                                      print('Error');
-                                    } else {
-                                      setState(() {
-                                        _house = val;
-                                      });
-                                    }
-                                  },
-                                ),
+                                DropDownField(
+                                    callback: houseCallback,
+                                    initValue: _house,
+                                    houseList: _houseList),
                                 SizedBox(height: 20.0),
                                 Padding(
                                   padding:
@@ -137,36 +131,23 @@ class _HouseState extends State<House> {
                                   ),
                                 ),
                                 SizedBox(height: 20.0),
-                                DropdownButton<String>(
-                                  value: _year,
-                                  hint: Text('Select'),
-                                  style: TextStyle(color: Colors.black),
-                                  isExpanded: true,
-                                  items: _yearList.map((val) {
-                                    return DropdownMenuItem(
-                                        value: val, child: Text(val));
-                                  }).toList(),
-                                  onChanged: (String? val) {
-                                    if (val != null) {
-                                      setState(() {
-                                        _year = val;
-                                      });
-                                    }
-                                  },
-                                ),
+                                DropDownField(
+                                    callback: yearCallback,
+                                    initValue: _year,
+                                    houseList: _yearList),
                                 SizedBox(height: 20.0),
                                 RoundedButton(
                                     text: 'Continue',
                                     onPressed: () async {
                                       if (_house != null && _year != null) {
                                         await DatabaseService(uid: user!.uid)
-                                            .updateHouse(_house);
+                                            .updateHouse(_house!);
                                         await DatabaseService(uid: user.uid)
-                                            .updateYear(_year);
+                                            .updateYear(_year!);
                                         Navigator.push(
                                           context,
                                           MaterialPageRoute(
-                                              builder: (context) => Identity()),
+                                              builder: (context) => Info()),
                                         );
                                       }
                                     }),

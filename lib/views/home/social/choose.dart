@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:uuid/uuid.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -9,7 +9,9 @@ import 'package:zesti/theme/theme.dart';
 import 'package:zesti/views/home/home.dart';
 import 'package:zesti/views/home/social/create.dart';
 import 'package:zesti/views/home/social/social.dart';
+import 'package:zesti/widgets/errors.dart';
 import 'package:zesti/widgets/groupavatar.dart';
+import 'package:zesti/widgets/loading.dart';
 
 class Choose extends StatefulWidget {
   Choose({
@@ -21,6 +23,7 @@ class Choose extends StatefulWidget {
 }
 
 class _ChooseState extends State<Choose> {
+  int groupCount = 0;
   @override
   Widget build(BuildContext context) {
     final user = Provider.of<User?>(context);
@@ -29,20 +32,33 @@ class _ChooseState extends State<Choose> {
       appBar: AppBar(
         backgroundColor: CustomTheme.reallyBrightOrange,
         title: Text("Group Selection"),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () => Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => Home()),
-          ),
-        ),
+        actions: [
+          InkWell(
+              onTap: () {
+                showDialog(
+                    context: context,
+                    barrierDismissible: false,
+                    builder: (context) => createDialog(context, groupCount));
+              },
+              child: Container(
+                padding: EdgeInsets.all(4.0),
+                child: Icon(
+                  Icons.add_circle,
+                  color: CustomTheme.reallyBrightOrange,
+                  size: 26.0,
+                ),
+                decoration:
+                    BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+              )),
+          SizedBox(width: 20.0),
+        ],
       ),
       body: StreamBuilder(
           stream: DatabaseService(uid: user!.uid).getGroups(),
           builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
             QuerySnapshot? tmp = snapshot.data;
             if (tmp != null) {
-              int groupCount = tmp.docs.length;
+              groupCount = tmp.docs.length;
               return Container(
                   width: size.width,
                   height: size.height,
@@ -55,16 +71,16 @@ class _ChooseState extends State<Choose> {
                     itemCount: groupCount + 1,
                     itemBuilder: (context, index) {
                       if (groupCount == 0) {
-                        return createGroup();
+                        return Empty(
+                            reason:
+                                "You are not in a blocking group. Try creating one yourself!");
                       }
-                      if (index == groupCount) {
-                        return groupCount < 3 ? createGroup() : Container();
-                      } else {
+                      if (index != groupCount) {
                         Map<String, dynamic> groupData =
                             tmp.docs[index].data() as Map<String, dynamic>;
-                        return index == groupCount
-                            ? createGroup()
-                            : dummySlot(groupData['group-ref'], user.uid);
+                        return groupSlot(groupData['group-ref'], user.uid);
+                      } else {
+                        return Container();
                       }
                     },
                     // A divider widgets is placed in between each matchsheet widget.
@@ -77,41 +93,7 @@ class _ChooseState extends State<Choose> {
     );
   }
 
-  Widget createGroup() {
-    String gid = Uuid().v4();
-    return Card(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
-      margin: EdgeInsets.all(8.0),
-      child: InkWell(
-        splashColor: CustomTheme.reallyBrightOrange,
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => CreateGroup(gid: gid)),
-          );
-        },
-        child: Padding(
-          padding: EdgeInsets.all(16.0),
-          child: Column(
-            children: [
-              CircleAvatar(
-                  radius: 80.0,
-                  backgroundImage: AssetImage("assets/plus.jpg"),
-                  backgroundColor: Colors.white),
-              SizedBox(height: 16.0),
-              Text("Create Group",
-                  textAlign: TextAlign.center,
-                  style: CustomTheme.textTheme.headline3),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget dummySlot(DocumentReference groupRef, String uid) {
+  Widget groupSlot(DocumentReference groupRef, String uid) {
     return Card(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
@@ -149,11 +131,58 @@ class _ChooseState extends State<Choose> {
                 );
               } else {
                 return Padding(
-                    padding: EdgeInsets.all(100.0),
-                    child: Center(child: CircularProgressIndicator()));
+                    padding: EdgeInsets.all(100.0), child: ZestiLoading());
               }
             }),
       ),
+    );
+  }
+
+  Widget createDialog(BuildContext context, int groupCount) {
+    return AlertDialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+      title: Text(groupCount == 3
+          ? "You are already in a maximum number of blocking groups."
+          : "Create a new blocking group?"),
+      content: SingleChildScrollView(
+        child: SizedBox(
+          width: double.infinity,
+          height: 150.0,
+          child: groupCount == 3
+              ? SvgPicture.asset("assets/warning.svg",
+                  semanticsLabel: "Warning")
+              : SvgPicture.asset("assets/match.svg", semanticsLabel: "Match"),
+        ),
+      ),
+      actions: groupCount == 3
+          ? <Widget>[
+              TextButton(
+                child: Text("Ok", style: CustomTheme.textTheme.headline2),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ]
+          : <Widget>[
+              TextButton(
+                child: Text("Yes", style: CustomTheme.textTheme.headline1),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => CreateGroup()),
+                  );
+                },
+              ),
+              TextButton(
+                child: Text("No", style: CustomTheme.textTheme.headline2),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
     );
   }
 }

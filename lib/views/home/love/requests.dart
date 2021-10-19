@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:zesti/widgets/loading.dart';
 import 'package:zesti/widgets/usercard.dart';
 import 'package:zesti/theme/theme.dart';
 import 'package:zesti/services/database.dart';
@@ -48,9 +49,13 @@ class _RequestsState extends State<Requests> {
                       // First index reserved for text "INCOMING REQUESTS".
                       if (index == 0) {
                         return Column(children: [
-                          Center(
-                              child: Text('INCOMING REQUESTS',
-                                  style: CustomTheme.textTheme.headline3)),
+                          Container(
+                            margin: EdgeInsets.only(left: 10.0),
+                            width: double.infinity,
+                            child: Text('Incoming Requests',
+                                textAlign: TextAlign.left,
+                                style: CustomTheme.textTheme.headline3),
+                          ),
                           tmp.docs.length == 0
                               ? Empty(
                                   reason:
@@ -60,13 +65,16 @@ class _RequestsState extends State<Requests> {
                       }
                       Map<String, dynamic> data =
                           tmp.docs[index - 1].data() as Map<String, dynamic>;
-                      return UserCard(userRef: data['user-ref'], rec: false);
+                      return UserCard(
+                          userRef: data['user-ref'],
+                          parentUserRef: tmp.docs[index - 1].reference,
+                          rec: false);
                     },
                     separatorBuilder: (context, index) =>
                         SizedBox(height: 16.0),
                     itemCount: tmp.docs.length + 1)
                 // While the StreamBuilder is loading, show a progress indicator.
-                : Center(child: CircularProgressIndicator());
+                : ZestiLoading();
           }),
     );
   }

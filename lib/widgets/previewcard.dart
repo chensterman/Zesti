@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:provider/provider.dart';
 import 'package:zesti/models/zestiuser.dart';
+import 'package:zesti/theme/theme.dart';
 
 // Widget displaying user cards to make decisions on.
 class PreviewCard extends StatelessWidget {
@@ -18,13 +17,12 @@ class PreviewCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final user = Provider.of<User?>(context);
     final size = MediaQuery.of(context).size;
     return Container(
       height: size.height * 0.7,
       width: size.width * 0.95,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(20),
         // User profile pic on card.
         image: DecorationImage(
           image: userOnCard.profPic,
@@ -34,7 +32,7 @@ class PreviewCard extends StatelessWidget {
       child: Container(
         // Box decoraion and gradient.
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(color: Colors.black12, spreadRadius: 0.5),
           ],
@@ -55,7 +53,7 @@ class PreviewCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  buildUserInfo(user: userOnCard),
+                  Flexible(child: buildUserInfo(user: userOnCard)),
                   // If "rec" is true, we display user cards meant for match recommendations.
                   // Otherwise, the user card is for incoming match requests. They look slightly different
                   // And the buttons call different database functions.
@@ -94,23 +92,19 @@ class PreviewCard extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            '${user.first}, ${user.age}',
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 18,
-            ),
+            '${userOnCard.first}, ${userOnCard.year}',
+            style: CustomTheme.textTheme.subtitle1,
+          ),
+          Text(
+            '${userOnCard.house} House',
+            style: CustomTheme.textTheme.subtitle2,
           ),
           SizedBox(height: 8),
           Text(
-            user.bio,
-            style: TextStyle(color: Colors.white),
+            userOnCard.bio,
+            style: CustomTheme.textTheme.subtitle2,
           ),
           SizedBox(height: 4),
-          Text(
-            '${user.house} House',
-            style: TextStyle(color: Colors.white),
-          )
         ],
       ),
     );

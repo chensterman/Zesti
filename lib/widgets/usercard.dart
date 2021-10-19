@@ -6,14 +6,18 @@ import 'package:provider/provider.dart';
 import 'package:zesti/models/zestiuser.dart';
 import 'package:zesti/services/database.dart';
 import 'package:zesti/theme/theme.dart';
+import 'package:zesti/widgets/errors.dart';
+import 'package:zesti/widgets/loading.dart';
 
 // Widget displaying user cards to make decisions on.
 class UserCard extends StatelessWidget {
   final DocumentReference userRef;
+  final DocumentReference parentUserRef;
   final bool rec;
 
   UserCard({
     required this.userRef,
+    required this.parentUserRef,
     required this.rec,
     Key? key,
   }) : super(key: key);
@@ -28,7 +32,9 @@ class UserCard extends StatelessWidget {
         builder: (context, AsyncSnapshot<ZestiUser> snapshot) {
           // On error.
           if (snapshot.hasError) {
-            return Text(snapshot.error.toString());
+            return NotFound(
+                reason: "This user account has been deleted :(",
+                doc: parentUserRef);
           }
           // On success.
           else if (snapshot.connectionState == ConnectionState.done) {
@@ -36,7 +42,7 @@ class UserCard extends StatelessWidget {
               height: size.height * 0.7,
               width: size.width * 0.95,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(20),
                 // User profile pic on card.
                 image: DecorationImage(
                   image: snapshot.data!.profPic,
@@ -46,7 +52,7 @@ class UserCard extends StatelessWidget {
               child: Container(
                 // Box decoraion and gradient.
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(color: Colors.black12, spreadRadius: 0.5),
                   ],
@@ -123,7 +129,14 @@ class UserCard extends StatelessWidget {
           }
           // On loading, return an empty container.
           else {
-            return Container();
+            return Container(
+                height: size.height * 0.7,
+                width: size.width * 0.95,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  color: Colors.white,
+                ),
+                child: ZestiLoading());
           }
         });
   }
@@ -141,16 +154,16 @@ class UserCard extends StatelessWidget {
             '${userOnCard.first}, ${userOnCard.year}',
             style: CustomTheme.textTheme.subtitle1,
           ),
+          Text(
+            '${userOnCard.house} House',
+            style: CustomTheme.textTheme.subtitle2,
+          ),
           SizedBox(height: 8),
           Text(
             userOnCard.bio,
             style: CustomTheme.textTheme.subtitle2,
           ),
           SizedBox(height: 4),
-          Text(
-            '${userOnCard.house} House',
-            style: CustomTheme.textTheme.subtitle2,
-          )
         ],
       ),
     );
@@ -159,6 +172,9 @@ class UserCard extends StatelessWidget {
   Widget sendDialog(
       BuildContext context, String message, String uid, String youid) {
     return AlertDialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
       title: Text(message),
       content: SingleChildScrollView(
         child: SizedBox(
@@ -213,7 +229,7 @@ class UserCardDummy extends StatelessWidget {
               height: size.height * 0.7,
               width: size.width * 0.95,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(20),
                 // User profile pic on card.
                 image: DecorationImage(
                   image: snapshot.data!.profPic,
@@ -223,7 +239,7 @@ class UserCardDummy extends StatelessWidget {
               child: Container(
                 // Box decoraion and gradient.
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(color: Colors.black12, spreadRadius: 0.5),
                   ],
@@ -255,7 +271,14 @@ class UserCardDummy extends StatelessWidget {
           }
           // On loading, return an empty container.
           else {
-            return Container();
+            return Container(
+                height: size.height * 0.7,
+                width: size.width * 0.95,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  color: Colors.white,
+                ),
+                child: ZestiLoading());
           }
         });
   }
@@ -271,18 +294,45 @@ class UserCardDummy extends StatelessWidget {
         children: [
           Text('${userOnCard.first}, ${userOnCard.year}',
               style: CustomTheme.textTheme.subtitle1),
+          Text(
+            '${userOnCard.house} House',
+            style: CustomTheme.textTheme.subtitle2,
+          ),
           SizedBox(height: 8),
           Text(
             userOnCard.bio,
             style: CustomTheme.textTheme.subtitle2,
           ),
           SizedBox(height: 4),
-          Text(
-            '${userOnCard.house} House',
-            style: CustomTheme.textTheme.subtitle2,
-          )
         ],
       ),
+    );
+  }
+}
+
+class UserOverview extends StatelessWidget {
+  final DocumentReference userRef;
+  final String name;
+  UserOverview({
+    Key? key,
+    required this.userRef,
+    required this.name,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: CustomTheme.reallyBrightOrange,
+        title: Text(name),
+      ),
+      body: Container(
+          width: size.width,
+          height: size.height,
+          decoration: CustomTheme.mode,
+          padding: EdgeInsets.all(16.0),
+          child: UserCardDummy(userRef: userRef)),
     );
   }
 }

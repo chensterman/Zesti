@@ -5,7 +5,9 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:zesti/services/database.dart';
 import 'package:zesti/theme/theme.dart';
-import 'package:zesti/views/home/redeem.dart';
+import 'package:zesti/views/home/deals.dart';
+import 'package:zesti/widgets/loading.dart';
+import 'package:zesti/widgets/usercard.dart';
 
 // Widget displaying the chat page for a specific match.
 class Chat extends StatefulWidget {
@@ -13,7 +15,7 @@ class Chat extends StatefulWidget {
   final String youid;
   final DocumentReference chatRef;
   final String name;
-  final ImageProvider<Object>? profpic;
+  final ImageProvider<Object> profpic;
   Chat({
     Key? key,
     required this.uid,
@@ -42,40 +44,10 @@ class _ChatState extends State<Chat> {
   @override
   Widget build(BuildContext context) {
     final user = Provider.of<User?>(context);
+    final size = MediaQuery.of(context).size;
     return Scaffold(
       // endDrawer is the restaurant display for discounts.
-      endDrawer: Drawer(
-        child: Container(
-          decoration: CustomTheme.standard,
-          child: ListView(
-            padding: EdgeInsets.zero,
-            children: <Widget>[
-              DrawerHeader(
-                decoration: BoxDecoration(
-                  color: Colors.orange.shade900,
-                ),
-                child: Center(
-                  child: Text(
-                    'Deals',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 36,
-                    ),
-                  ),
-                ),
-              ),
-              dealCard("assets/amorino.jpg", "AMORINO",
-                  "20% off of the Spring and Summer menu!"),
-              dealCard("assets/grendels.jpg", "GRENDEL'S DEN",
-                  "Free \$20 gift card for each visit (max 3)!"),
-              dealCard("assets/zinnekens.jpg", "ZINNEKEN'S",
-                  "20% off of any purchase!"),
-              dealCard("assets/maharaja.jpg", "THE MAHARAJA",
-                  "Anything off of the dessert menu, on the house!"),
-            ],
-          ),
-        ),
-      ),
+      endDrawer: Deals(),
       appBar: AppBar(
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
@@ -84,51 +56,90 @@ class _ChatState extends State<Chat> {
         backgroundColor: CustomTheme.reallyBrightOrange,
         elevation: 0.0,
         actions: [
-          IconButton(
-            icon: Icon(Icons.cancel),
-            onPressed: () {
-              showDialog(
-                  context: context,
-                  barrierDismissible: false,
-                  builder: (context) => unmatchDialog(
-                      context,
-                      "Unmatch with " + widget.name + " forever?",
-                      user!.uid,
-                      widget.youid,
-                      widget.chatRef.id));
-            },
-            color: Colors.orange[300],
-          ),
-          Builder(
-            builder: (context) => IconButton(
-              icon: Icon(Icons.fastfood),
-              onPressed: () {
-                Scaffold.of(context).openEndDrawer();
+          InkWell(
+              onTap: () {
+                showDialog(
+                    context: context,
+                    barrierDismissible: false,
+                    builder: (context) => unmatchDialog(
+                        context,
+                        "Unmatch with " + widget.name + " forever?",
+                        user!.uid,
+                        widget.youid,
+                        widget.chatRef.id));
               },
-              color: Colors.white,
-            ),
+              child: Container(
+                padding: EdgeInsets.all(4.0),
+                child: Icon(
+                  Icons.cancel,
+                  color: Colors.redAccent[700],
+                  size: 26.0,
+                ),
+                decoration:
+                    BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+              )),
+          SizedBox(width: 20.0),
+          Builder(
+            builder: (context) => InkWell(
+                onTap: () {
+                  Scaffold.of(context).openEndDrawer();
+                },
+                child: Container(
+                  padding: EdgeInsets.all(5.0),
+                  child: Icon(
+                    Icons.fastfood_rounded,
+                    color: CustomTheme.reallyBrightOrange,
+                    size: 22.0,
+                  ),
+                  decoration: BoxDecoration(
+                      color: Colors.white, shape: BoxShape.circle),
+                )),
           ),
+          SizedBox(width: 20.0),
         ],
-        title: Row(
-          children: [
-            CircleAvatar(
-              radius: 20.0,
-              backgroundImage: widget.profpic,
-              backgroundColor: Colors.white,
-            ),
-            SizedBox(width: 10.0),
-            Text(widget.name, style: TextStyle(fontSize: 20))
-          ],
+        title: InkWell(
+          child: Row(
+            children: [
+              CircleAvatar(
+                radius: 20.0,
+                backgroundImage: widget.profpic,
+                backgroundColor: Colors.white,
+              ),
+              SizedBox(width: 10.0),
+              Text(widget.name, style: TextStyle(fontSize: 20)),
+            ],
+          ),
+          onTap: () {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => UserOverview(
+                        userRef: DatabaseService(uid: user!.uid)
+                            .userCollection
+                            .doc(widget.youid),
+                        name: widget.name)));
+          },
         ),
       ),
       body: Container(
+        decoration: BoxDecoration(color: CustomTheme.cream),
         child: Stack(
           children: [
             chatMessages(widget.uid),
             Container(
               alignment: Alignment.bottomCenter,
               child: Container(
-                color: Colors.white.withOpacity(0.8),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.5),
+                      spreadRadius: 5,
+                      blurRadius: 7,
+                      offset: Offset(0, 3), // changes position of shadow
+                    ),
+                  ],
+                ),
                 padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                 child: Row(
                   children: [
@@ -157,21 +168,15 @@ class _ChatState extends State<Chat> {
                     ),
                     GestureDetector(
                       onTap: () {
-                        if (user == null) {
-                          print('User Error');
-                        } else {
-                          // Check for an empty text editor (don't send empty chats).
-                          if (messageText.text != '') {
-                            sendMessage(user.uid, widget.chatRef, 'text',
-                                messageText.text);
-                          } else {
-                            print('No message content');
-                          }
+                        if (messageText.text != '') {
+                          sendMessage(user!.uid, widget.chatRef, 'text',
+                              messageText.text);
                         }
                       },
                       child: Icon(
                         Icons.send,
-                        color: Colors.orange,
+                        color: CustomTheme.reallyBrightOrange,
+                        size: 32.0,
                       ),
                     )
                   ],
@@ -179,47 +184,6 @@ class _ChatState extends State<Chat> {
               ),
             )
           ],
-        ),
-      ),
-    );
-  }
-
-  // Card that displays a specific partner deal.
-  Widget dealCard(String imagePath, String vendor, String description) {
-    return Card(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
-      margin: EdgeInsets.all(16.0),
-      child: InkWell(
-        splashColor: CustomTheme.reallyBrightOrange,
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => Redeem(
-                    imagePath: imagePath,
-                    vendor: vendor,
-                    description: description)),
-          );
-        },
-        child: Padding(
-          padding: EdgeInsets.all(16.0),
-          child: Column(
-            children: [
-              CircleAvatar(
-                  radius: 80.0,
-                  backgroundImage: AssetImage(imagePath),
-                  backgroundColor: Colors.white),
-              SizedBox(height: 16.0),
-              Text(vendor,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.orange[900], fontSize: 24.0)),
-              Text(description,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 24.0)),
-            ],
-          ),
         ),
       ),
     );
@@ -234,12 +198,64 @@ class _ChatState extends State<Chat> {
         QuerySnapshot? tmp = snapshot.data;
         return tmp != null
             ? ListView.builder(
-                padding: EdgeInsets.only(bottom: 90, top: 16),
-                itemCount: tmp.docs.length,
+                padding: EdgeInsets.only(bottom: 100, top: 16),
+                itemCount: tmp.docs.length + 1,
                 reverse: true,
                 itemBuilder: (context, index) {
+                  if (index == tmp.docs.length) {
+                    return FutureBuilder(
+                        future: DatabaseService(uid: uid)
+                            .getChatInfo(widget.chatRef),
+                        builder: (context,
+                            AsyncSnapshot<Map<String, dynamic>> snapshot) {
+                          // On error.
+                          if (snapshot.hasError) {
+                            return Text(snapshot.error.toString());
+                          }
+                          // On success.
+                          else if (snapshot.connectionState ==
+                              ConnectionState.done) {
+                            DateTime ts = snapshot.data!['timestamp'].toDate();
+                            String date = ts.month.toString() +
+                                "/" +
+                                ts.day.toString() +
+                                "/" +
+                                ts.year.toString();
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                CircleAvatar(
+                                    radius: 80.0,
+                                    backgroundImage: widget.profpic,
+                                    backgroundColor: Colors.white),
+                                SizedBox(height: 20.0),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 32.0),
+                                  child: Text(
+                                    "You matched with " +
+                                        widget.name +
+                                        " on " +
+                                        date,
+                                    style: CustomTheme.textTheme.headline3,
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                                SizedBox(height: 20.0),
+                              ],
+                            );
+                          } else {
+                            return ZestiLoading();
+                          }
+                        });
+                  }
                   Map<String, dynamic> data =
                       tmp.docs[index].data() as Map<String, dynamic>;
+                  if (index == 0 && index + 1 == tmp.docs.length) {
+                    return chatMessageTile(data['content'],
+                        uid == data['sender-ref'].id, true, true);
+                  }
                   if (index == 0) {
                     return chatMessageTile(data['content'],
                         uid == data['sender-ref'].id, true, false);
@@ -258,7 +274,7 @@ class _ChatState extends State<Chat> {
                         uid == dataBelow['sender-ref'].id);
                   }
                 })
-            : Center(child: CircularProgressIndicator());
+            : ZestiLoading();
       },
     );
   }
@@ -329,6 +345,9 @@ class _ChatState extends State<Chat> {
   Widget unmatchDialog(BuildContext context, String message, String uid,
       String youid, String chatid) {
     return AlertDialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
       title: Text(message),
       content: SingleChildScrollView(
         child: SizedBox(

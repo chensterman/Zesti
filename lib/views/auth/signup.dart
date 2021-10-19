@@ -1,27 +1,34 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:zesti/theme/theme.dart';
 import 'package:zesti/views/auth/signin.dart';
 import 'package:zesti/services/auth.dart';
 import 'package:zesti/widgets/formwidgets.dart';
 
-// Widget for handling account creation
+// Widget for handling account creation.
 class SignUp extends StatefulWidget {
   @override
   _SignUpState createState() => _SignUpState();
 }
 
 class _SignUpState extends State<SignUp> {
-  // Validation of entered values
+  // Validation of entered values.
   final _formKey = GlobalKey<FormState>();
 
-  // States likes these are needed when we pass in the values to Firebase
-  // State of text fields
+  // States likes these are needed when we pass in the values to Firebase.
+  // State of text fields.
   String email = '';
   String password = '';
   String passwordConfirm = '';
 
-  // Error message when email is not valid
+  // Error message when email is not valid.
   String error = '';
+
+  void errorCallback() {
+    String error = "Sign up error. This email may already be registered.";
+    showDialog(
+        context: context, builder: (context) => errorDialog(context, error));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,8 +54,9 @@ class _SignUpState extends State<SignUp> {
                         validator: (val) {
                           if (val == null || val.isEmpty) {
                             return 'Please enter an email';
-                          } else if (!val.endsWith('.edu')) {
-                            return 'Email must be .edu';
+                          } else if (!val.endsWith('college.harvard.edu') &&
+                              val != "admin@test.edu") {
+                            return 'Email must be Harvard College.';
                           }
                         },
                         onChanged: (val) {
@@ -84,18 +92,22 @@ class _SignUpState extends State<SignUp> {
                       RoundedButton(
                           text: 'Sign Up',
                           onPressed: () async {
-                            // Validate form fields
+                            // Validate form fields.
                             if (_formKey.currentState!.validate()) {
-                              // Once validated, auth service creates account
-                              // Then push authentication route
-                              await AuthService().signUp(email, password);
-                              Navigator.pushReplacementNamed(
-                                context,
-                                '/auth',
-                              );
+                              // Once validated, auth service creates account.
+                              // Then push authentication route.
+                              int status = await AuthService()
+                                  .signUp(email, password, errorCallback);
+                              // On success, push the authentication route.
+                              if (status == 0) {
+                                Navigator.pushReplacementNamed(
+                                  context,
+                                  '/auth',
+                                );
+                              }
                             }
                           }),
-                      SizedBox(height: size.height * 0.01),
+                      SizedBox(height: size.height * 0.02),
                       Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[
@@ -128,6 +140,31 @@ class _SignUpState extends State<SignUp> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget errorDialog(BuildContext context, String error) {
+    return AlertDialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+      title: Text(error),
+      content: SingleChildScrollView(
+        child: SizedBox(
+          width: double.infinity,
+          height: 150.0,
+          child:
+              SvgPicture.asset("assets/warning.svg", semanticsLabel: "Warning"),
+        ),
+      ),
+      actions: <Widget>[
+        TextButton(
+          child: Text("Ok", style: CustomTheme.textTheme.headline2),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
+      ],
     );
   }
 }

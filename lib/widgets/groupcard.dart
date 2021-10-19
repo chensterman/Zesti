@@ -7,6 +7,7 @@ import 'package:zesti/models/zestigroup.dart';
 import 'package:zesti/services/database.dart';
 import 'package:zesti/theme/theme.dart';
 import 'package:zesti/widgets/errors.dart';
+import 'package:zesti/widgets/loading.dart';
 import 'package:zesti/widgets/usercard.dart';
 
 // Widget displaying user cards to make decisions on.
@@ -55,12 +56,12 @@ class GroupCard extends StatelessWidget {
                 height: height,
                 width: size.width * 0.95,
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(20),
                 ),
                 child: Stack(
                   children: [
                     ClipRRect(
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(20),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: <Widget>[
@@ -90,7 +91,7 @@ class GroupCard extends StatelessWidget {
                     Container(
                       // Box decoraion and gradient.
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(20),
                         boxShadow: [
                           BoxShadow(color: Colors.black12, spreadRadius: 0.5),
                         ],
@@ -178,7 +179,14 @@ class GroupCard extends StatelessWidget {
           }
           // On loading, return an empty container.
           else {
-            return Container();
+            return Container(
+                height: size.height * 0.7,
+                width: size.width * 0.95,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  color: Colors.white,
+                ),
+                child: ZestiLoading());
           }
         });
   }
@@ -211,7 +219,7 @@ class GroupCard extends StatelessWidget {
           ),
           SizedBox(height: 8),
           Text(
-            groupOnCard.funFact,
+            groupOnCard.groupTagline,
             style: CustomTheme.textTheme.subtitle2,
           ),
           SizedBox(height: 4),
@@ -227,6 +235,9 @@ class GroupCard extends StatelessWidget {
   Widget sendDialog(BuildContext context, String message, String uid,
       String gid, String yougid) {
     return AlertDialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
       title: Text(message),
       content: SingleChildScrollView(
         child: SizedBox(
@@ -294,12 +305,12 @@ class GroupCardDummy extends StatelessWidget {
                 height: height,
                 width: size.width * 0.95,
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(20),
                 ),
                 child: Stack(
                   children: [
                     ClipRRect(
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(20),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: <Widget>[
@@ -329,7 +340,7 @@ class GroupCardDummy extends StatelessWidget {
                     Container(
                       // Box decoraion and gradient.
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(20),
                         boxShadow: [
                           BoxShadow(color: Colors.black12, spreadRadius: 0.5),
                         ],
@@ -376,9 +387,10 @@ class GroupCardDummy extends StatelessWidget {
                 height: size.height * 0.7,
                 width: size.width * 0.95,
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(20),
+                  color: Colors.white,
                 ),
-                child: Center(child: CircularProgressIndicator()));
+                child: ZestiLoading());
           }
         });
   }
@@ -411,7 +423,7 @@ class GroupCardDummy extends StatelessWidget {
           ),
           SizedBox(height: 8),
           Text(
-            groupOnCard.funFact,
+            groupOnCard.groupTagline,
             style: CustomTheme.textTheme.subtitle2,
           ),
           SizedBox(height: 4),

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:zesti/theme/theme.dart';
-import 'package:zesti/views/home/home.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:zesti/views/home/social/recommendations.dart';
 import 'package:zesti/views/home/social/requests.dart';
 import 'package:zesti/views/home/social/group.dart';
@@ -18,9 +18,6 @@ class Social extends StatefulWidget {
 }
 
 class _SocialState extends State<Social> {
-  // Firebase storage instance
-  final FirebaseStorage _storage = FirebaseStorage.instance;
-
   // Inital widget to display
   int _selectedIndex = 0;
 
@@ -37,15 +34,14 @@ class _SocialState extends State<Social> {
     // Main page widget (contains nav bar pages as well)
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () => Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => Home()),
+        backgroundColor: CustomTheme.reallyBrightOrange,
+        title: SizedBox(
+          height: 50.0,
+          child: SvgPicture.asset(
+            "assets/zesti.svg",
+            alignment: Alignment.centerLeft,
           ),
         ),
-        backgroundColor: CustomTheme.reallyBrightOrange,
-        title: Text("Zesti Social"),
       ),
       body: Container(
         decoration: CustomTheme.mode,

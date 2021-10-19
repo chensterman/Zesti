@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:zesti/widgets/errors.dart';
+import 'package:zesti/widgets/loading.dart';
 import 'package:zesti/widgets/usercard.dart';
 import 'package:zesti/theme/theme.dart';
 import 'package:zesti/services/database.dart';
@@ -50,19 +51,24 @@ class _RecommendationsState extends State<Recommendations> {
                       if (index == 0) {
                         return Center(
                           child: Column(children: [
-                            Text('RECOMMENDATIONS',
-                                style: CustomTheme.textTheme.headline3),
-                            TextButton(
-                              child: Text('Generate'),
-                              onPressed: () async {
-                                await DatabaseService(uid: widget.uid)
-                                    .generateRecommendations();
-                              },
+                            Container(
+                              margin: EdgeInsets.only(left: 10.0),
+                              width: double.infinity,
+                              child: Text('Recommendations',
+                                  textAlign: TextAlign.left,
+                                  style: CustomTheme.textTheme.headline3),
                             ),
+                            // TextButton(
+                            //   child: Text('Generate'),
+                            //   onPressed: () async {
+                            //     await DatabaseService(uid: widget.uid)
+                            //         .generateRecommendations();
+                            //   },
+                            // ),
                             tmp.docs.length == 0
                                 ? Empty(
                                     reason:
-                                        "You've ran out of recommendations for the week! Check back in for next round!")
+                                        "Check back next week for new recs!")
                                 : Container(),
                           ]),
                         );
@@ -71,14 +77,17 @@ class _RecommendationsState extends State<Recommendations> {
                       // Other indeces used to populate user cards in the ListView.
                       Map<String, dynamic> data =
                           tmp.docs[index - 1].data() as Map<String, dynamic>;
-                      return UserCard(userRef: data['user-ref'], rec: true);
+                      return UserCard(
+                          userRef: data['user-ref'],
+                          parentUserRef: tmp.docs[index - 1].reference,
+                          rec: true);
                     },
                     // SizedBox used as separated between user cards.
                     separatorBuilder: (context, index) =>
                         SizedBox(height: 16.0),
                     itemCount: tmp.docs.length + 1)
                 // When StreamBuilder hasn't loaded, show progress indicator.
-                : Center(child: CircularProgressIndicator());
+                : ZestiLoading();
           }),
     );
   }

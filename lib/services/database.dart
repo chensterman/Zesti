@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'dart:typed_data';
-import 'dart:math';
 import 'package:uuid/uuid.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -29,10 +28,33 @@ class DatabaseService {
   final CollectionReference chatCollection =
       FirebaseFirestore.instance.collection('chats');
 
+  // Access to 'partners' collection.
+  final CollectionReference partnerCollection =
+      FirebaseFirestore.instance.collection('partners');
+
   // Random id generator.
   final uuid = Uuid();
 
-  // Creater user:
+  // Delete user.
+  Future<void> deleteUser() async {
+    // Loop through all matches and unmatch with the other user.
+    QuerySnapshot allMatched =
+        await userCollection.doc(uid).collection("matched").get();
+    for (QueryDocumentSnapshot doc in allMatched.docs) {
+      Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+      await unmatch(data['user-ref'].id, doc.id);
+    }
+    // Loop through all groups and leave each one.
+    QuerySnapshot allGroups =
+        await userCollection.doc(uid).collection("groups").get();
+    for (QueryDocumentSnapshot doc in allGroups.docs) {
+      await leaveGroup(doc.id);
+    }
+    // Delete the user document.
+    await userCollection.doc(uid).delete();
+  }
+
+  // Create user:
   //  Add user document to 'users' and initialize fields.
   Future<void> createUser() async {
     await userCollection
@@ -123,14 +145,22 @@ class DatabaseService {
   }
 
   // Update user photo.
-  Future<void> updatePhoto(File image) async {
-    String storageRefPut = "profpics/" + uid + "/" + uuid.v4() + ".jpg";
-    await _storage.ref(storageRefPut).putFile(image);
-    await userCollection
-        .doc(uid)
-        .update({'photo-ref': storageRefPut})
-        .then((value) => print("Photo Updated"))
-        .catchError((error) => print("Failed to update user: $error"));
+  Future<void> updatePhoto(File? image) async {
+    if (image == null) {
+      await userCollection
+          .doc(uid)
+          .update({'photo-ref': null})
+          .then((value) => print("Photo Updated"))
+          .catchError((error) => print("Failed to update user: $error"));
+    } else {
+      String storageRefPut = "profpics/" + uid + "/" + uuid.v4() + ".jpg";
+      await _storage.ref(storageRefPut).putFile(image);
+      await userCollection
+          .doc(uid)
+          .update({'photo-ref': storageRefPut})
+          .then((value) => print("Photo Updated"))
+          .catchError((error) => print("Failed to update user: $error"));
+    }
   }
 
   // Update user bio.
@@ -158,11 +188,6 @@ class DatabaseService {
     QuerySnapshot sameKey =
         await userCollection.where('zest-key', isEqualTo: zestKey).get();
     return sameKey.docs.length == 0 ? false : true;
-  }
-
-  // Stream to retrieve profile info from the given uid.
-  Stream<DocumentSnapshot> getEditProfileInfo() {
-    return userCollection.doc(uid).snapshots();
   }
 
   // Stream to retrieve match recommendations (generated with function below).
@@ -255,14 +280,24 @@ class DatabaseService {
 
   // Retrieves all info of a group document including user photos.
   Future<ZestiGroup> getGroupInfo(DocumentReference groupRef) async {
+    // Get document snapshot of the group reference.
     DocumentSnapshot groupSnapshot = await groupRef.get();
+
+    // Convert the snapshot into a map.
     Map<String, dynamic> groupInfo =
         groupSnapshot.data() as Map<String, dynamic>;
+
+    // Get query of all users in this group and convert to a list.
     QuerySnapshot groupUsers = await groupRef.collection("users").get();
     List groupUserRefs =
         groupUsers.docs.map((doc) => doc.get("user-ref")).toList();
+
+    // Instantiate the ZestiGroup nameMap.
     Map<DocumentReference, String> nameMap = {};
+    // Instantiate the ZestiGroup photoMap.
     Map<DocumentReference, ImageProvider<Object>> photoMap = {};
+
+    // Add document reference, String/Image pairs into the respective maps.
     for (DocumentReference userRef in groupUserRefs) {
       DocumentSnapshot userSnapshot = await userRef.get();
       ImageProvider<Object> photo =
@@ -271,10 +306,12 @@ class DatabaseService {
       nameMap[userRef] = name;
       photoMap[userRef] = photo;
     }
+
+    // Return a ZestiGroup instance.
     return ZestiGroup(
         gid: groupRef.id,
         groupName: groupInfo['group-name'],
-        funFact: groupInfo['fun-fact'],
+        groupTagline: groupInfo['fun-fact'],
         nameMap: nameMap,
         photoMap: photoMap);
   }
@@ -326,6 +363,12 @@ class DatabaseService {
         .snapshots();
   }
 
+  // Retrieves document fields from a given chat reference.
+  Future<Map<String, dynamic>> getChatInfo(DocumentReference chatRef) async {
+    DocumentSnapshot snapshot = await chatRef.get();
+    return snapshot.data() as Map<String, dynamic>;
+  }
+
   // Send a chat message.
   Future<void> sendMessage(
       DocumentReference chatRef, String type, String content) async {
@@ -358,6 +401,7 @@ class DatabaseService {
         .delete();
   }
 
+/*
   // Helper function for converting a user DocumentReference to a dart map.
   Future<Map<String, dynamic>> _userRefToMap(DocumentReference userRef) async {
     // Get snapshot of user doc reference.
@@ -370,6 +414,7 @@ class DatabaseService {
     mapData['user-ref'] = userRef;
     return mapData;
   }
+
 
   // Generates random match recommendations based on dating identity and interest.
   Future<void> generateRecommendations() async {
@@ -538,6 +583,7 @@ class DatabaseService {
       });
     }
   }
+*/
 
   // Handles the interactions a user conducts on a recommended match.
   Future<void> outgoingInteraction(String youid, bool requested) async {
@@ -723,6 +769,11 @@ class DatabaseService {
     // Search for the user by unique zest-key.
     QuerySnapshot userByZestKey =
         await userCollection.where("zest-key", isEqualTo: zestKey).get();
+
+    // Check if Zestkey exists.
+    if (userByZestKey.docs.length == 0) {
+      return "This user does not exist.";
+    }
     // Get the UID.
     String uidToAdd = userByZestKey.docs[0].id;
     // Add the user info to the group.
@@ -753,9 +804,14 @@ class DatabaseService {
     QuerySnapshot cap =
         await groupCollection.doc(gid).collection("users").get();
     if (cap.docs.length <= 0) {
+      QuerySnapshot allMatched =
+          await groupCollection.doc(gid).collection("matched").get();
+      for (QueryDocumentSnapshot doc in allMatched.docs) {
+        Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+        await unmatchGroup(gid, data["group-ref"].id, doc.id);
+      }
       // Delete the group if there are no users left in it.
       await groupCollection.doc(gid).delete();
-      print("Permanently deleting this group.");
       return;
     } else {
       // Otherwise just decrement the group user count.
@@ -779,6 +835,7 @@ class DatabaseService {
     return mapData;
   }
 
+/*
   Future<void> generateGroupRecommendations(String gid) async {
     // Get snapshot of all users the user reacted (liked or disliked) to. Convert
     // to list and subtract from list of all users
@@ -792,9 +849,6 @@ class DatabaseService {
 
     var availableGroups = allGroups.toSet().difference(allReactions.toSet());
     availableGroups = availableGroups.difference([gid].toSet());
-
-    print('available Groups:');
-    print(availableGroups);
 
     // Query based on the given parameters
     QuerySnapshot snapshot =
@@ -845,6 +899,7 @@ class DatabaseService {
       });
     }
   }
+*/
 
   // Handles the interactions a user conducts on a recommended match.
   Future<void> outgoingGroupInteraction(
@@ -968,5 +1023,34 @@ class DatabaseService {
         .then((value) => print("Incoming request deleted."))
         .catchError(
             (error) => print("Failed to delete incoming request: $error"));
+  }
+
+  // Stream to retrieve all partner info.
+  Stream<QuerySnapshot> getPartners() {
+    return partnerCollection.where('available', isEqualTo: true).snapshots();
+  }
+
+  Future<void> redeemMetrics(String partnerid) async {
+    await partnerCollection
+        .doc(partnerid)
+        .update({'count': FieldValue.increment(1)});
+    DocumentSnapshot test = await userCollection
+        .doc(uid)
+        .collection('metrics')
+        .doc(partnerid)
+        .get();
+    if (test.exists) {
+      await userCollection
+          .doc(uid)
+          .collection('metrics')
+          .doc(partnerid)
+          .update({'count': FieldValue.increment(1)});
+    } else {
+      await userCollection
+          .doc(uid)
+          .collection('metrics')
+          .doc(partnerid)
+          .set({'count': 1});
+    }
   }
 }

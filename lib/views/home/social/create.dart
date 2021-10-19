@@ -3,14 +3,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:zesti/theme/theme.dart';
 import 'package:zesti/services/database.dart';
-import 'package:zesti/views/home/social/choose.dart';
 import 'package:zesti/widgets/formwidgets.dart';
 
 class CreateGroup extends StatefulWidget {
-  final String gid;
   CreateGroup({
     Key? key,
-    required this.gid,
   }) : super(key: key);
 
   @override
@@ -25,7 +22,6 @@ class _CreateGroupState extends State<CreateGroup> {
   @override
   Widget build(BuildContext context) {
     final user = Provider.of<User?>(context);
-    Size size = MediaQuery.of(context).size;
 
     return Scaffold(
       appBar: AppBar(
@@ -36,9 +32,6 @@ class _CreateGroupState extends State<CreateGroup> {
         decoration: CustomTheme.mode,
         child: Center(
           child: Container(
-            padding: EdgeInsets.symmetric(
-                vertical: size.height * CustomTheme.paddingMultiplier,
-                horizontal: size.width * CustomTheme.paddingMultiplier),
             child: Form(
               key: _formKey,
               child: Center(
@@ -50,7 +43,7 @@ class _CreateGroupState extends State<CreateGroup> {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20),
                           ),
-                          margin: EdgeInsets.all(8.0),
+                          margin: EdgeInsets.all(32.0),
                           child: Padding(
                             padding: const EdgeInsets.symmetric(
                                 vertical: 32.0, horizontal: 32.0),
@@ -84,14 +77,14 @@ class _CreateGroupState extends State<CreateGroup> {
                                   padding:
                                       const EdgeInsets.symmetric(vertical: 8.0),
                                   child: Text(
-                                    "Enter a fun fact:",
+                                    "Enter a group tagline:",
                                     style: CustomTheme.textTheme.headline2,
                                   ),
                                 ),
                                 TextFormField(
                                     validator: (val) {
                                       if (val == null || val.isEmpty) {
-                                        return "Please enter a fun fact.";
+                                        return "Please enter a group tagline.";
                                       }
                                       if (val.length > 140) {
                                         return "Please enter a shorter tagline (140 characters max).";
@@ -101,7 +94,7 @@ class _CreateGroupState extends State<CreateGroup> {
                                       setState(() => funFact = val);
                                     },
                                     decoration: const InputDecoration(
-                                        hintText: "Fun Fact")),
+                                        hintText: "Tagline")),
                                 SizedBox(height: 20.0),
                                 RoundedButton(
                                     text: 'Continue',
@@ -109,11 +102,7 @@ class _CreateGroupState extends State<CreateGroup> {
                                       if (_formKey.currentState!.validate()) {
                                         await DatabaseService(uid: user!.uid)
                                             .createGroup(groupName, funFact);
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) => Choose()),
-                                        );
+                                        Navigator.of(context).pop();
                                       }
                                     }),
                               ],

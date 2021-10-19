@@ -6,6 +6,7 @@ import 'package:zesti/services/database.dart';
 import 'package:zesti/widgets/errors.dart';
 import 'package:zesti/widgets/groupcard.dart';
 import 'package:zesti/theme/theme.dart';
+import 'package:zesti/widgets/loading.dart';
 
 // Displays list of recommended matches.
 class Recommendations extends StatefulWidget {
@@ -45,19 +46,24 @@ class _RecommendationsState extends State<Recommendations> {
                       if (index == 0) {
                         return Center(
                           child: Column(children: [
-                            Text('RECOMMENDATIONS',
-                                style: CustomTheme.textTheme.headline3),
-                            TextButton(
-                              child: Text('Generate'),
-                              onPressed: () async {
-                                await DatabaseService(uid: user.uid)
-                                    .generateGroupRecommendations(widget.gid);
-                              },
+                            Container(
+                              margin: EdgeInsets.only(left: 10.0),
+                              width: double.infinity,
+                              child: Text('Recommendations',
+                                  textAlign: TextAlign.left,
+                                  style: CustomTheme.textTheme.headline3),
                             ),
+                            // TextButton(
+                            //   child: Text('Generate'),
+                            //   onPressed: () async {
+                            //     await DatabaseService(uid: user.uid)
+                            //         .generateGroupRecommendations(widget.gid);
+                            //   },
+                            // ),
                             tmp.docs.length == 0
                                 ? Empty(
                                     reason:
-                                        "You've ran out of recommendations for the week! Make sure your group has more than one member!")
+                                        "Check back next week for new recs! Make sure your group has at least two members!")
                                 : Container(),
                           ]),
                         );
@@ -77,7 +83,7 @@ class _RecommendationsState extends State<Recommendations> {
                         SizedBox(height: 16.0),
                     itemCount: tmp.docs.length + 1)
                 // When StreamBuilder hasn't loaded, show progress indicator.
-                : Center(child: CircularProgressIndicator());
+                : ZestiLoading();
           }),
     );
   }
