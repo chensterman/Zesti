@@ -320,6 +320,10 @@ class DatabaseService {
   Future<ZestiUser> getUserInfo(DocumentReference userRef) async {
     DocumentSnapshot userSnapshot = await userRef.get();
     Map<String, dynamic> userInfo = userSnapshot.data() as Map<String, dynamic>;
+    String photoURL = "profpics/default/profile.jpg";
+    if (userInfo['photo-ref'] != null) {
+      photoURL = userInfo['photo-ref'];
+    }
     return ZestiUser(
       uid: userRef.id,
       first: userInfo['first-name'],
@@ -328,8 +332,8 @@ class DatabaseService {
       dIdentity: userInfo['dating-identity'],
       dInterest: userInfo['dating-interest'],
       house: userInfo['house'],
-      photoURL: userInfo['photo-ref'],
-      profPic: await getPhoto(userInfo['photo-ref']),
+      photoURL: photoURL,
+      profPic: await getPhoto(photoURL),
       age: userInfo['age'],
       year: userInfo['year'],
       zestKey: userInfo['zest-key'],
