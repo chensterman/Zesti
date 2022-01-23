@@ -58,7 +58,7 @@ class AuthService {
   Future<void> deleteUser() async {
     User currUser = _auth.currentUser!;
     await DatabaseService(uid: currUser.uid).deleteUser();
-    await _auth.currentUser!.delete();
+    await currUser.delete();
     await _auth.signOut();
   }
 
