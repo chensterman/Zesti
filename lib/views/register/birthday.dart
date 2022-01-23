@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:zesti/theme/theme.dart';
 import 'package:zesti/services/database.dart';
 import 'package:zesti/views/register/name.dart';
+import 'package:zesti/widgets/formwidgets.dart';
 
 class NumberLine extends StatelessWidget {
   NumberLine({@required this.width, @required this.text});
@@ -79,130 +80,75 @@ class _BirthdayState extends State<Birthday> {
                                 Container(
                                   margin: EdgeInsets.only(top: 20),
                                   child: Center(
-                                      child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      NumberLine(
-                                          width: size.width * .15,
-                                          text: "$month"),
-                                      Text("/", style: TextStyle(fontSize: 25)),
-                                      NumberLine(
-                                          width: size.width * .15,
-                                          text: "$day"),
-                                      Text("/", style: TextStyle(fontSize: 25)),
-                                      NumberLine(
-                                          width: size.width * .2,
-                                          text: "$year"),
-                                    ],
-                                  )),
+                                    child: InkWell(
+                                        onTap: () {
+                                          DatePicker.showDatePicker(context,
+                                              showTitleActions: true,
+                                              minTime: DateTime(1900, 3, 5),
+                                              maxTime: DateTime.now(),
+                                              onChanged: (date) {
+                                            print('change $date in time zone ' +
+                                                date.timeZoneOffset.inHours
+                                                    .toString());
+                                            setState(() {
+                                              month = date.month;
+                                              day = date.day;
+                                              year = date.year;
+                                              picked = true;
+                                            });
+                                          }, onConfirm: (date) {
+                                            birthday = date;
+                                          },
+                                              currentTime: DateTime.now(),
+                                              locale: LocaleType.en);
+                                        },
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            NumberLine(
+                                                width: size.width * .15,
+                                                text: "$month"),
+                                            Text("/",
+                                                style: TextStyle(fontSize: 25)),
+                                            NumberLine(
+                                                width: size.width * .15,
+                                                text: "$day"),
+                                            Text("/",
+                                                style: TextStyle(fontSize: 25)),
+                                            NumberLine(
+                                                width: size.width * .2,
+                                                text: "$year"),
+                                          ],
+                                        )),
+                                  ),
                                 ),
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceEvenly,
-                                  children: [
-                                    SizedBox(
-                                      width: size.width *
-                                          CustomTheme.containerWidth *
-                                          0.35,
-                                      child: Padding(
-                                          padding:
-                                              const EdgeInsets.only(top: 20.0),
-                                          child: ElevatedButton(
-                                            style: ElevatedButton.styleFrom(
-                                                primary: CustomTheme
-                                                    .reallyBrightOrange,
-                                                padding: const EdgeInsets.only(
-                                                    left: 30,
-                                                    top: 10,
-                                                    right: 30,
-                                                    bottom: 10),
-                                                shape:
-                                                    new RoundedRectangleBorder(
-                                                        borderRadius:
-                                                            new BorderRadius
-                                                                    .circular(
-                                                                30.0))),
-                                            onPressed: () {
-                                              DatePicker.showDatePicker(context,
-                                                  showTitleActions: true,
-                                                  minTime: DateTime(1900, 3, 5),
-                                                  maxTime: DateTime.now(),
-                                                  onChanged: (date) {
-                                                print(
-                                                    'change $date in time zone ' +
-                                                        date.timeZoneOffset
-                                                            .inHours
-                                                            .toString());
-                                                setState(() {
-                                                  month = date.month;
-                                                  day = date.day;
-                                                  year = date.year;
-                                                  picked = true;
-                                                });
-                                              }, onConfirm: (date) {
-                                                birthday = date;
-                                              },
-                                                  currentTime: DateTime.now(),
-                                                  locale: LocaleType.en);
-                                            },
-                                            child: Text("Select"),
-                                          )),
-                                    ),
-                                    SizedBox(
-                                      width: size.width *
-                                          CustomTheme.containerWidth *
-                                          0.35,
-                                      child: Padding(
-                                          padding:
-                                              const EdgeInsets.only(top: 20.0),
-                                          child: ElevatedButton(
-                                            style: ElevatedButton.styleFrom(
-                                                primary: CustomTheme
-                                                    .reallyBrightOrange,
-                                                padding: const EdgeInsets.only(
-                                                    left: 30,
-                                                    top: 10,
-                                                    right: 30,
-                                                    bottom: 10),
-                                                shape:
-                                                    new RoundedRectangleBorder(
-                                                        borderRadius:
-                                                            new BorderRadius
-                                                                    .circular(
-                                                                30.0))),
-                                            onPressed: () async {
-                                              // Check for non-user
-                                              if (picked) {
-                                                Duration difference =
-                                                    DateTime.now()
-                                                        .difference(birthday);
-                                                num age =
-                                                    difference.inDays ~/ 365;
-                                                if (age >= 18) {
-                                                  await DatabaseService(
-                                                          uid: user!.uid)
-                                                      .updateAge(age);
-                                                  // Push to House form
-                                                  Navigator.push(
-                                                    context,
-                                                    MaterialPageRoute(
-                                                        builder: (context) =>
-                                                            Name()),
-                                                  );
-                                                } else {
-                                                  showDialog(
-                                                      context: context,
-                                                      builder: (context) =>
-                                                          ageDialog(context));
-                                                }
-                                              }
-                                            },
-                                            child: Text("Confirm"),
-                                          )),
-                                    )
-                                  ],
-                                ),
+                                SizedBox(height: 20.0),
+                                RoundedButton(
+                                    text: 'Confirm',
+                                    onPressed: () async {
+                                      // Check for non-user
+                                      if (picked) {
+                                        Duration difference =
+                                            DateTime.now().difference(birthday);
+                                        num age = difference.inDays ~/ 365;
+                                        if (age >= 18) {
+                                          await DatabaseService(uid: user!.uid)
+                                              .updateAge(age);
+                                          // Push to House form
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                                builder: (context) => Name()),
+                                          );
+                                        } else {
+                                          showDialog(
+                                              context: context,
+                                              builder: (context) =>
+                                                  ageDialog(context));
+                                        }
+                                      }
+                                    }),
                                 SizedBox(
                                   width: double.infinity,
                                   height: size.height * 0.3,

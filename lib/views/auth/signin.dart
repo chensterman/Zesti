@@ -51,6 +51,7 @@ class _SignInState extends State<SignIn> {
                         validator: (val) =>
                             val!.isEmpty ? 'Please enter an email' : null,
                         onChanged: (val) {
+                          val = val.toLowerCase();
                           setState(() => email = val);
                         },
                         hintText: 'Email',
@@ -143,6 +144,7 @@ class _SignInState extends State<SignIn> {
       content: SingleChildScrollView(
         child: TextFormField(
           onChanged: (val) {
+            val = val.toLowerCase();
             setState(() => resetEmail = val);
           },
           decoration: const InputDecoration(hintText: "Email"),

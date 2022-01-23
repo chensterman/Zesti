@@ -7,9 +7,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:508027656486:android:5415cdf2bea18a344409e7",
+        "mobilesdk_app_id": "1:508027656486:android:1519b11c3207c3a74409e7",
         "android_client_info": {
-          "package_name": "com.zestiapp.zesti"
+          "package_name": "com.zesti.zestiapp"
         }
       },
       "oauth_client": [
@@ -29,6 +29,13 @@
             {
               "client_id": "508027656486-5esdkhtp1002v5lcpmtkanauhlu5r1qs.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "508027656486-p24kouu68352mkatdbu4852dp22vhtk9.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.zestiapp.zesti"
+              }
             }
           ]
         }

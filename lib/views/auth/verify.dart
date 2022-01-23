@@ -59,8 +59,8 @@ class _VerifyScreenState extends State<VerifyScreen> {
                                 padding:
                                     const EdgeInsets.symmetric(vertical: 8.0),
                                 child: Text(
-                                  'An email will be sent to ${user.email} shortly. Please verify to proceed (you may need to check your spam).',
-                                  style: CustomTheme.textTheme.headline3,
+                                  'An verification email will be sent to your address shortly. You may need to check your spam folder, and once verified, you will be taken to the next page. There may be a few minutes of delay.',
+                                  style: CustomTheme.textTheme.headline2,
                                 ),
                               ),
                               SizedBox(height: 20.0),
