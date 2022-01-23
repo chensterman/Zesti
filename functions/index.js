@@ -22,7 +22,7 @@ exports.generateRecommendations = functions.pubsub.schedule('every 2 minutes').o
   // Loop through all user documents
   var collectionQuery = await userCollection.get();
   collectionQuery.docs.forEach(async function (doc) {
-    
+
     var currUser = await _userRefToObject(doc.ref);
     // Get querying parameters based on user info
     var queryIdentity = [];
@@ -122,14 +122,14 @@ exports.generateRecommendations = functions.pubsub.schedule('every 2 minutes').o
       if (data['user-ref'].exists) {
         return qdoc.id;
       } else {
-        await qdoc.delete();
+        qdoc.delete();
         return "deleted";
       }
     });
     var allUsers = collectionQuery.docs.map(qdoc => qdoc.id);
     var availableUsers = allUsers.filter(x => !allReactions.includes(x));
     var availableUsers = availableUsers.filter(x => x != doc.id);
-    
+
     var snapshot;
     if (queryIdentity.length > 1) {
       snapshot = await userCollection
@@ -159,7 +159,7 @@ exports.generateRecommendations = functions.pubsub.schedule('every 2 minutes').o
       potentialSet.delete(selectedUID);
       userList.push(selectedUID);
     }
-    
+
     // Delete all currently stored recommendations.
     var recommendations = await doc.ref.collection("recommendations").get();
     recommendations.docs.forEach(async function (rec) {
@@ -194,7 +194,7 @@ exports.generateGroupRecommendations = functions.pubsub.schedule('every 2 minute
           if (data['group-ref'].exists) {
             return qdoc.id;
           } else {
-            await qdoc.delete();
+            qdoc.delete();
             return "deleted";
           }
         });
@@ -238,7 +238,7 @@ exports.generateGroupRecommendations = functions.pubsub.schedule('every 2 minute
     recommendations.docs.forEach(async function (rec) {
       await rec.ref.delete();
     });
-    
+
     // Populate recommendations collection with newly generated groups.
     var ts = admin.firestore.Timestamp.now();
     groupList.forEach(async function (gid) {
