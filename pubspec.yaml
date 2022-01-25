@@ -24,9 +24,11 @@ dependencies:
 
   # Firebase
   firebase_core: ^1.2.0
-  firebase_auth: ^1.2.0
-  firebase_storage: ^8.1.0
-  cloud_firestore: ^2.2.0
+  firebase_auth: ^3.3.5
+  firebase_storage: ^10.2.5
+  cloud_firestore: ^3.1.6
+  firebase_messaging: ^11.2.5
+  flutter_local_notifications: ^9.2.0
 
   # API Requests
   http: ^0.13.3
@@ -35,10 +37,10 @@ dependencies:
   uuid: ^3.0.4
 
   # Image uploading
-  image_picker: 0.7.5+2
+  image_picker: ^0.8.4+4
 
   # Provider package (auth streams)
-  provider: ^5.0.0
+  provider: ^6.0.2
 
   flutter:
     sdk: flutter
@@ -48,7 +50,7 @@ dependencies:
   cupertino_icons: ^1.0.2
 
   # Flutter useful libraries
-  flutter_svg: ^0.21.0+1
+  flutter_svg: ^1.0.3
   flutter_datetime_picker:
     git:
       url: https://github.com/Realank/flutter_datetime_picker.git
