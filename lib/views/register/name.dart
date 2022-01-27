@@ -6,6 +6,7 @@ import 'package:zesti/theme/theme.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:zesti/views/register/identity.dart';
 import 'package:zesti/widgets/formwidgets.dart';
+import 'package:zesti/widgets/loading.dart';
 
 // Widget for name form
 class Name extends StatefulWidget {
@@ -94,8 +95,10 @@ class _NameState extends State<Name> {
                                         if (user == null) {
                                           print("Error");
                                         } else {
+                                          ZestiLoadingAsync().show(context);
                                           await DatabaseService(uid: user.uid)
                                               .updateName(first, last);
+                                          ZestiLoadingAsync().dismiss();
                                         }
                                         Navigator.push(
                                           context,

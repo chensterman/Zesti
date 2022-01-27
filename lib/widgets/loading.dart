@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter/widgets.dart';
 
 /// This is the stateful widget that the main application instantiates.
 class ZestiLoading extends StatefulWidget {
@@ -14,7 +15,7 @@ class ZestiLoading extends StatefulWidget {
 class _ZestiLoadingState extends State<ZestiLoading>
     with TickerProviderStateMixin {
   late final AnimationController _controller = AnimationController(
-    duration: const Duration(seconds: 10),
+    duration: const Duration(seconds: 5),
     vsync: this,
   )..repeat(reverse: true);
   late final Animation<double> _animation = CurvedAnimation(
@@ -44,5 +45,35 @@ class _ZestiLoadingState extends State<ZestiLoading>
         ),
       ),
     );
+  }
+}
+
+class ZestiLoadingAsync {
+  static final ZestiLoadingAsync _singleton = ZestiLoadingAsync._internal();
+  BuildContext? _context;
+
+  factory ZestiLoadingAsync() {
+    return _singleton;
+  }
+
+  ZestiLoadingAsync._internal();
+
+  show(BuildContext context) {
+    showDialog<void>(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          _context = context;
+          return WillPopScope(
+            onWillPop: () async => false,
+            child: ZestiLoading(),
+          );
+        });
+  }
+
+  dismiss() {
+    if (_context != null) {
+      Navigator.of(_context!).pop();
+    }
   }
 }

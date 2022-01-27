@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter/material.dart';
 import 'package:zesti/theme/theme.dart';
+import 'package:zesti/widgets/loading.dart';
 
 // Text input used across multiple forms.
 class Empty extends StatelessWidget {
@@ -76,7 +77,9 @@ class NotFound extends StatelessWidget {
             InkWell(
               child: Icon(Icons.cancel_rounded, color: Colors.red, size: 64.0),
               onTap: () async {
+                ZestiLoadingAsync().show(context);
                 await doc.delete();
+                ZestiLoadingAsync().dismiss();
               },
             ),
           ],
@@ -103,7 +106,9 @@ class NotFoundMatchSheet extends StatelessWidget {
       margin: EdgeInsets.all(8.0),
       child: InkWell(
         onTap: () async {
+          ZestiLoadingAsync().show(context);
           await doc.delete();
+          ZestiLoadingAsync().dismiss();
         },
         // Display match info (user data) on the sheet.
         child: Container(

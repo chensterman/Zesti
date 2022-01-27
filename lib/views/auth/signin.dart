@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:zesti/views/auth/signup.dart';
 import 'package:zesti/services/auth.dart';
 import 'package:zesti/widgets/formwidgets.dart';
+import 'package:zesti/widgets/loading.dart';
 
 // Widget for handling login.
 class SignIn extends StatefulWidget {
@@ -23,12 +24,6 @@ class _SignInState extends State<SignIn> {
   // State of password obscurer
   bool passObscure = true;
   Icon passObscureIcon = Icon(Icons.visibility);
-
-  void errorCallback() {
-    String error = "Sign in error. The email or password is invalid.";
-    showDialog(
-        context: context, builder: (context) => errorDialog(context, error));
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -93,14 +88,24 @@ class _SignInState extends State<SignIn> {
                             // Validate all form fields.
                             if (_formKey.currentState!.validate()) {
                               // Get login status.
-                              int status = await AuthService()
-                                  .signIn(email, password, errorCallback);
+                              ZestiLoadingAsync().show(context);
+                              int status =
+                                  await AuthService().signIn(email, password);
+                              ZestiLoadingAsync().dismiss();
+
                               // On success, push the authentication route.
                               if (status == 0) {
                                 Navigator.pushReplacementNamed(
                                   context,
                                   '/auth',
                                 );
+                              } else {
+                                String error =
+                                    "Sign in error. The email or password is invalid.";
+                                showDialog(
+                                    context: context,
+                                    builder: (context) =>
+                                        errorDialog(context, error));
                               }
                             }
                           }),
@@ -171,7 +176,12 @@ class _SignInState extends State<SignIn> {
         TextButton(
           child: Text("Send", style: CustomTheme.textTheme.headline1),
           onPressed: () async {
+            // Send password reset email
+            ZestiLoadingAsync().show(context);
             await AuthService().resetPassword(resetEmail);
+            ZestiLoadingAsync().dismiss();
+
+            // Pop the dialog
             Navigator.of(context).pop();
           },
         ),

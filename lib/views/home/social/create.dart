@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:zesti/theme/theme.dart';
 import 'package:zesti/services/database.dart';
 import 'package:zesti/widgets/formwidgets.dart';
+import 'package:zesti/widgets/loading.dart';
 
 class CreateGroup extends StatefulWidget {
   CreateGroup({
@@ -100,8 +101,10 @@ class _CreateGroupState extends State<CreateGroup> {
                                     text: 'Continue',
                                     onPressed: () async {
                                       if (_formKey.currentState!.validate()) {
+                                        ZestiLoadingAsync().show(context);
                                         await DatabaseService(uid: user!.uid)
                                             .createGroup(groupName, funFact);
+                                        ZestiLoadingAsync().dismiss();
                                         Navigator.of(context).pop();
                                       }
                                     }),

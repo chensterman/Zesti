@@ -10,6 +10,7 @@ import 'package:zesti/services/database.dart';
 import 'package:zesti/theme/theme.dart';
 import 'package:zesti/widgets/previewcard.dart';
 import 'package:zesti/widgets/formwidgets.dart';
+import 'package:zesti/widgets/loading.dart';
 
 // Widget for the profile editing page.
 class EditProfile extends StatefulWidget {
@@ -354,6 +355,7 @@ class _EditProfileState extends State<EditProfile> {
                                                 _formKey.currentState!
                                                     .validate()) {
                                               // Update all info in Firestore.
+                                              ZestiLoadingAsync().show(context);
                                               await DatabaseService(
                                                       uid: widget.user.uid)
                                                   .updateBio(bio!);
@@ -386,6 +388,8 @@ class _EditProfileState extends State<EditProfile> {
                                                         uid: widget.user.uid)
                                                     .updatePhoto(profpic);
                                               }
+                                              ZestiLoadingAsync().dismiss();
+
                                               // Navigate back to home page.
                                               Navigator.of(context).pop();
                                               widget.callback();
@@ -488,7 +492,9 @@ class _EditProfileState extends State<EditProfile> {
               RoundedButton(
                   text: 'Logout',
                   onPressed: () async {
+                    ZestiLoadingAsync().show(context);
                     await AuthService().signOut();
+                    ZestiLoadingAsync().dismiss();
                     Navigator.of(context).popUntil((route) => route.isFirst);
                   }),
             ],
@@ -515,7 +521,9 @@ class _EditProfileState extends State<EditProfile> {
         TextButton(
           child: Text("Yes", style: CustomTheme.textTheme.headline1),
           onPressed: () async {
+            ZestiLoadingAsync().show(context);
             await AuthService().resetPassword(email);
+            ZestiLoadingAsync().dismiss();
             Navigator.of(context).pop();
           },
         ),
@@ -591,8 +599,10 @@ class _EditProfileState extends State<EditProfile> {
                     // Validate email and password non-empty
                     if (email != "" && password != "") {
                       // Get deletion status
+                      ZestiLoadingAsync().show(context);
                       int status =
                           await AuthService().deleteUser(email, password);
+                      ZestiLoadingAsync().dismiss();
                       // Move to start page regardless
                       Navigator.of(context).popUntil((route) => route.isFirst);
                       // Give message based on status
