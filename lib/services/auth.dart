@@ -55,11 +55,26 @@ class AuthService {
   }
 
   // Method for deleting a user.
-  Future<void> deleteUser() async {
-    User currUser = _auth.currentUser!;
-    await DatabaseService(uid: currUser.uid).deleteUser();
-    await currUser.delete();
-    await _auth.signOut();
+  Future<int> deleteUser(String email, String password) async {
+    try {
+      // Retrieve current user info
+      User currUser = _auth.currentUser!;
+      // Input reauthentication data
+      AuthCredential credentials =
+          EmailAuthProvider.credential(email: email, password: password);
+      // Attempt to reauthenticate (invalid credentials results in a sign out event)
+      UserCredential result =
+          await currUser.reauthenticateWithCredential(credentials);
+      // Delete user data from Firestore
+      await DatabaseService(uid: result.user!.uid).deleteUser();
+      // Delete from Firebase Auth and logout
+      await currUser.delete();
+      // Success status
+      return 0;
+    } catch (e) {
+      // Error status
+      return 1;
+    }
   }
 
   // Method for sending password reset email.
