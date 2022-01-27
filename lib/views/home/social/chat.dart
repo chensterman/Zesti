@@ -160,6 +160,7 @@ class _ChatState extends State<Chat> {
                         ),
                         child: TextField(
                           controller: messageText,
+                          textCapitalization: TextCapitalization.sentences,
                           style: TextStyle(color: Colors.grey),
                           decoration: InputDecoration(
                               border: InputBorder.none,
