@@ -530,11 +530,72 @@ class _EditProfileState extends State<EditProfile> {
   }
 
   Widget deleteConfirmDialog(BuildContext context) {
+    // Email and password from form
+    String email = "";
+    String password = "";
+
+    // Alert dialog
     return AlertDialog(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
       ),
-      title: const Text("Are you sure? All of your info will be erased."),
+      title: const Text(
+          "Please reauthenticate to erase all of your data. Incorrect credentials will log you out."),
+      content: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextFormField(
+                onChanged: (val) {
+                  email = val;
+                },
+                decoration: const InputDecoration(hintText: "Email"),
+              ),
+              SizedBox(height: 20.0),
+              TextFormField(
+                onChanged: (val) {
+                  password = val;
+                },
+                decoration: const InputDecoration(hintText: "Password"),
+                obscureText: true,
+              ),
+              SizedBox(height: 40.0),
+              RoundedButton(
+                text: 'Confirm',
+                onPressed: () async {
+                  // Validate email and password non-empty
+                  if (email != "" && password != "") {
+                    // Get deletion status
+                    int status =
+                        await AuthService().deleteUser(email, password);
+                    // Move to start page regardless
+                    Navigator.of(context).popUntil((route) => route.isFirst);
+                    // Give message based on status
+                    showDialog(
+                        context: context,
+                        builder: (context) =>
+                            deleteStatusDialog(context, status));
+                  }
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget deleteStatusDialog(BuildContext context, int status) {
+    return AlertDialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+      title: status == 0
+          ? Text("Your account has been deleted.")
+          : Text(
+              "You were logged out and your account was not deleted. Please double check your credentials."),
       content: SingleChildScrollView(
         child: SizedBox(
           width: double.infinity,
@@ -544,14 +605,7 @@ class _EditProfileState extends State<EditProfile> {
       ),
       actions: <Widget>[
         TextButton(
-          child: Text("Yes", style: CustomTheme.textTheme.headline1),
-          onPressed: () async {
-            await AuthService().deleteUser();
-            Navigator.of(context).popUntil((route) => route.isFirst);
-          },
-        ),
-        TextButton(
-          child: Text("No", style: CustomTheme.textTheme.headline2),
+          child: Text("Ok", style: CustomTheme.textTheme.headline3),
           onPressed: () async {
             Navigator.of(context).pop();
           },
