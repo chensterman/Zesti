@@ -21,6 +21,10 @@ class _SignUpState extends State<SignUp> {
   String password = '';
   String passwordConfirm = '';
 
+  // State of password obscurer
+  bool passObscure = true;
+  Icon passObscureIcon = Icon(Icons.visibility);
+
   // Error message when email is not valid.
   String error = '';
 
@@ -74,12 +78,26 @@ class _SignUpState extends State<SignUp> {
                         validator: (val) => val!.length < 8
                             ? 'Password must be over 8 characters long'
                             : null,
-                        obscureText: true,
+                        obscureText: passObscure,
                         onChanged: (val) {
                           setState(() => password = val);
                         },
                         hintText: 'Password',
                         icon: Icon(Icons.lock),
+                        suffixIcon: IconButton(
+                          onPressed: () {
+                            // Logic to reveal typed password
+                            if (passObscure) {
+                              setState(() =>
+                                  passObscureIcon = Icon(Icons.visibility_off));
+                            } else {
+                              setState(() =>
+                                  passObscureIcon = Icon(Icons.visibility));
+                            }
+                            setState(() => passObscure = !passObscure);
+                          },
+                          icon: passObscureIcon,
+                        ),
                       ),
                       SizedBox(height: size.height * 0.03),
                       TextFieldContainer(

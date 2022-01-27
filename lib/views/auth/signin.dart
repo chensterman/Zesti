@@ -20,6 +20,10 @@ class _SignInState extends State<SignIn> {
   String password = '';
   String resetEmail = '';
 
+  // State of password obscurer
+  bool passObscure = true;
+  Icon passObscureIcon = Icon(Icons.visibility);
+
   void errorCallback() {
     String error = "Sign in error. The email or password is invalid.";
     showDialog(
@@ -29,7 +33,6 @@ class _SignInState extends State<SignIn> {
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
-
     return Scaffold(
       body: Container(
         padding: EdgeInsets.symmetric(
@@ -59,7 +62,7 @@ class _SignInState extends State<SignIn> {
                       ),
                       SizedBox(height: size.height * 0.03),
                       TextFieldContainer(
-                        obscureText: true,
+                        obscureText: passObscure,
                         validator: (val) => val!.length < 8
                             ? 'Password must be over 8 characters long'
                             : null,
@@ -68,6 +71,20 @@ class _SignInState extends State<SignIn> {
                         },
                         hintText: 'Password',
                         icon: Icon(Icons.lock),
+                        suffixIcon: IconButton(
+                          onPressed: () {
+                            // Logic to reveal typed password
+                            if (passObscure) {
+                              setState(() =>
+                                  passObscureIcon = Icon(Icons.visibility_off));
+                            } else {
+                              setState(() =>
+                                  passObscureIcon = Icon(Icons.visibility));
+                            }
+                            setState(() => passObscure = !passObscure);
+                          },
+                          icon: passObscureIcon,
+                        ),
                       ),
                       SizedBox(height: size.height * 0.03),
                       RoundedButton(

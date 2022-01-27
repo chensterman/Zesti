@@ -530,61 +530,85 @@ class _EditProfileState extends State<EditProfile> {
   }
 
   Widget deleteConfirmDialog(BuildContext context) {
-    // Email and password from form
+    // State of email and password
     String email = "";
     String password = "";
 
-    // Alert dialog
-    return AlertDialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
-      title: const Text(
-          "Please reauthenticate to erase all of your data. Incorrect credentials will log you out."),
-      content: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextFormField(
-                onChanged: (val) {
-                  email = val;
-                },
-                decoration: const InputDecoration(hintText: "Email"),
-              ),
-              SizedBox(height: 20.0),
-              TextFormField(
-                onChanged: (val) {
-                  password = val;
-                },
-                decoration: const InputDecoration(hintText: "Password"),
-                obscureText: true,
-              ),
-              SizedBox(height: 40.0),
-              RoundedButton(
-                text: 'Confirm',
-                onPressed: () async {
-                  // Validate email and password non-empty
-                  if (email != "" && password != "") {
-                    // Get deletion status
-                    int status =
-                        await AuthService().deleteUser(email, password);
-                    // Move to start page regardless
-                    Navigator.of(context).popUntil((route) => route.isFirst);
-                    // Give message based on status
-                    showDialog(
-                        context: context,
-                        builder: (context) =>
-                            deleteStatusDialog(context, status));
-                  }
-                },
-              ),
-            ],
+    // State of password obscurer
+    bool passObscure = true;
+    Icon passObscureIcon = Icon(Icons.visibility);
+
+    // StatefulBuilder - allows for just this widget to be rebuilt
+    return StatefulBuilder(builder: (context, setState) {
+      return AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        title: const Text(
+            "Please reauthenticate to erase all of your data. Incorrect credentials will log you out."),
+        content: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextFormField(
+                  onChanged: (val) {
+                    setState(() => email = val);
+                  },
+                  decoration: const InputDecoration(
+                      icon: Icon(Icons.person), hintText: "Email"),
+                ),
+                SizedBox(height: 20.0),
+                TextFormField(
+                  onChanged: (val) {
+                    setState(() => password = val);
+                  },
+                  decoration: InputDecoration(
+                    icon: Icon(Icons.lock),
+                    hintText: "Password",
+                    suffixIcon: IconButton(
+                      onPressed: () {
+                        // Logic to reveal typed password
+                        if (passObscure) {
+                          setState(() =>
+                              passObscureIcon = Icon(Icons.visibility_off));
+                        } else {
+                          setState(
+                              () => passObscureIcon = Icon(Icons.visibility));
+                        }
+                        setState(() => passObscure = !passObscure);
+                      },
+                      icon: passObscureIcon,
+                    ),
+                  ),
+                  obscureText: passObscure,
+                ),
+                SizedBox(height: 40.0),
+                RoundedButton(
+                  text: 'Confirm',
+                  onPressed: () async {
+                    // Validate email and password non-empty
+                    if (email != "" && password != "") {
+                      // Get deletion status
+                      int status =
+                          await AuthService().deleteUser(email, password);
+                      // Move to start page regardless
+                      Navigator.of(context).popUntil((route) => route.isFirst);
+                      // Give message based on status
+                      showDialog(
+                          context: context,
+                          builder: (context) =>
+                              deleteStatusDialog(context, status));
+                    }
+                  },
+                ),
+              ],
+            ),
           ),
         ),
-      ),
-    );
+      );
+    });
   }
 
   Widget deleteStatusDialog(BuildContext context, int status) {
