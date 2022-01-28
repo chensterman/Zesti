@@ -123,10 +123,12 @@ class _MatchesState extends State<Matches> {
               margin: EdgeInsets.all(8.0),
               child: InkWell(
                 onTap: () async {
+                  ZestiLoadingAsync().show(context);
                   ZestiGroup currGroup = await DatabaseService(uid: uid)
                       .getGroupInfo(DatabaseService(uid: uid)
                           .groupCollection
                           .doc(widget.gid));
+                  ZestiLoadingAsync().dismiss();
                   Map<DocumentReference, String> yourGroupMap =
                       new Map<DocumentReference, String>.from(
                           currGroup.nameMap);

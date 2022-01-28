@@ -6,6 +6,7 @@ import 'package:zesti/theme/theme.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:zesti/views/home/home.dart';
 import 'package:zesti/widgets/formwidgets.dart';
+import 'package:zesti/widgets/loading.dart';
 
 // Widget for name form
 class ZestKey extends StatefulWidget {
@@ -74,15 +75,21 @@ class _ZestKeyState extends State<ZestKey> {
                                 RoundedButton(
                                     text: "I'm Ready!",
                                     onPressed: () async {
+                                      ZestiLoadingAsync().show(context);
                                       bool tmp =
                                           await DatabaseService(uid: user!.uid)
                                               .checkZestKey(zestKey);
+                                      ZestiLoadingAsync().dismiss();
+
                                       setState(() {
                                         zestKeyFlag = tmp;
                                       });
+
                                       if (_formKey.currentState!.validate()) {
+                                        ZestiLoadingAsync().show(context);
                                         await DatabaseService(uid: user.uid)
                                             .updateZestKey(zestKey);
+                                        ZestiLoadingAsync().dismiss();
                                         Navigator.push(
                                           context,
                                           MaterialPageRoute(

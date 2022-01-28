@@ -4,6 +4,7 @@ import 'package:zesti/theme/theme.dart';
 import 'package:zesti/views/auth/signin.dart';
 import 'package:zesti/services/auth.dart';
 import 'package:zesti/widgets/formwidgets.dart';
+import 'package:zesti/widgets/loading.dart';
 
 // Widget for handling account creation.
 class SignUp extends StatefulWidget {
@@ -21,14 +22,12 @@ class _SignUpState extends State<SignUp> {
   String password = '';
   String passwordConfirm = '';
 
+  // State of password obscurer
+  bool passObscure = true;
+  Icon passObscureIcon = Icon(Icons.visibility);
+
   // Error message when email is not valid.
   String error = '';
-
-  void errorCallback() {
-    String error = "Sign up error. This email may already be registered.";
-    showDialog(
-        context: context, builder: (context) => errorDialog(context, error));
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -74,12 +73,26 @@ class _SignUpState extends State<SignUp> {
                         validator: (val) => val!.length < 8
                             ? 'Password must be over 8 characters long'
                             : null,
-                        obscureText: true,
+                        obscureText: passObscure,
                         onChanged: (val) {
                           setState(() => password = val);
                         },
                         hintText: 'Password',
                         icon: Icon(Icons.lock),
+                        suffixIcon: IconButton(
+                          onPressed: () {
+                            // Logic to reveal typed password
+                            if (passObscure) {
+                              setState(() =>
+                                  passObscureIcon = Icon(Icons.visibility_off));
+                            } else {
+                              setState(() =>
+                                  passObscureIcon = Icon(Icons.visibility));
+                            }
+                            setState(() => passObscure = !passObscure);
+                          },
+                          icon: passObscureIcon,
+                        ),
                       ),
                       SizedBox(height: size.height * 0.03),
                       TextFieldContainer(
@@ -100,14 +113,23 @@ class _SignUpState extends State<SignUp> {
                             if (_formKey.currentState!.validate()) {
                               // Once validated, auth service creates account.
                               // Then push authentication route.
-                              int status = await AuthService()
-                                  .signUp(email, password, errorCallback);
+                              ZestiLoadingAsync().show(context);
+                              int status =
+                                  await AuthService().signUp(email, password);
+                              ZestiLoadingAsync().dismiss();
                               // On success, push the authentication route.
                               if (status == 0) {
                                 Navigator.pushReplacementNamed(
                                   context,
                                   '/auth',
                                 );
+                              } else {
+                                String error =
+                                    "Sign up error. This email may already be registered.";
+                                showDialog(
+                                    context: context,
+                                    builder: (context) =>
+                                        errorDialog(context, error));
                               }
                             }
                           }),

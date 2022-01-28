@@ -6,6 +6,7 @@ import 'package:zesti/services/database.dart';
 import 'package:zesti/theme/theme.dart';
 import 'package:zesti/views/register/interest.dart';
 import 'package:zesti/widgets/formwidgets.dart';
+import 'package:zesti/widgets/loading.dart';
 
 // Widget for the identity form
 class Identity extends StatelessWidget {
@@ -50,8 +51,10 @@ class Identity extends StatelessWidget {
                                 RoundedButton(
                                   text: 'Man',
                                   onPressed: () async {
+                                    ZestiLoadingAsync().show(context);
                                     await DatabaseService(uid: user!.uid)
                                         .updateDatingIdentity("man");
+                                    ZestiLoadingAsync().dismiss();
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
@@ -66,8 +69,10 @@ class Identity extends StatelessWidget {
                                     if (user == null) {
                                       print("Error");
                                     } else {
+                                      ZestiLoadingAsync().show(context);
                                       await DatabaseService(uid: user.uid)
                                           .updateDatingIdentity("woman");
+                                      ZestiLoadingAsync().dismiss();
                                     }
                                     Navigator.push(
                                       context,

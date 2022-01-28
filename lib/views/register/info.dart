@@ -6,6 +6,7 @@ import 'package:zesti/services/database.dart';
 import 'package:zesti/theme/theme.dart';
 import 'package:zesti/views/register/zestkey.dart';
 import 'package:zesti/widgets/formwidgets.dart';
+import 'package:zesti/widgets/loading.dart';
 
 // Widget for profile picture upload and bio
 class Info extends StatefulWidget {
@@ -104,6 +105,7 @@ class _InfoState extends State<Info> {
                                     //  Does nothing if validation is incorrect.
                                     if (_formKey.currentState!.validate()) {
                                       // Do not upload if dynamic imageFile is null.
+                                      ZestiLoadingAsync().show(context);
                                       if (profpic != null) {
                                         // Update user document with the reference.
                                         await DatabaseService(uid: user!.uid)
@@ -115,6 +117,7 @@ class _InfoState extends State<Info> {
                                       // Flag account as fully set up
                                       await DatabaseService(uid: user.uid)
                                           .updateAccountSetup();
+                                      ZestiLoadingAsync().dismiss();
                                       // Navigate accordingly.
                                       Navigator.push(
                                         context,

@@ -7,6 +7,7 @@ import 'package:zesti/theme/theme.dart';
 import 'package:zesti/services/database.dart';
 import 'package:zesti/views/register/name.dart';
 import 'package:zesti/widgets/formwidgets.dart';
+import 'package:zesti/widgets/loading.dart';
 
 class NumberLine extends StatelessWidget {
   NumberLine({@required this.width, @required this.text});
@@ -133,8 +134,10 @@ class _BirthdayState extends State<Birthday> {
                                             DateTime.now().difference(birthday);
                                         num age = difference.inDays ~/ 365;
                                         if (age >= 18) {
+                                          ZestiLoadingAsync().show(context);
                                           await DatabaseService(uid: user!.uid)
                                               .updateAge(age);
+                                          ZestiLoadingAsync().dismiss();
                                           // Push to House form
                                           Navigator.push(
                                             context,

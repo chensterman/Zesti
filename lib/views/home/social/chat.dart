@@ -160,6 +160,7 @@ class _ChatState extends State<Chat> {
                         ),
                         child: TextField(
                           controller: messageText,
+                          textCapitalization: TextCapitalization.sentences,
                           style: TextStyle(color: Colors.grey),
                           decoration: InputDecoration(
                               border: InputBorder.none,
@@ -427,7 +428,12 @@ class _ChatState extends State<Chat> {
         TextButton(
           child: Text("Yes", style: CustomTheme.textTheme.headline1),
           onPressed: () async {
+            // Unmatch from database
+            ZestiLoadingAsync().show(context);
             await DatabaseService(uid: uid).unmatchGroup(gid, yougid, chatid);
+            ZestiLoadingAsync().dismiss();
+
+            // Pop pages
             Navigator.pop(context);
             Navigator.pop(context);
           },

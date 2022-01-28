@@ -83,6 +83,7 @@ class UserCard extends StatelessWidget {
                               child: Icon(Icons.cancel_rounded,
                                   color: Colors.red, size: 64.0),
                               onTap: () async {
+                                ZestiLoadingAsync().show(context);
                                 if (rec) {
                                   await DatabaseService(uid: user.uid)
                                       .outgoingInteraction(
@@ -92,6 +93,7 @@ class UserCard extends StatelessWidget {
                                       .incomingInteraction(
                                           snapshot.data!.uid, false);
                                 }
+                                ZestiLoadingAsync().dismiss();
                               },
                             ),
                           ),
@@ -189,11 +191,13 @@ class UserCard extends StatelessWidget {
         TextButton(
           child: Text("Nice!", style: CustomTheme.textTheme.headline2),
           onPressed: () async {
+            ZestiLoadingAsync().show(context);
             if (rec) {
               await DatabaseService(uid: uid).outgoingInteraction(youid, true);
             } else {
               await DatabaseService(uid: uid).incomingInteraction(youid, true);
             }
+            ZestiLoadingAsync().dismiss();
             Navigator.of(context).pop();
           },
         ),

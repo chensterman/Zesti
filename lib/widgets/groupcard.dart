@@ -122,6 +122,7 @@ class GroupCard extends StatelessWidget {
                               child: Icon(Icons.cancel_rounded,
                                   color: Colors.red, size: 64.0),
                               onTap: () async {
+                                ZestiLoadingAsync().show(context);
                                 if (rec) {
                                   await DatabaseService(uid: user.uid)
                                       .outgoingGroupInteraction(
@@ -131,6 +132,7 @@ class GroupCard extends StatelessWidget {
                                       .incomingGroupInteraction(
                                           gid, snapshot.data!.gid, false);
                                 }
+                                ZestiLoadingAsync().dismiss();
                               },
                             ),
                           ),
@@ -252,6 +254,7 @@ class GroupCard extends StatelessWidget {
         TextButton(
           child: Text("Nice!", style: CustomTheme.textTheme.headline2),
           onPressed: () async {
+            ZestiLoadingAsync().show(context);
             if (rec) {
               await DatabaseService(uid: uid)
                   .outgoingGroupInteraction(gid, yougid, true);
@@ -259,6 +262,7 @@ class GroupCard extends StatelessWidget {
               await DatabaseService(uid: uid)
                   .incomingGroupInteraction(gid, yougid, true);
             }
+            ZestiLoadingAsync().dismiss();
             Navigator.of(context).pop();
           },
         ),

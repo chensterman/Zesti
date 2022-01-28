@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:zesti/views/auth/signup.dart';
 import 'package:zesti/services/auth.dart';
 import 'package:zesti/widgets/formwidgets.dart';
+import 'package:zesti/widgets/loading.dart';
 
 // Widget for handling login.
 class SignIn extends StatefulWidget {
@@ -20,16 +21,13 @@ class _SignInState extends State<SignIn> {
   String password = '';
   String resetEmail = '';
 
-  void errorCallback() {
-    String error = "Sign in error. The email or password is invalid.";
-    showDialog(
-        context: context, builder: (context) => errorDialog(context, error));
-  }
+  // State of password obscurer
+  bool passObscure = true;
+  Icon passObscureIcon = Icon(Icons.visibility);
 
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
-
     return Scaffold(
       body: Container(
         padding: EdgeInsets.symmetric(
@@ -59,7 +57,7 @@ class _SignInState extends State<SignIn> {
                       ),
                       SizedBox(height: size.height * 0.03),
                       TextFieldContainer(
-                        obscureText: true,
+                        obscureText: passObscure,
                         validator: (val) => val!.length < 8
                             ? 'Password must be over 8 characters long'
                             : null,
@@ -68,6 +66,20 @@ class _SignInState extends State<SignIn> {
                         },
                         hintText: 'Password',
                         icon: Icon(Icons.lock),
+                        suffixIcon: IconButton(
+                          onPressed: () {
+                            // Logic to reveal typed password
+                            if (passObscure) {
+                              setState(() =>
+                                  passObscureIcon = Icon(Icons.visibility_off));
+                            } else {
+                              setState(() =>
+                                  passObscureIcon = Icon(Icons.visibility));
+                            }
+                            setState(() => passObscure = !passObscure);
+                          },
+                          icon: passObscureIcon,
+                        ),
                       ),
                       SizedBox(height: size.height * 0.03),
                       RoundedButton(
@@ -76,14 +88,24 @@ class _SignInState extends State<SignIn> {
                             // Validate all form fields.
                             if (_formKey.currentState!.validate()) {
                               // Get login status.
-                              int status = await AuthService()
-                                  .signIn(email, password, errorCallback);
+                              ZestiLoadingAsync().show(context);
+                              int status =
+                                  await AuthService().signIn(email, password);
+                              ZestiLoadingAsync().dismiss();
+
                               // On success, push the authentication route.
                               if (status == 0) {
                                 Navigator.pushReplacementNamed(
                                   context,
                                   '/auth',
                                 );
+                              } else {
+                                String error =
+                                    "Sign in error. The email or password is invalid.";
+                                showDialog(
+                                    context: context,
+                                    builder: (context) =>
+                                        errorDialog(context, error));
                               }
                             }
                           }),
@@ -154,7 +176,12 @@ class _SignInState extends State<SignIn> {
         TextButton(
           child: Text("Send", style: CustomTheme.textTheme.headline1),
           onPressed: () async {
+            // Send password reset email
+            ZestiLoadingAsync().show(context);
             await AuthService().resetPassword(resetEmail);
+            ZestiLoadingAsync().dismiss();
+
+            // Pop the dialog
             Navigator.of(context).pop();
           },
         ),
