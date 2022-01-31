@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:zesti/services/database.dart';
 import 'package:zesti/widgets/formwidgets.dart';
-import 'package:zesti/views/home/social/choose.dart';
+import 'package:zesti/widgets/loading.dart';
 import 'package:zesti/widgets/groupcard.dart';
 
 class Group extends StatefulWidget {
@@ -96,9 +96,11 @@ class _GroupState extends State<Group> {
                                               context,
                                               "Please enter a shorter name (50 characters max)."));
                                     } else {
+                                      ZestiLoadingAsync().show(context);
                                       await DatabaseService(uid: user.uid)
                                           .updateGroupName(
                                               widget.gid, groupName);
+                                      ZestiLoadingAsync().dismiss();
                                       showDialog(
                                           context: context,
                                           builder: (context) => changeDialog(
@@ -139,9 +141,12 @@ class _GroupState extends State<Group> {
                                               context,
                                               "Please enter a shorter tagline (140 characters max)."));
                                     } else {
+                                      ZestiLoadingAsync().show(context);
                                       await DatabaseService(uid: user.uid)
                                           .updateGroupTagline(
                                               widget.gid, groupTagline);
+                                      ZestiLoadingAsync().dismiss();
+
                                       showDialog(
                                           context: context,
                                           builder: (context) => changeDialog(
@@ -177,9 +182,12 @@ class _GroupState extends State<Group> {
                                               context,
                                               "Please enter a ZestKey."));
                                     } else {
+                                      ZestiLoadingAsync().show(context);
                                       String message = await DatabaseService(
                                               uid: user.uid)
                                           .addUserToGroup(widget.gid, zestKey);
+                                      ZestiLoadingAsync().dismiss();
+
                                       showDialog(
                                           context: context,
                                           builder: (context) =>
@@ -280,7 +288,10 @@ class _GroupState extends State<Group> {
         TextButton(
           child: Text("Yes", style: CustomTheme.textTheme.headline2),
           onPressed: () async {
+            ZestiLoadingAsync().show(context);
             await DatabaseService(uid: uid).leaveGroup(widget.gid);
+            ZestiLoadingAsync().dismiss();
+
             Navigator.of(context).pop();
             Navigator.of(context).pop();
           },

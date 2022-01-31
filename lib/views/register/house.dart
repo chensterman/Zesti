@@ -6,6 +6,7 @@ import 'package:zesti/theme/theme.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:zesti/views/register/info.dart';
 import 'package:zesti/widgets/formwidgets.dart';
+import 'package:zesti/widgets/loading.dart';
 
 // Widget for the housing form
 class House extends StatefulWidget {
@@ -140,10 +141,12 @@ class _HouseState extends State<House> {
                                     text: 'Continue',
                                     onPressed: () async {
                                       if (_house != null && _year != null) {
+                                        ZestiLoadingAsync().show(context);
                                         await DatabaseService(uid: user!.uid)
                                             .updateHouse(_house!);
                                         await DatabaseService(uid: user.uid)
                                             .updateYear(_year!);
+                                        ZestiLoadingAsync().dismiss();
                                         Navigator.push(
                                           context,
                                           MaterialPageRoute(

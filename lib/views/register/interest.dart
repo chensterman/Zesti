@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:zesti/services/database.dart';
 import 'package:zesti/theme/theme.dart';
 import 'package:zesti/views/register/house.dart';
-import 'package:zesti/views/register/info.dart';
+import 'package:zesti/widgets/loading.dart';
 import 'package:zesti/widgets/formwidgets.dart';
 
 // Widget for interest form
@@ -51,8 +51,10 @@ class Interest extends StatelessWidget {
                                 RoundedButton(
                                   text: 'Men',
                                   onPressed: () async {
+                                    ZestiLoadingAsync().show(context);
                                     await DatabaseService(uid: user!.uid)
                                         .updateDatingInterest("man");
+                                    ZestiLoadingAsync().dismiss();
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
@@ -67,8 +69,10 @@ class Interest extends StatelessWidget {
                                     if (user == null) {
                                       print("Error");
                                     } else {
+                                      ZestiLoadingAsync().show(context);
                                       await DatabaseService(uid: user.uid)
                                           .updateDatingInterest("woman");
+                                      ZestiLoadingAsync().dismiss();
                                     }
                                     Navigator.push(
                                       context,
@@ -84,8 +88,10 @@ class Interest extends StatelessWidget {
                                     if (user == null) {
                                       print("Error");
                                     } else {
+                                      ZestiLoadingAsync().show(context);
                                       await DatabaseService(uid: user.uid)
                                           .updateDatingInterest("everyone");
+                                      ZestiLoadingAsync().dismiss();
                                     }
                                     Navigator.push(
                                       context,

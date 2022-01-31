@@ -10,6 +10,7 @@ import 'package:zesti/services/database.dart';
 import 'package:zesti/theme/theme.dart';
 import 'package:zesti/widgets/previewcard.dart';
 import 'package:zesti/widgets/formwidgets.dart';
+import 'package:zesti/widgets/loading.dart';
 
 // Widget for the profile editing page.
 class EditProfile extends StatefulWidget {
@@ -354,6 +355,7 @@ class _EditProfileState extends State<EditProfile> {
                                                 _formKey.currentState!
                                                     .validate()) {
                                               // Update all info in Firestore.
+                                              ZestiLoadingAsync().show(context);
                                               await DatabaseService(
                                                       uid: widget.user.uid)
                                                   .updateBio(bio!);
@@ -386,6 +388,8 @@ class _EditProfileState extends State<EditProfile> {
                                                         uid: widget.user.uid)
                                                     .updatePhoto(profpic);
                                               }
+                                              ZestiLoadingAsync().dismiss();
+
                                               // Navigate back to home page.
                                               Navigator.of(context).pop();
                                               widget.callback();
@@ -488,7 +492,9 @@ class _EditProfileState extends State<EditProfile> {
               RoundedButton(
                   text: 'Logout',
                   onPressed: () async {
+                    ZestiLoadingAsync().show(context);
                     await AuthService().signOut();
+                    ZestiLoadingAsync().dismiss();
                     Navigator.of(context).popUntil((route) => route.isFirst);
                   }),
             ],
@@ -515,7 +521,9 @@ class _EditProfileState extends State<EditProfile> {
         TextButton(
           child: Text("Yes", style: CustomTheme.textTheme.headline1),
           onPressed: () async {
+            ZestiLoadingAsync().show(context);
             await AuthService().resetPassword(email);
+            ZestiLoadingAsync().dismiss();
             Navigator.of(context).pop();
           },
         ),
@@ -530,11 +538,98 @@ class _EditProfileState extends State<EditProfile> {
   }
 
   Widget deleteConfirmDialog(BuildContext context) {
+    // State of email and password
+    String email = "";
+    String password = "";
+
+    // State of password obscurer
+    bool passObscure = true;
+    Icon passObscureIcon = Icon(Icons.visibility);
+
+    // StatefulBuilder - allows for just this widget to be rebuilt
+    return StatefulBuilder(builder: (context, setState) {
+      return AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        title: const Text(
+            "Please reauthenticate to erase all of your data. Incorrect credentials will log you out."),
+        content: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextFormField(
+                  onChanged: (val) {
+                    setState(() => email = val);
+                  },
+                  decoration: const InputDecoration(
+                      icon: Icon(Icons.person), hintText: "Email"),
+                ),
+                SizedBox(height: 20.0),
+                TextFormField(
+                  onChanged: (val) {
+                    setState(() => password = val);
+                  },
+                  decoration: InputDecoration(
+                    icon: Icon(Icons.lock),
+                    hintText: "Password",
+                    suffixIcon: IconButton(
+                      onPressed: () {
+                        // Logic to reveal typed password
+                        if (passObscure) {
+                          setState(() =>
+                              passObscureIcon = Icon(Icons.visibility_off));
+                        } else {
+                          setState(
+                              () => passObscureIcon = Icon(Icons.visibility));
+                        }
+                        setState(() => passObscure = !passObscure);
+                      },
+                      icon: passObscureIcon,
+                    ),
+                  ),
+                  obscureText: passObscure,
+                ),
+                SizedBox(height: 40.0),
+                RoundedButton(
+                  text: 'Confirm',
+                  onPressed: () async {
+                    // Validate email and password non-empty
+                    if (email != "" && password != "") {
+                      // Get deletion status
+                      ZestiLoadingAsync().show(context);
+                      int status =
+                          await AuthService().deleteUser(email, password);
+                      ZestiLoadingAsync().dismiss();
+                      // Move to start page regardless
+                      Navigator.of(context).popUntil((route) => route.isFirst);
+                      // Give message based on status
+                      showDialog(
+                          context: context,
+                          builder: (context) =>
+                              deleteStatusDialog(context, status));
+                    }
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    });
+  }
+
+  Widget deleteStatusDialog(BuildContext context, int status) {
     return AlertDialog(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
       ),
-      title: const Text("Are you sure? All of your info will be erased."),
+      title: status == 0
+          ? Text("Your account has been deleted.")
+          : Text(
+              "You were logged out and your account was not deleted. Please double check your credentials."),
       content: SingleChildScrollView(
         child: SizedBox(
           width: double.infinity,
@@ -544,14 +639,7 @@ class _EditProfileState extends State<EditProfile> {
       ),
       actions: <Widget>[
         TextButton(
-          child: Text("Yes", style: CustomTheme.textTheme.headline1),
-          onPressed: () async {
-            await AuthService().deleteUser();
-            Navigator.of(context).popUntil((route) => route.isFirst);
-          },
-        ),
-        TextButton(
-          child: Text("No", style: CustomTheme.textTheme.headline2),
+          child: Text("Ok", style: CustomTheme.textTheme.headline3),
           onPressed: () async {
             Navigator.of(context).pop();
           },

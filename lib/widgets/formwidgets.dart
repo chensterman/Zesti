@@ -12,6 +12,7 @@ class TextFieldContainer extends StatelessWidget {
   final ValueChanged<String>? onChanged;
   final String? hintText;
   final Icon? icon;
+  final Widget? suffixIcon;
   TextFieldContainer({
     Key? key,
     this.obscureText = false,
@@ -19,6 +20,7 @@ class TextFieldContainer extends StatelessWidget {
     this.onChanged,
     this.hintText,
     this.icon,
+    this.suffixIcon,
   }) : super(key: key);
 
   @override
@@ -39,6 +41,7 @@ class TextFieldContainer extends StatelessWidget {
           hintText: hintText,
           icon: icon,
           border: InputBorder.none,
+          suffixIcon: suffixIcon,
         ),
       ),
     );
