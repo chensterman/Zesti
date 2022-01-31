@@ -16,6 +16,106 @@ async function _userRefToObject(userRef) {
   return userData;
 }
 
+async function _chatRefToObject(chatRef) {
+  var snapshot = await chatRef.get();
+  var chatData = snapshot.data();
+  return chatData;
+}
+
+exports.notifyNewMatch = functions.firestore.document('/users/{id}/matched/{matchID}')
+  .onCreate(async (snap, context) => {
+
+    var matcheeUser = await _userRefToObject(snap.data()["user-ref"]);
+    var matcherUserRef = db.doc(`users/${context.params.id}`);
+    var matcherUser = await _userRefToObject(matcherUserRef);
+
+
+    let tokens = matcheeUser['tokens'];
+
+    // Notification details.
+    const payload = {
+      notification: {
+        title: 'You have a match!',
+        body: `Say hello to ${matcherUser['first-name']}!`,
+      }
+    };
+
+    // Send notifications to all tokens.
+    const response = await admin.messaging().sendToDevice(tokens, payload);
+    // For each message check if there was an error.
+    const tokensToRemove = [];
+    response.results.forEach((result, index) => {
+      const error = result.error;
+      if (error) {
+        functions.logger.error(
+          'Failure sending notification to',
+          tokens[index],
+          error
+        );
+        // Cleanup the tokens who are not registered anymore.
+        if (error.code === 'messaging/invalid-registration-token' ||
+            error.code === 'messaging/registration-token-not-registered') {
+          tokensToRemove.push(tokensSnapshot.ref.child(tokens[index]).remove());
+        }
+      }
+    });
+    return Promise.all(tokensToRemove);
+
+  });
+
+// exports.notifyNewChat = functions.firestore.document('chats/{id}/messages/{messageID}')
+//   .onCreate(async (snap, context) => {
+//     var chatRef = db.doc(`chats/${context.params.id}`);
+//     var chatObject = await _chatRefToObject(chatRef);
+
+//     var sender = await _userRefToObject(snap.data()["sender-ref"]);
+//     var receiverRef;
+
+//     var users = [chatObject['user1-ref'], chatObject['user2-ref']];
+//     users.forEach((user, index) => {
+//       if (user.toString() != snap.data()["sender-ref"].toString()) {
+//         receiverRef = user;
+//       }
+//     });
+//     var receiver = await _userRefToObject(receiverRef);
+
+//     console.log("AFF");
+//     console.log(sender['first-name']);
+//     console.log(receiver['first-name']);
+
+//     let tokens = receiver['tokens'];
+
+//     // Notification details.
+//     const payload = {
+//       notification: {
+//         title: `${sender['first-name']} sent a message.`,
+//         body: `${snap.data()['content']}`,
+//       }
+//     };
+
+//     // Send notifications to all tokens.
+//     const response = await admin.messaging().sendToDevice(tokens, payload);
+//     // For each message check if there was an error.
+//     const tokensToRemove = [];
+//     response.results.forEach((result, index) => {
+//       const error = result.error;
+//       if (error) {
+//         functions.logger.error(
+//           'Failure sending notification to',
+//           tokens[index],
+//           error
+//         );
+//         // Cleanup the tokens who are not registered anymore.
+//         if (error.code === 'messaging/invalid-registration-token' ||
+//             error.code === 'messaging/registration-token-not-registered') {
+//           tokensToRemove.push(tokensSnapshot.ref.child(tokens[index]).remove());
+//         }
+//       }
+//     });
+//     return Promise.all(tokensToRemove);
+
+//   });
+
 exports.generateRecommendations = functions.pubsub.schedule('every 2 minutes').onRun(async context => {
   console.log('This will be run every 2 minutes!');
 

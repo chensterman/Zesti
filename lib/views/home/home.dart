@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -9,6 +11,7 @@ import 'package:zesti/views/home/profile.dart';
 import 'package:zesti/views/home/love/love.dart';
 import 'package:zesti/views/home/social/choose.dart';
 import 'package:zesti/widgets/loading.dart';
+import 'package:zesti/services/notifications.dart';
 
 // Home page of a logged in user.
 class Home extends StatefulWidget {
@@ -24,6 +27,27 @@ class _HomeState extends State<Home> {
   void resetCallback() {
     setState(() {});
   }
+  String notificationTitle = 'No Title';
+  String notificationBody = 'No Body';
+  String notificationData = 'No Data';
+
+  @override
+  void initState() {
+    final notificationService = NotificationService();
+    notificationService.setNotifications();
+
+    notificationService.streamCtlr.stream.listen(_changeData);
+    notificationService.bodyCtlr.stream.listen(_changeBody);
+    notificationService.titleCtlr.stream.listen(_changeTitle);
+    super.initState();
+
+    NotificationService().handlePermissions();
+    NotificationService().handleToken();
+  }
+
+  _changeData(String msg) => setState(() => notificationData = msg);
+  _changeBody(String msg) => setState(() => notificationBody = msg);
+  _changeTitle(String msg) => setState(() => notificationTitle = msg);
 
   @override
   Widget build(BuildContext context) {
