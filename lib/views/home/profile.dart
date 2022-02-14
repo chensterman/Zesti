@@ -96,6 +96,7 @@ class _EditProfileState extends State<EditProfile> {
   String zestKey = "";
   dynamic profpic;
 
+  // Initialization populates state variables as needed
   @override
   void initState() {
     super.initState();
@@ -117,6 +118,9 @@ class _EditProfileState extends State<EditProfile> {
     zestKey = widget.user.zestKey;
     profpic = widget.user.profPic;
   }
+
+  // Various callback functions to pass into the Dropdown widget to set state variables on this page
+  ///////////////////////////////////////////////////////////
 
   void houseCallback(String? val) {
     setState(() {
@@ -392,6 +396,7 @@ class _EditProfileState extends State<EditProfile> {
 
                                               // Navigate back to home page.
                                               Navigator.of(context).pop();
+                                              // Reset the state of the home page to get updated info.
                                               widget.callback();
                                               showDialog(
                                                   context: context,
@@ -417,7 +422,7 @@ class _EditProfileState extends State<EditProfile> {
     );
   }
 
-  // Preview widget.
+  // Preview of user profile widget
   Widget preview() {
     Size size = MediaQuery.of(context).size;
     dynamic tmp;

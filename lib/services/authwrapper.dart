@@ -36,7 +36,7 @@ class AuthWrapper extends StatelessWidget {
           // homepage or beginning of registration.
           else if (snapshot.connectionState == ConnectionState.done) {
             dynamic userData = snapshot.data?.data();
-            // Check if user already setup account (finished all registration forms)
+            // Account setup check - if setup, send to home, otherwise, send to email verification
             if (userData['account-setup']) {
               return Home();
             } else {
