@@ -116,7 +116,7 @@ exports.notifyNewMatch = functions.firestore.document('/users/{id}/matched/{matc
 
 //   });
 
-exports.generateRecommendations = functions.pubsub.schedule('every 2 minutes').onRun(async context => {
+exports.generateRecommendations = functions.pubsub.schedule('every 60 minutes').onRun(async context => {
   console.log('This will be run every 2 minutes!');
 
   // Loop through all user documents
@@ -217,12 +217,12 @@ exports.generateRecommendations = functions.pubsub.schedule('every 2 minutes').o
     }
 
     var reactionsSnapshot = await doc.ref.collection('outgoing').get();
-    var allReactions = reactionsSnapshot.docs.map(function (qdoc) {
+    var allReactions = reactionsSnapshot.docs.map(async function (qdoc) {
       var data = qdoc.data();
       if (data['user-ref'].exists) {
         return qdoc.id;
       } else {
-        qdoc.delete();
+        qdoc.ref.delete();
         return "deleted";
       }
     });
@@ -282,7 +282,7 @@ exports.generateRecommendations = functions.pubsub.schedule('every 2 minutes').o
 });
 
 
-exports.generateGroupRecommendations = functions.pubsub.schedule('every 2 minutes').onRun(async context => {
+exports.generateGroupRecommendations = functions.pubsub.schedule('every 60 minutes').onRun(async context => {
   // Loop through all group documents
   var collectionQuery = await groupCollection.get();
   collectionQuery.docs.forEach(async function (doc) {
@@ -294,7 +294,7 @@ exports.generateGroupRecommendations = functions.pubsub.schedule('every 2 minute
           if (data['group-ref'].exists) {
             return qdoc.id;
           } else {
-            qdoc.delete();
+            qdoc.ref.delete();
             return "deleted";
           }
         });

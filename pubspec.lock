@@ -477,7 +477,7 @@ packages:
       name: test_api
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.4.3"
+    version: "0.4.2"
   timezone:
     dependency: transitive
     description:
@@ -505,7 +505,7 @@ packages:
       name: vector_math
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.1.1"
+    version: "2.1.0"
   xdg_directories:
     dependency: transitive
     description:
