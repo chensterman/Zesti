@@ -17,9 +17,11 @@ class _VerifyScreenState extends State<VerifyScreen> {
 
   @override
   void initState() {
+    // Firebase function: sends verification email
     user = auth.currentUser!;
     user.sendEmailVerification();
 
+    // Check every 5 seconds for verification
     timer = Timer.periodic(Duration(seconds: 5), (timer) {
       checkEmailVerified();
     });
@@ -85,10 +87,13 @@ class _VerifyScreenState extends State<VerifyScreen> {
     );
   }
 
+  // Function to check that a user has responded to the verification email
   Future<void> checkEmailVerified() async {
+    // Reloads current user info from Firebase
     user = auth.currentUser!;
     await user.reload();
 
+    // Send to registration if verified
     if (user.emailVerified) {
       timer.cancel();
       Navigator.of(context)

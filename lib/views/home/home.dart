@@ -24,6 +24,8 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  // This callback function resets the state of this homepage
+  // It is called in EditProfile for when a user updates their info
   void resetCallback() {
     setState(() {});
   }
@@ -97,6 +99,7 @@ class _HomeState extends State<Home> {
                               right: 1.0,
                               child: InkWell(
                                   onTap: () {
+                                    // Navigate to EditProfile page
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
@@ -126,6 +129,7 @@ class _HomeState extends State<Home> {
                             children: [
                               InkWell(
                                   onTap: () async {
+                                    // Navigate to solo matching
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
@@ -177,6 +181,7 @@ class _HomeState extends State<Home> {
                                   )),
                               InkWell(
                                   onTap: () async {
+                                    // Navigate to group matching
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
