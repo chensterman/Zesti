@@ -17,7 +17,7 @@ class Start extends StatelessWidget {
           child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
             SizedBox(
               width: size.width * 0.8,
-              height: size.height * 0.4,
+              height: size.height * 0.3,
               child: ZestiLogo(),
             ),
             RoundedButton(
@@ -28,7 +28,15 @@ class Start extends StatelessWidget {
                   MaterialPageRoute(builder: (context) => SignUp()),
                 );
               },
-            )
+            ),
+            SizedBox(
+              height: 40.0,
+            ),
+            Text(
+              'Now serving students at Harvard College.',
+              style: CustomTheme.textTheme.bodyText1,
+              textAlign: TextAlign.center,
+            ),
           ]),
         ),
       ),

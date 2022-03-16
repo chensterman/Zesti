@@ -32,18 +32,14 @@ class NotificationService {
     // Assume user is logged in for this example
     String? userId = FirebaseAuth.instance.currentUser?.uid;
 
-    await FirebaseFirestore.instance
-      .collection('users')
-      .doc(userId)
-      .update({
-        'tokens': FieldValue.arrayUnion([token]),
-      });
+    await FirebaseFirestore.instance.collection('users').doc(userId).update({
+      'tokens': FieldValue.arrayUnion([token]),
+    });
   }
 
   Future<void> handlePermissions() async {
     // Handling permissions for ios notifications
     if (Platform.isIOS) {
-
       NotificationSettings settings = _firebaseMessaging.requestPermission(
         alert: true,
         announcement: false,
@@ -56,7 +52,8 @@ class NotificationService {
 
       if (settings.authorizationStatus == AuthorizationStatus.authorized) {
         print('User granted permission');
-      } else if (settings.authorizationStatus == AuthorizationStatus.provisional) {
+      } else if (settings.authorizationStatus ==
+          AuthorizationStatus.provisional) {
         print('User granted provisional permission');
       } else {
         print('User declined or has not accepted permission');

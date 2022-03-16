@@ -119,11 +119,15 @@ exports.notifyNewMatch = functions.firestore.document('/users/{id}/matched/{matc
 exports.generateRecommendations = functions.pubsub.schedule('every 60 minutes').onRun(async context => {
   console.log('This will be run every 2 minutes!');
 
-  // Loop through all user documents
+  // Get user collection
   var collectionQuery = await userCollection.get();
+
+  // Loop through all user documents
   collectionQuery.docs.forEach(async function (doc) {
 
+    // Get user data of current doc
     var currUser = await _userRefToObject(doc.ref);
+
     // Get querying parameters based on user info
     var queryIdentity = [];
     var queryInterest = [];
@@ -216,7 +220,9 @@ exports.generateRecommendations = functions.pubsub.schedule('every 60 minutes').
         break;
     }
 
+    // Get outgoing reactions and matches of current user
     var reactionsSnapshot = await doc.ref.collection('outgoing').get();
+    var matchesSnapshot = await doc.ref.collection('matched').get();
     var allReactions = reactionsSnapshot.docs.map(async function (qdoc) {
       var data = qdoc.data();
       if (data['user-ref'].exists) {
@@ -226,10 +232,22 @@ exports.generateRecommendations = functions.pubsub.schedule('every 60 minutes').
         return "deleted";
       }
     });
+    var allMatches = matchesSnapshot.docs.map(async function (qdoc) {
+      var data = qdoc.data();
+      if (data['user-ref'].exists) {
+        return qdoc.id;
+      } else {
+        qdoc.ref.delete();
+        return "deleted";
+      }
+    });
+
+    // Filter out outgoing reactions and matches from all users
     var allUsers = collectionQuery.docs.map(qdoc => qdoc.id);
-    var availableUsers = allUsers.filter(x => !allReactions.includes(x));
+    var availableUsers = allUsers.filter(x => !allReactions.includes(x) && !allMatches.includes(x));
     var availableUsers = availableUsers.filter(x => x != doc.id);
 
+    // Query for users within interests
     var snapshot;
     if (queryIdentity.length > 1) {
       snapshot = await userCollection
@@ -242,8 +260,11 @@ exports.generateRecommendations = functions.pubsub.schedule('every 60 minutes').
           .get();
     }
 
+    // Get list of potential recommendations
     var snapshotUserRefs = snapshot.docs.map(qdoc => qdoc.id);
     var potentialUserRefs = availableUsers.filter(x => snapshotUserRefs.includes(x));
+
+    // Determine max list length
     var userListMaxLength;
     if (potentialUserRefs.length < 5) {
       userListMaxLength = potentialUserRefs.length;
@@ -251,6 +272,7 @@ exports.generateRecommendations = functions.pubsub.schedule('every 60 minutes').
       userListMaxLength = 5;
     }
 
+    // If potential user list over 5, randomly select 5
     var potentialSet = new Set(potentialUserRefs);
     var userList = [];
     while (userList.length < userListMaxLength) {
@@ -283,9 +305,14 @@ exports.generateRecommendations = functions.pubsub.schedule('every 60 minutes').
 
 
 exports.generateGroupRecommendations = functions.pubsub.schedule('every 60 minutes').onRun(async context => {
-  // Loop through all group documents
+  
+  // Get entire group collection
   var collectionQuery = await groupCollection.get();
+
+  // Loop through all group documents
   collectionQuery.docs.forEach(async function (doc) {
+
+    // Get outgoing reactions and matches
     var reactionsSnapshot =
         await doc.ref.collection("outgoing").get();
     var allReactions =
@@ -298,11 +325,25 @@ exports.generateGroupRecommendations = functions.pubsub.schedule('every 60 minut
             return "deleted";
           }
         });
+    var matchesSnapshot =
+        await doc.ref.collection("matched").get();
+    var allMatches =
+        matchesSnapshot.docs.map(function (qdoc) {
+          var data = qdoc.data();
+          if (data['group-ref'].exists) {
+            return qdoc.id;
+          } else {
+            qdoc.ref.delete();
+            return "deleted";
+          }
+        });
 
+    // Get all group docs in list
     var groupsSnapshot = await groupCollection.get();
     var allGroups = groupsSnapshot.docs.map(qdoc => qdoc.id);
 
-    var availableGroups = allGroups.filter(x => !allReactions.includes(x));
+    // Filter for viable groups
+    var availableGroups = allGroups.filter(x => !allReactions.includes(x) && !allMatches.includes(x));
     availableGroups = availableGroups.filter(x => x != doc.id);
 
     // Query based on the given parameters
@@ -311,7 +352,6 @@ exports.generateGroupRecommendations = functions.pubsub.schedule('every 60 minut
 
     // Create a list of potential recommendations
     var snapshotGIDs = snapshot.docs.map(qdoc => qdoc.id);
-
     var potentialGIDs =
         availableGroups.filter(x => snapshotGIDs.includes(x));
 
