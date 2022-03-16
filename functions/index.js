@@ -116,8 +116,8 @@ exports.notifyNewMatch = functions.firestore.document('/users/{id}/matched/{matc
 
 //   });
 
-exports.generateRecommendations = functions.pubsub.schedule('every 60 minutes').onRun(async context => {
-  console.log('This will be run every 2 minutes!');
+exports.generateRecommendations = functions.pubsub.schedule('every 24 hours').onRun(async context => {
+  console.log('This will be run every 24 hours!');
 
   // Get user collection
   var collectionQuery = await userCollection.get();
@@ -127,6 +127,11 @@ exports.generateRecommendations = functions.pubsub.schedule('every 60 minutes').
 
     // Get user data of current doc
     var currUser = await _userRefToObject(doc.ref);
+
+    // Skip over if registration incomplete
+    if (!currUser["dating-identity"] || !currUser["dating-interest"]) {
+      return null;
+    }
 
     // Get querying parameters based on user info
     var queryIdentity = [];
@@ -223,23 +228,13 @@ exports.generateRecommendations = functions.pubsub.schedule('every 60 minutes').
     // Get outgoing reactions and matches of current user
     var reactionsSnapshot = await doc.ref.collection('outgoing').get();
     var matchesSnapshot = await doc.ref.collection('matched').get();
-    var allReactions = reactionsSnapshot.docs.map(async function (qdoc) {
+    var allReactions = reactionsSnapshot.docs.map(function (qdoc) {
       var data = qdoc.data();
-      if (data['user-ref'].exists) {
-        return qdoc.id;
-      } else {
-        qdoc.ref.delete();
-        return "deleted";
-      }
+      return data['user-ref'].id;
     });
-    var allMatches = matchesSnapshot.docs.map(async function (qdoc) {
+    var allMatches = matchesSnapshot.docs.map(function (qdoc) {
       var data = qdoc.data();
-      if (data['user-ref'].exists) {
-        return qdoc.id;
-      } else {
-        qdoc.ref.delete();
-        return "deleted";
-      }
+      return data['user-ref'].id;
     });
 
     // Filter out outgoing reactions and matches from all users
@@ -304,8 +299,9 @@ exports.generateRecommendations = functions.pubsub.schedule('every 60 minutes').
 });
 
 
-exports.generateGroupRecommendations = functions.pubsub.schedule('every 60 minutes').onRun(async context => {
-  
+exports.generateGroupRecommendations = functions.pubsub.schedule('every 24 hours').onRun(async context => {
+  console.log('This will be run every 24 hours!');
+
   // Get entire group collection
   var collectionQuery = await groupCollection.get();
 
@@ -318,24 +314,14 @@ exports.generateGroupRecommendations = functions.pubsub.schedule('every 60 minut
     var allReactions =
         reactionsSnapshot.docs.map(function (qdoc) {
           var data = qdoc.data();
-          if (data['group-ref'].exists) {
-            return qdoc.id;
-          } else {
-            qdoc.ref.delete();
-            return "deleted";
-          }
+          return data['group-ref'].id;
         });
     var matchesSnapshot =
         await doc.ref.collection("matched").get();
     var allMatches =
         matchesSnapshot.docs.map(function (qdoc) {
           var data = qdoc.data();
-          if (data['group-ref'].exists) {
-            return qdoc.id;
-          } else {
-            qdoc.ref.delete();
-            return "deleted";
-          }
+          return data['group-ref'].id;
         });
 
     // Get all group docs in list
