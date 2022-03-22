@@ -105,6 +105,32 @@ class GroupCard extends StatelessWidget {
                       child: Container(),
                     ),
                     Positioned(
+                      right: 20,
+                      top: 20,
+                      child: InkWell(
+                          onTap: () {
+                            // showDialog(
+                            //     context: context,
+                            //     barrierDismissible: false,
+                            //     builder: (context) => unmatchDialog(
+                            //         context,
+                            //         "Unmatch with " + widget.name + " forever?",
+                            //         user!.uid,
+                            //         widget.youid,
+                            //         widget.chatRef.id));
+                          },
+                          child: Container(
+                            padding: EdgeInsets.all(4.0),
+                            child: Icon(
+                              Icons.warning_rounded,
+                              color: Colors.redAccent[700],
+                              size: 30.0,
+                            ),
+                            decoration: BoxDecoration(
+                                color: Colors.white, shape: BoxShape.circle),
+                          )),
+                    ),
+                    Positioned(
                       right: 10,
                       left: 10,
                       bottom: 10,
@@ -356,6 +382,32 @@ class GroupCardDummy extends StatelessWidget {
                         ),
                       ),
                       child: Container(),
+                    ),
+                    Positioned(
+                      right: 20,
+                      top: 20,
+                      child: InkWell(
+                          onTap: () {
+                            // showDialog(
+                            //     context: context,
+                            //     barrierDismissible: false,
+                            //     builder: (context) => unmatchDialog(
+                            //         context,
+                            //         "Unmatch with " + widget.name + " forever?",
+                            //         user!.uid,
+                            //         widget.youid,
+                            //         widget.chatRef.id));
+                          },
+                          child: Container(
+                            padding: EdgeInsets.all(4.0),
+                            child: Icon(
+                              Icons.warning_rounded,
+                              color: Colors.redAccent[700],
+                              size: 30.0,
+                            ),
+                            decoration: BoxDecoration(
+                                color: Colors.white, shape: BoxShape.circle),
+                          )),
                     ),
                     Positioned(
                       right: 10,
