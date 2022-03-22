@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:zesti/theme/theme.dart';
-import 'package:zesti/views/auth/signup.dart';
+import 'package:zesti/views/auth/agree.dart';
 import 'package:zesti/widgets/formwidgets.dart';
 
 // Starting page widget
@@ -25,7 +25,7 @@ class Start extends StatelessWidget {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => SignUp()),
+                  MaterialPageRoute(builder: (context) => Agree()),
                 );
               },
             ),

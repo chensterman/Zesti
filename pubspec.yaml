@@ -39,6 +39,10 @@ dependencies:
   # Image uploading
   image_picker: ^0.8.4+4
 
+  # Hyperlink texts
+  flutter_linkify: ^5.0.2
+  url_launcher: ^6.0.20
+
   # Provider package (auth streams)
   provider: ^6.0.2
 
