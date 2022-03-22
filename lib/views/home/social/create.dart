@@ -78,24 +78,24 @@ class _CreateGroupState extends State<CreateGroup> {
                                   padding:
                                       const EdgeInsets.symmetric(vertical: 8.0),
                                   child: Text(
-                                    "Enter a group tagline:",
+                                    "Enter a group bio:",
                                     style: CustomTheme.textTheme.headline2,
                                   ),
                                 ),
                                 TextFormField(
                                     validator: (val) {
                                       if (val == null || val.isEmpty) {
-                                        return "Please enter a group tagline.";
+                                        return "Please enter a group bio.";
                                       }
                                       if (val.length > 140) {
-                                        return "Please enter a shorter tagline (140 characters max).";
+                                        return "Please enter a shorter bio (140 characters max).";
                                       }
                                     },
                                     onChanged: (val) {
                                       setState(() => funFact = val);
                                     },
                                     decoration: const InputDecoration(
-                                        hintText: "Tagline")),
+                                        hintText: "Group Bio")),
                                 SizedBox(height: 20.0),
                                 RoundedButton(
                                     text: 'Continue',

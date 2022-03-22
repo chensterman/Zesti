@@ -1034,6 +1034,7 @@ class DatabaseService {
     return partnerCollection.where('available', isEqualTo: true).snapshots();
   }
 
+  // Function to record coupon redemption
   Future<void> redeemMetrics(String partnerid) async {
     await partnerCollection
         .doc(partnerid)

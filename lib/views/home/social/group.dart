@@ -113,7 +113,7 @@ class _GroupState extends State<Group> {
                               padding:
                                   const EdgeInsets.symmetric(vertical: 8.0),
                               child: Text(
-                                "Change group tagline:",
+                                "Change group bio:",
                                 style: CustomTheme.textTheme.headline2,
                               ),
                             ),
@@ -122,7 +122,7 @@ class _GroupState extends State<Group> {
                                   setState(() => groupTagline = val);
                                 },
                                 decoration: const InputDecoration(
-                                    hintText: "Group Tagline")),
+                                    hintText: "Group Bio")),
                             SizedBox(height: 20.0),
                             Center(
                               child: RoundedButton(
@@ -133,13 +133,13 @@ class _GroupState extends State<Group> {
                                           context: context,
                                           builder: (context) => errorDialog(
                                               context,
-                                              "Please enter a group tagline."));
+                                              "Please enter a group bio."));
                                     } else if (groupTagline.length > 140) {
                                       showDialog(
                                           context: context,
                                           builder: (context) => errorDialog(
                                               context,
-                                              "Please enter a shorter tagline (140 characters max)."));
+                                              "Please enter a shorter bio (140 characters max)."));
                                     } else {
                                       ZestiLoadingAsync().show(context);
                                       await DatabaseService(uid: user.uid)
@@ -150,8 +150,7 @@ class _GroupState extends State<Group> {
                                       showDialog(
                                           context: context,
                                           builder: (context) => changeDialog(
-                                              context,
-                                              "Group tagline updated!"));
+                                              context, "Group bio updated!"));
                                     }
                                   }),
                             ),

@@ -116,14 +116,23 @@ exports.notifyNewMatch = functions.firestore.document('/users/{id}/matched/{matc
 
 //   });
 
-exports.generateRecommendations = functions.pubsub.schedule('every 2 minutes').onRun(async context => {
-  console.log('This will be run every 2 minutes!');
+exports.generateRecommendations = functions.pubsub.schedule('every 24 hours').onRun(async context => {
+  console.log('This will be run every 24 hours!');
+
+  // Get user collection
+  var collectionQuery = await userCollection.get();
 
   // Loop through all user documents
-  var collectionQuery = await userCollection.get();
   collectionQuery.docs.forEach(async function (doc) {
 
+    // Get user data of current doc
     var currUser = await _userRefToObject(doc.ref);
+
+    // Skip over if registration incomplete
+    if (!currUser["dating-identity"] || !currUser["dating-interest"]) {
+      return null;
+    }
+
     // Get querying parameters based on user info
     var queryIdentity = [];
     var queryInterest = [];
@@ -216,20 +225,24 @@ exports.generateRecommendations = functions.pubsub.schedule('every 2 minutes').o
         break;
     }
 
+    // Get outgoing reactions and matches of current user
     var reactionsSnapshot = await doc.ref.collection('outgoing').get();
+    var matchesSnapshot = await doc.ref.collection('matched').get();
     var allReactions = reactionsSnapshot.docs.map(function (qdoc) {
       var data = qdoc.data();
-      if (data['user-ref'].exists) {
-        return qdoc.id;
-      } else {
-        qdoc.delete();
-        return "deleted";
-      }
+      return data['user-ref'].id;
     });
+    var allMatches = matchesSnapshot.docs.map(function (qdoc) {
+      var data = qdoc.data();
+      return data['user-ref'].id;
+    });
+
+    // Filter out outgoing reactions and matches from all users
     var allUsers = collectionQuery.docs.map(qdoc => qdoc.id);
-    var availableUsers = allUsers.filter(x => !allReactions.includes(x));
+    var availableUsers = allUsers.filter(x => !allReactions.includes(x) && !allMatches.includes(x));
     var availableUsers = availableUsers.filter(x => x != doc.id);
 
+    // Query for users within interests
     var snapshot;
     if (queryIdentity.length > 1) {
       snapshot = await userCollection
@@ -242,8 +255,11 @@ exports.generateRecommendations = functions.pubsub.schedule('every 2 minutes').o
           .get();
     }
 
+    // Get list of potential recommendations
     var snapshotUserRefs = snapshot.docs.map(qdoc => qdoc.id);
     var potentialUserRefs = availableUsers.filter(x => snapshotUserRefs.includes(x));
+
+    // Determine max list length
     var userListMaxLength;
     if (potentialUserRefs.length < 5) {
       userListMaxLength = potentialUserRefs.length;
@@ -251,6 +267,7 @@ exports.generateRecommendations = functions.pubsub.schedule('every 2 minutes').o
       userListMaxLength = 5;
     }
 
+    // If potential user list over 5, randomly select 5
     var potentialSet = new Set(potentialUserRefs);
     var userList = [];
     while (userList.length < userListMaxLength) {
@@ -282,27 +299,37 @@ exports.generateRecommendations = functions.pubsub.schedule('every 2 minutes').o
 });
 
 
-exports.generateGroupRecommendations = functions.pubsub.schedule('every 2 minutes').onRun(async context => {
-  // Loop through all group documents
+exports.generateGroupRecommendations = functions.pubsub.schedule('every 24 hours').onRun(async context => {
+  console.log('This will be run every 24 hours!');
+
+  // Get entire group collection
   var collectionQuery = await groupCollection.get();
+
+  // Loop through all group documents
   collectionQuery.docs.forEach(async function (doc) {
+
+    // Get outgoing reactions and matches
     var reactionsSnapshot =
         await doc.ref.collection("outgoing").get();
     var allReactions =
         reactionsSnapshot.docs.map(function (qdoc) {
           var data = qdoc.data();
-          if (data['group-ref'].exists) {
-            return qdoc.id;
-          } else {
-            qdoc.delete();
-            return "deleted";
-          }
+          return data['group-ref'].id;
+        });
+    var matchesSnapshot =
+        await doc.ref.collection("matched").get();
+    var allMatches =
+        matchesSnapshot.docs.map(function (qdoc) {
+          var data = qdoc.data();
+          return data['group-ref'].id;
         });
 
+    // Get all group docs in list
     var groupsSnapshot = await groupCollection.get();
     var allGroups = groupsSnapshot.docs.map(qdoc => qdoc.id);
 
-    var availableGroups = allGroups.filter(x => !allReactions.includes(x));
+    // Filter for viable groups
+    var availableGroups = allGroups.filter(x => !allReactions.includes(x) && !allMatches.includes(x));
     availableGroups = availableGroups.filter(x => x != doc.id);
 
     // Query based on the given parameters
@@ -311,7 +338,6 @@ exports.generateGroupRecommendations = functions.pubsub.schedule('every 2 minute
 
     // Create a list of potential recommendations
     var snapshotGIDs = snapshot.docs.map(qdoc => qdoc.id);
-
     var potentialGIDs =
         availableGroups.filter(x => snapshotGIDs.includes(x));
 
