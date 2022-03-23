@@ -32,6 +32,10 @@ class DatabaseService {
   final CollectionReference partnerCollection =
       FirebaseFirestore.instance.collection('partners');
 
+  // Access to 'reports' collection.
+  final CollectionReference reportCollection =
+      FirebaseFirestore.instance.collection('reports');
+
   // Random id generator.
   final uuid = Uuid();
 
@@ -67,6 +71,7 @@ class DatabaseService {
           'house': null,
           'dating-identity': null,
           'dating-interest': null,
+          'dating-intent': null,
           'photo-ref': null,
           'bio': null,
           'year': null,
@@ -141,6 +146,15 @@ class DatabaseService {
         .doc(uid)
         .update({'dating-interest': interest})
         .then((value) => print("Interest Updated"))
+        .catchError((error) => print("Failed to update user: $error"));
+  }
+
+  // Update user intent.
+  Future<void> updateDatingIntent(String intent) async {
+    await userCollection
+        .doc(uid)
+        .update({'dating-intent': intent})
+        .then((value) => print("Intent Updated"))
         .catchError((error) => print("Failed to update user: $error"));
   }
 
@@ -331,6 +345,7 @@ class DatabaseService {
       bio: userInfo['bio'],
       dIdentity: userInfo['dating-identity'],
       dInterest: userInfo['dating-interest'],
+      dIntent: userInfo['dating-intent'],
       house: userInfo['house'],
       photoURL: photoURL,
       profPic: await getPhoto(photoURL),
@@ -404,190 +419,6 @@ class DatabaseService {
         .doc(chatid)
         .delete();
   }
-
-/*
-  // Helper function for converting a user DocumentReference to a dart map.
-  Future<Map<String, dynamic>> _userRefToMap(DocumentReference userRef) async {
-    // Get snapshot of user doc reference.
-    DocumentSnapshot snapshot = await userRef.get();
-
-    // Convert snapshot data into a dart map.
-    Map<String, dynamic> mapData = snapshot.data() as Map<String, dynamic>;
-
-    // Add user reference to the dart map.
-    mapData['user-ref'] = userRef;
-    return mapData;
-  }
-
-
-  // Generates random match recommendations based on dating identity and interest.
-  Future<void> generateRecommendations() async {
-    // Get current user info
-    Map<String, dynamic> currUser =
-        await _userRefToMap(userCollection.doc(uid));
-
-    // Get querying parameters based on user info
-    List<String> queryIdentity = [];
-    List<String> queryInterest = [];
-    switch (currUser["dating-identity"]) {
-      case 'non-binary':
-        {
-          switch (currUser["dating-interest"]) {
-            case 'everyone':
-              {
-                queryIdentity = ['man', 'woman', 'non-binary'];
-                queryInterest = ['everyone'];
-              }
-              break;
-
-            case 'man':
-              {
-                queryIdentity = ['man'];
-                queryInterest = ['everyone'];
-              }
-              break;
-
-            case 'woman':
-              {
-                queryIdentity = ['woman'];
-                queryInterest = ['everyone'];
-              }
-              break;
-          }
-        }
-        break;
-
-      case 'man':
-        {
-          switch (currUser["dating-interest"]) {
-            case 'everyone':
-              {
-                queryIdentity = ['man', 'woman', 'non-binary'];
-                queryInterest = ['man', 'everyone'];
-              }
-              break;
-
-            case 'man':
-              {
-                queryIdentity = ['man'];
-                queryInterest = ['man', 'everyone'];
-              }
-              break;
-
-            case 'woman':
-              {
-                queryIdentity = ['woman'];
-                queryInterest = ['man', 'everyone'];
-              }
-              break;
-          }
-        }
-        break;
-
-      case 'woman':
-        {
-          switch (currUser["dating-interest"]) {
-            case 'everyone':
-              {
-                queryIdentity = ['man', 'woman', 'non-binary'];
-                queryInterest = ['woman', 'everyone'];
-              }
-              break;
-
-            case 'man':
-              {
-                queryIdentity = ['man'];
-                queryInterest = ['woman', 'everyone'];
-              }
-              break;
-
-            case 'woman':
-              {
-                queryIdentity = ['woman'];
-                queryInterest = ['woman', 'everyone'];
-              }
-              break;
-            default:
-              {
-                queryIdentity = ['man'];
-                queryInterest = ['woman'];
-              }
-              break;
-          }
-        }
-        break;
-    }
-
-    // Get snapshot of all users the user reacted (liked or disliked) to. Convert
-    // to list and subtract from list of all users
-    QuerySnapshot reactionsSnapshot =
-        await userCollection.doc(uid).collection("outgoing").get();
-    final allReactions =
-        reactionsSnapshot.docs.map((doc) => doc.get("user-ref").id).toList();
-
-    QuerySnapshot usersSnapshot = await userCollection.get();
-    final allUsers = usersSnapshot.docs.map((doc) => doc.id).toList();
-
-    var availableUsers = allUsers.toSet().difference(allReactions.toSet());
-    availableUsers = availableUsers.difference([uid].toSet());
-
-    // Query based on the given parameters
-    QuerySnapshot snapshot;
-    if (queryIdentity.length == 3) {
-      snapshot = await userCollection
-          .where('dating-interest', whereIn: queryInterest)
-          .get();
-    } else {
-      snapshot = await userCollection
-          .where('dating-identity', isEqualTo: queryIdentity[0])
-          .where('dating-interest', whereIn: queryInterest)
-          .get();
-    }
-
-    // Create a list of potential recommendations
-    List<String> snapshotUIDs = snapshot.docs.map((doc) => doc.id).toList();
-    List<String> potentialUIDs =
-        availableUsers.intersection(snapshotUIDs.toSet()).toList();
-
-    // Randomly pick from potentialUIDs. Max 3 picks, unless there are less than
-    // 3 potenialUIDs
-    int userListMaxLength;
-    if (potentialUIDs.length < 3) {
-      userListMaxLength = potentialUIDs.length;
-    } else {
-      userListMaxLength = 3;
-    }
-    List<Map<String, dynamic>> userList = [];
-    while (userList.length < userListMaxLength) {
-      final random = new Random();
-      var selectedUID = potentialUIDs[random.nextInt(potentialUIDs.length)];
-      potentialUIDs.remove(selectedUID);
-      DocumentReference selectedDoc = userCollection.doc(selectedUID);
-      Map<String, dynamic> selectedUser = await _userRefToMap(selectedDoc);
-      userList.add(selectedUser);
-    }
-
-    // Delete all currently stored recommendations.
-    QuerySnapshot recommendations =
-        await userCollection.doc(uid).collection("recommendations").get();
-    for (QueryDocumentSnapshot recUser in recommendations.docs) {
-      await recUser.reference.delete();
-    }
-
-    // Populate recommendations collection with newly generated users.
-    DateTime ts = DateTime.now();
-    for (Map<String, dynamic> recUser in userList) {
-      await userCollection
-          .doc(uid)
-          .collection("recommendations")
-          .doc(recUser['user-ref'].id)
-          .set({
-        "timestamp": ts,
-        "user-ref": recUser['user-ref'],
-      });
-    }
-  }
-*/
 
   // Handles the interactions a user conducts on a recommended match.
   Future<void> outgoingInteraction(String youid, bool requested) async {
@@ -839,72 +670,6 @@ class DatabaseService {
     return mapData;
   }
 
-/*
-  Future<void> generateGroupRecommendations(String gid) async {
-    // Get snapshot of all users the user reacted (liked or disliked) to. Convert
-    // to list and subtract from list of all users
-    QuerySnapshot reactionsSnapshot =
-        await groupCollection.doc(gid).collection("outgoing").get();
-    final allReactions =
-        reactionsSnapshot.docs.map((doc) => doc.get("group-ref").id).toList();
-
-    QuerySnapshot groupsSnapshot = await groupCollection.get();
-    final allGroups = groupsSnapshot.docs.map((doc) => doc.id).toList();
-
-    var availableGroups = allGroups.toSet().difference(allReactions.toSet());
-    availableGroups = availableGroups.difference([gid].toSet());
-
-    // Query based on the given parameters
-    QuerySnapshot snapshot =
-        await groupCollection.where('user-count', isGreaterThan: 1).get();
-
-    // Create a list of potential recommendations
-    List<String> snapshotGIDs = snapshot.docs.map((doc) => doc.id).toList();
-
-    List<String> potentialGIDs =
-        availableGroups.intersection(snapshotGIDs.toSet()).toList();
-
-    // Randomly pick from potentialUIDs. Max 3 picks, unless there are less than
-    // 3 potenialUIDs
-    int groupListMaxLength;
-    if (potentialGIDs.length < 3) {
-      groupListMaxLength = potentialGIDs.length;
-    } else {
-      groupListMaxLength = 3;
-    }
-    List<Map<String, dynamic>> groupList = [];
-    while (groupList.length < groupListMaxLength) {
-      final random = new Random();
-      var selectedGID = potentialGIDs[random.nextInt(potentialGIDs.length)];
-      potentialGIDs.remove(selectedGID);
-      DocumentReference selectedDoc = groupCollection.doc(selectedGID);
-      Map<String, dynamic> selectedGroup = await _groupRefToMap(selectedDoc);
-      groupList.add(selectedGroup);
-    }
-
-    // Delete all currently stored recommendations.
-    QuerySnapshot recommendations =
-        await groupCollection.doc(uid).collection("recommendations").get();
-    for (QueryDocumentSnapshot recGroup in recommendations.docs) {
-      await recGroup.reference.delete();
-    }
-    // Populate recommendations collection with newly generated users.
-    DateTime ts = DateTime.now();
-    for (Map<String, dynamic> recGroup in groupList) {
-      await groupCollection
-          .doc(gid)
-          .collection("recommendations")
-          .doc(recGroup['group-ref'].id)
-          .set({
-        "timestamp": ts,
-        "group-ref": recGroup['group-ref'],
-        "group-name": recGroup['group-name'],
-        "fun-fact": recGroup['fun-fact'],
-      });
-    }
-  }
-*/
-
   // Handles the interactions a user conducts on a recommended match.
   Future<void> outgoingGroupInteraction(
       String gid, String yougid, bool requested) async {
@@ -1057,5 +822,21 @@ class DatabaseService {
           .doc(partnerid)
           .set({'count': 1});
     }
+  }
+
+  // Logging reports in the database.
+  Future<void> report(String type, String reason,
+      DocumentReference reporterUser, DocumentReference accused) async {
+    await reportCollection
+        .doc()
+        .set({
+          'accused-ref': accused,
+          'reason': reason,
+          'reported-by-ref': reporterUser,
+          'reported-type': type,
+          'timestamp': DateTime.now(),
+        })
+        .then((value) => print("Report added"))
+        .catchError((error) => print(error.toString()));
   }
 }

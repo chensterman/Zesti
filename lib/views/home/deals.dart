@@ -58,8 +58,13 @@ class Deals extends StatelessWidget {
                       // Remaining indeces used for matchsheet widgets.
                       Map<String, dynamic> data =
                           tmp.docs[index - 1].data() as Map<String, dynamic>;
-                      return dealCard(context, tmp.docs[index - 1].id,
-                          data['photo-ref'], data['name'], data['description']);
+                      return dealCard(
+                          context,
+                          tmp.docs[index - 1].id,
+                          data['photo-ref'],
+                          data['name'],
+                          data['description'],
+                          user.uid);
                     },
                     // A divider widgets is placed in between each matchsheet widget.
                     separatorBuilder: (context, index) => SizedBox(height: 8.0),
@@ -74,7 +79,7 @@ class Deals extends StatelessWidget {
 
   // Card that displays a specific partner deal.
   Widget dealCard(BuildContext context, String partnerid, String imagePath,
-      String vendor, String description) {
+      String vendor, String description, String uid) {
     final user = Provider.of<User?>(context);
     ImageProvider<Object> partnerPic = AssetImage("assets/profile.jpg");
     return Card(
@@ -92,7 +97,8 @@ class Deals extends StatelessWidget {
                     partnerid: partnerid,
                     partnerPic: partnerPic,
                     vendor: vendor,
-                    description: description)),
+                    description: description,
+                    uid: uid)),
           );
         },
         child: Padding(
@@ -141,12 +147,14 @@ class Redeem extends StatefulWidget {
   final ImageProvider<Object> partnerPic;
   final String vendor;
   final String description;
+  final String uid;
   Redeem({
     Key? key,
     required this.partnerid,
     required this.partnerPic,
     required this.vendor,
     required this.description,
+    required this.uid,
   }) : super(key: key);
 
   @override
@@ -189,16 +197,54 @@ class _RedeemState extends State<Redeem> {
                 SizedBox(height: 20.0),
                 RoundedButton(
                     text: 'Redeem',
-                    onPressed: () {
-                      showDialog(
-                          context: context,
-                          barrierDismissible: false,
-                          builder: (context) => redeemDialog(
-                                context,
-                                widget.partnerid,
-                                "Are you sure? Do not redeem this coupon until you are ready to present it to the restaurant staff. If this coupon has limited uses, proceeding will deplete one use.",
-                                widget.vendor,
-                              ));
+                    onPressed: () async {
+                      // Check for amount of uses left here for Grendel's
+                      if (widget.partnerid != 'grendels') {
+                        showDialog(
+                            context: context,
+                            barrierDismissible: false,
+                            builder: (context) => redeemDialog(
+                                  context,
+                                  widget.partnerid,
+                                  "Are you sure? Be ready to show the next screen to restaurant staff.",
+                                  widget.vendor,
+                                  widget.partnerPic,
+                                ));
+                      } else {
+                        DocumentSnapshot snapshot =
+                            await DatabaseService(uid: widget.uid)
+                                .userCollection
+                                .doc(widget.uid)
+                                .collection('metrics')
+                                .doc(widget.partnerid)
+                                .get();
+                        num remaining;
+                        if (snapshot.exists) {
+                          Map<String, dynamic> data =
+                              snapshot.data() as Map<String, dynamic>;
+                          remaining = 3 - data['count'];
+                        } else {
+                          remaining = 3;
+                        }
+
+                        if (remaining != 0) {
+                          showDialog(
+                              context: context,
+                              barrierDismissible: false,
+                              builder: (context) => redeemDialog(
+                                    context,
+                                    widget.partnerid,
+                                    "You have $remaining uses left for this coupon. Be ready to show the next screen to restaurant staff.",
+                                    widget.vendor,
+                                    widget.partnerPic,
+                                  ));
+                        } else {
+                          showDialog(
+                              context: context,
+                              barrierDismissible: false,
+                              builder: (context) => redeemFailDialog(context));
+                        }
+                      }
                     }),
                 SizedBox(height: 20.0),
               ],
@@ -209,8 +255,8 @@ class _RedeemState extends State<Redeem> {
     );
   }
 
-  Widget redeemDialog(
-      BuildContext context, String partnerid, String message, String vendor) {
+  Widget redeemDialog(BuildContext context, String partnerid, String message,
+      String vendor, ImageProvider<Object> pic) {
     final user = Provider.of<User?>(context);
     return AlertDialog(
       shape: RoundedRectangleBorder(
@@ -229,14 +275,17 @@ class _RedeemState extends State<Redeem> {
         TextButton(
           child: Text("Yes", style: CustomTheme.textTheme.headline2),
           onPressed: () async {
-            Navigator.pop(context);
-            DatabaseService(uid: user!.uid).redeemMetrics(partnerid);
+            ZestiLoadingAsync().show(context);
+            await DatabaseService(uid: user!.uid).redeemMetrics(partnerid);
+            ZestiLoadingAsync().dismiss();
+            Navigator.of(context).pop();
             showDialog(
                 context: context,
                 barrierDismissible: false,
                 builder: (context) => redeemedDialog(
                       context,
-                      "You have redeemed the Amorino discount. Please show this to staff and then press 'Done'.",
+                      "You have redeemed the $vendor discount. Please show this to staff and then press 'Done'.",
+                      pic,
                     ));
           },
         ),
@@ -250,7 +299,9 @@ class _RedeemState extends State<Redeem> {
     );
   }
 
-  Widget redeemedDialog(BuildContext context, String message) {
+  // On redeem success.
+  Widget redeemedDialog(
+      BuildContext context, String message, ImageProvider<Object> pic) {
     return AlertDialog(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
@@ -258,15 +309,39 @@ class _RedeemState extends State<Redeem> {
       title: Text(message),
       content: SingleChildScrollView(
         child: CircleAvatar(
-            radius: 120.0,
-            backgroundImage: AssetImage("assets/amorino.jpg"),
-            backgroundColor: Colors.white),
+            radius: 120.0, backgroundImage: pic, backgroundColor: Colors.white),
       ),
       actions: <Widget>[
         TextButton(
           child: Text("Done", style: CustomTheme.textTheme.headline2),
           onPressed: () {
             Navigator.of(context).pop();
+          },
+        ),
+      ],
+    );
+  }
+
+  // When no limited use coupons left.
+  Widget redeemFailDialog(BuildContext context) {
+    return AlertDialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+      title: Text("You have no uses left for this coupon."),
+      content: SingleChildScrollView(
+        child: SizedBox(
+          width: double.infinity,
+          height: 150.0,
+          child:
+              SvgPicture.asset("assets/warning.svg", semanticsLabel: "Warning"),
+        ),
+      ),
+      actions: <Widget>[
+        TextButton(
+          child: Text("Ok", style: CustomTheme.textTheme.headline2),
+          onPressed: () {
+            Navigator.pop(context);
           },
         ),
       ],

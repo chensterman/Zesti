@@ -85,6 +85,13 @@ class _EditProfileState extends State<EditProfile> {
     'Everyone',
   ];
 
+  // List of intents
+  List<String> _intentList = [
+    'Friendship',
+    'Love',
+    'Both',
+  ];
+
   // User data to retrieve and display.
   String? name;
   String? bio;
@@ -92,6 +99,7 @@ class _EditProfileState extends State<EditProfile> {
   String? year;
   String? dIdentity;
   String? dInterest;
+  String? dIntent;
   String? photoref;
   String zestKey = "";
   dynamic profpic;
@@ -114,6 +122,8 @@ class _EditProfileState extends State<EditProfile> {
     } else if (tmp == 'everyone') {
       dInterest = "${tmp[0].toUpperCase()}${tmp.substring(1)}";
     }
+    tmp = widget.user.dIntent;
+    dIntent = "${tmp[0].toUpperCase()}${tmp.substring(1)}";
     photoref = widget.user.photoURL;
     zestKey = widget.user.zestKey;
     profpic = widget.user.profPic;
@@ -142,7 +152,13 @@ class _EditProfileState extends State<EditProfile> {
 
   void dInterestCallback(String? val) {
     setState(() {
-      dIdentity = val;
+      dInterest = val;
+    });
+  }
+
+  void dIntentCallback(String? val) {
+    setState(() {
+      dIntent = val;
     });
   }
 
@@ -346,6 +362,20 @@ class _EditProfileState extends State<EditProfile> {
                                       initValue: dInterest,
                                       houseList: _interestList),
                                   SizedBox(height: 20.0),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 8.0),
+                                    child: Text(
+                                      "Intent:",
+                                      style: CustomTheme.textTheme.headline2,
+                                    ),
+                                  ),
+                                  SizedBox(height: 20.0),
+                                  DropDownField(
+                                      callback: dIntentCallback,
+                                      initValue: dIntent,
+                                      houseList: _intentList),
+                                  SizedBox(height: 20.0),
                                   Center(
                                       child: RoundedButton(
                                           text: 'Update',
@@ -356,6 +386,7 @@ class _EditProfileState extends State<EditProfile> {
                                                 year != null &&
                                                 dIdentity != null &&
                                                 dInterest != null &&
+                                                dIntent != null &&
                                                 _formKey.currentState!
                                                     .validate()) {
                                               // Update all info in Firestore.
@@ -391,6 +422,10 @@ class _EditProfileState extends State<EditProfile> {
                                                 await DatabaseService(
                                                         uid: widget.user.uid)
                                                     .updatePhoto(profpic);
+                                                await DatabaseService(
+                                                        uid: widget.user.uid)
+                                                    .updateDatingIntent(
+                                                        dIntent!.toLowerCase());
                                               }
                                               ZestiLoadingAsync().dismiss();
 
@@ -440,6 +475,7 @@ class _EditProfileState extends State<EditProfile> {
         bio: bio.toString(),
         dIdentity: "",
         dInterest: "",
+        dIntent: dIntent.toString().toLowerCase(),
         house: house.toString(),
         age: 21,
         photoURL: "",

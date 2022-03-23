@@ -9,6 +9,7 @@ import 'package:zesti/theme/theme.dart';
 import 'package:zesti/widgets/errors.dart';
 import 'package:zesti/widgets/loading.dart';
 import 'package:zesti/widgets/usercard.dart';
+import 'package:zesti/widgets/formwidgets.dart';
 
 // Widget displaying user cards to make decisions on.
 class GroupCard extends StatelessWidget {
@@ -103,6 +104,31 @@ class GroupCard extends StatelessWidget {
                         ),
                       ),
                       child: Container(),
+                    ),
+                    Positioned(
+                      right: 20,
+                      top: 20,
+                      child: InkWell(
+                          onTap: () {
+                            showDialog(
+                                context: context,
+                                barrierDismissible: false,
+                                builder: (context) => reportDialog(
+                                    context,
+                                    "Report this group?",
+                                    user.uid,
+                                    groupRef.id));
+                          },
+                          child: Container(
+                            padding: EdgeInsets.all(4.0),
+                            child: Icon(
+                              Icons.warning_rounded,
+                              color: Colors.redAccent[700],
+                              size: 30.0,
+                            ),
+                            decoration: BoxDecoration(
+                                color: Colors.white, shape: BoxShape.circle),
+                          )),
                     ),
                     Positioned(
                       right: 10,
@@ -358,6 +384,31 @@ class GroupCardDummy extends StatelessWidget {
                       child: Container(),
                     ),
                     Positioned(
+                      right: 20,
+                      top: 20,
+                      child: InkWell(
+                          onTap: () {
+                            showDialog(
+                                context: context,
+                                barrierDismissible: false,
+                                builder: (context) => reportDialog(
+                                    context,
+                                    "Report this group?",
+                                    user.uid,
+                                    groupRef.id));
+                          },
+                          child: Container(
+                            padding: EdgeInsets.all(4.0),
+                            child: Icon(
+                              Icons.warning_rounded,
+                              color: Colors.redAccent[700],
+                              size: 30.0,
+                            ),
+                            decoration: BoxDecoration(
+                                color: Colors.white, shape: BoxShape.circle),
+                          )),
+                    ),
+                    Positioned(
                       right: 10,
                       left: 10,
                       bottom: 10,
@@ -504,4 +555,90 @@ class _GroupUsersState extends State<GroupUsers> {
           }),
     );
   }
+}
+
+// Global widget used by both regular and dummy group cards.
+Widget reportDialog(
+    BuildContext context, String message, String uid, String gid) {
+  // Text field controller for reasoning.
+  TextEditingController reasonController = TextEditingController();
+
+  return AlertDialog(
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(20),
+    ),
+    title: Text(message),
+    content: SingleChildScrollView(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(
+              width: double.infinity,
+              height: 150.0,
+              child: SvgPicture.asset("assets/warning.svg",
+                  semanticsLabel: "Report")),
+          SizedBox(height: 20.0),
+          TextFormField(
+            controller: reasonController,
+            decoration: InputDecoration(
+                hintText: "(Optional) What's wrong?",
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10.0),
+                )),
+          ),
+        ],
+      ),
+    ),
+    actions: <Widget>[
+      TextButton(
+        child: Text("Cancel", style: CustomTheme.textTheme.headline2),
+        onPressed: () {
+          Navigator.of(context).pop();
+        },
+      ),
+      TextButton(
+        child: Text("Confirm", style: CustomTheme.textTheme.headline1),
+        onPressed: () async {
+          ZestiLoadingAsync().show(context);
+          await DatabaseService(uid: uid).report(
+            "group",
+            reasonController.text,
+            DatabaseService(uid: uid).userCollection.doc(uid),
+            DatabaseService(uid: uid).groupCollection.doc(gid),
+          );
+          ZestiLoadingAsync().dismiss();
+          Navigator.of(context).pop();
+          showDialog(
+              context: context,
+              barrierDismissible: false,
+              builder: (context) => reportStatusDialog(context));
+        },
+      ),
+    ],
+  );
+}
+
+// Global widget used by both regular and dummy group cards.
+Widget reportStatusDialog(BuildContext context) {
+  return AlertDialog(
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(20),
+    ),
+    title: Text("You feedback is under review!"),
+    content: SingleChildScrollView(
+      child: SizedBox(
+          width: double.infinity,
+          height: 150.0,
+          child: SvgPicture.asset("assets/tos.svg",
+              semanticsLabel: "Under Review")),
+    ),
+    actions: <Widget>[
+      TextButton(
+        child: Text("Ok", style: CustomTheme.textTheme.headline1),
+        onPressed: () {
+          Navigator.of(context).pop();
+        },
+      ),
+    ],
+  );
 }
