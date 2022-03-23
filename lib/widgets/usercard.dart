@@ -66,6 +66,26 @@ class UserCard extends StatelessWidget {
                 child: Stack(
                   children: [
                     Positioned(
+                      left: 10,
+                      top: 10,
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          snapshot.data!.dIntent == "both" ||
+                                  snapshot.data!.dIntent == "friendship"
+                              ? intentTagTile(
+                                  "Friendship", Colors.yellow.shade600)
+                              : Container(),
+                          snapshot.data!.dIntent == "both" ||
+                                  snapshot.data!.dIntent == "love"
+                              ? intentTagTile(
+                                  "Love", CustomTheme.reallyBrightOrange)
+                              : Container(),
+                        ],
+                      ),
+                    ),
+                    Positioned(
                       right: 20,
                       top: 20,
                       child: InkWell(
@@ -279,6 +299,26 @@ class UserCardDummy extends StatelessWidget {
                 child: Stack(
                   children: [
                     Positioned(
+                      left: 10,
+                      top: 10,
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          snapshot.data!.dIntent == "both" ||
+                                  snapshot.data!.dIntent == "friendship"
+                              ? intentTagTile(
+                                  "Friendship", Colors.yellow.shade600)
+                              : Container(),
+                          snapshot.data!.dIntent == "both" ||
+                                  snapshot.data!.dIntent == "love"
+                              ? intentTagTile(
+                                  "Love", CustomTheme.reallyBrightOrange)
+                              : Container(),
+                        ],
+                      ),
+                    ),
+                    Positioned(
                       right: 20,
                       top: 20,
                       child: InkWell(
@@ -383,6 +423,21 @@ class UserOverview extends StatelessWidget {
           child: UserCardDummy(userRef: userRef)),
     );
   }
+}
+
+// Global widget for intent tile indicators.
+Widget intentTagTile(String intent, Color color) {
+  return Container(
+      margin: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.all(Radius.circular(24)),
+        color: color,
+      ),
+      padding: EdgeInsets.all(12),
+      child: Text(
+        intent,
+        style: CustomTheme.textTheme.subtitle2,
+      ));
 }
 
 // Global widget used by both regular and dummy user cards.

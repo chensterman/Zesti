@@ -4,12 +4,12 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:zesti/services/database.dart';
 import 'package:zesti/theme/theme.dart';
-import 'package:zesti/views/register/intents.dart';
+import 'package:zesti/views/register/house.dart';
 import 'package:zesti/widgets/loading.dart';
 import 'package:zesti/widgets/formwidgets.dart';
 
 // Widget for interest form
-class Interest extends StatelessWidget {
+class Intents extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
@@ -43,60 +43,60 @@ class Interest extends StatelessWidget {
                                   padding:
                                       const EdgeInsets.symmetric(vertical: 8.0),
                                   child: Text(
-                                    "Who do you want to see?",
+                                    "What are you looking for?",
                                     style: CustomTheme.textTheme.headline2,
                                   ),
                                 ),
                                 SizedBox(height: 20.0),
                                 RoundedButton(
-                                  text: 'Men',
+                                  text: 'Friendship',
                                   onPressed: () async {
                                     ZestiLoadingAsync().show(context);
                                     await DatabaseService(uid: user!.uid)
-                                        .updateDatingInterest("man");
+                                        .updateDatingIntent("friendship");
                                     ZestiLoadingAsync().dismiss();
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                          builder: (context) => Intents()),
+                                          builder: (context) => House()),
                                     );
                                   },
                                 ),
                                 SizedBox(height: 20.0),
                                 RoundedButton(
-                                  text: 'Women',
+                                  text: 'Love',
                                   onPressed: () async {
                                     if (user == null) {
                                       print("Error");
                                     } else {
                                       ZestiLoadingAsync().show(context);
                                       await DatabaseService(uid: user.uid)
-                                          .updateDatingInterest("woman");
+                                          .updateDatingIntent("love");
                                       ZestiLoadingAsync().dismiss();
                                     }
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                          builder: (context) => Intents()),
+                                          builder: (context) => House()),
                                     );
                                   },
                                 ),
                                 SizedBox(height: 20.0),
                                 RoundedButton(
-                                  text: 'Everyone',
+                                  text: 'Both',
                                   onPressed: () async {
                                     if (user == null) {
                                       print("Error");
                                     } else {
                                       ZestiLoadingAsync().show(context);
                                       await DatabaseService(uid: user.uid)
-                                          .updateDatingInterest("everyone");
+                                          .updateDatingInterest("both");
                                       ZestiLoadingAsync().dismiss();
                                     }
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                          builder: (context) => Intents()),
+                                          builder: (context) => House()),
                                     );
                                   },
                                 ),

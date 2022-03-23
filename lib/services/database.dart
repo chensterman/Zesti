@@ -71,6 +71,7 @@ class DatabaseService {
           'house': null,
           'dating-identity': null,
           'dating-interest': null,
+          'dating-intent': null,
           'photo-ref': null,
           'bio': null,
           'year': null,
@@ -145,6 +146,15 @@ class DatabaseService {
         .doc(uid)
         .update({'dating-interest': interest})
         .then((value) => print("Interest Updated"))
+        .catchError((error) => print("Failed to update user: $error"));
+  }
+
+  // Update user intent.
+  Future<void> updateDatingIntent(String intent) async {
+    await userCollection
+        .doc(uid)
+        .update({'dating-intent': intent})
+        .then((value) => print("Intent Updated"))
         .catchError((error) => print("Failed to update user: $error"));
   }
 
@@ -335,6 +345,7 @@ class DatabaseService {
       bio: userInfo['bio'],
       dIdentity: userInfo['dating-identity'],
       dInterest: userInfo['dating-interest'],
+      dIntent: userInfo['dating-intent'],
       house: userInfo['house'],
       photoURL: photoURL,
       profPic: await getPhoto(photoURL),

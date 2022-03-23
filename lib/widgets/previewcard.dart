@@ -18,6 +18,7 @@ class PreviewCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    print(userOnCard.dIntent);
     return Container(
       height: size.height * 0.7,
       width: size.width * 0.95,
@@ -45,6 +46,23 @@ class PreviewCard extends StatelessWidget {
         ),
         child: Stack(
           children: [
+            Positioned(
+              left: 10,
+              top: 10,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  userOnCard.dIntent == "both" ||
+                          userOnCard.dIntent == "friendship"
+                      ? intentTagTile("Friendship", Colors.yellow.shade600)
+                      : Container(),
+                  userOnCard.dIntent == "both" || userOnCard.dIntent == "love"
+                      ? intentTagTile("Love", CustomTheme.reallyBrightOrange)
+                      : Container(),
+                ],
+              ),
+            ),
             Positioned(
               right: 10,
               left: 10,
@@ -80,6 +98,21 @@ class PreviewCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  // Intent tile indicators.
+  Widget intentTagTile(String intent, Color color) {
+    return Container(
+        margin: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.all(Radius.circular(24)),
+          color: color,
+        ),
+        padding: EdgeInsets.all(12),
+        child: Text(
+          intent,
+          style: CustomTheme.textTheme.subtitle2,
+        ));
   }
 
   // Put user information onto the cards.

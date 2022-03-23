@@ -9,6 +9,7 @@ class ZestiUser {
   final String bio; // Bio of the user.
   final String dIdentity; // Dating identity of the user.
   final String dInterest; // Dating interest of the user.
+  final String dIntent; // Dating intent (friends, love, both) of the user.
   final String house; // Harvard house of the user.
   final String photoURL; // Firebase Storage URL of user's profile picture.
   final ImageProvider<Object> profPic; // Profile picture of the user.
@@ -23,6 +24,7 @@ class ZestiUser {
     required this.bio,
     required this.dIdentity,
     required this.dInterest,
+    required this.dIntent,
     required this.house,
     required this.photoURL,
     required this.profPic,
