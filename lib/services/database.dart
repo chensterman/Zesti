@@ -32,6 +32,10 @@ class DatabaseService {
   final CollectionReference partnerCollection =
       FirebaseFirestore.instance.collection('partners');
 
+  // Access to 'reports' collection.
+  final CollectionReference reportCollection =
+      FirebaseFirestore.instance.collection('reports');
+
   // Random id generator.
   final uuid = Uuid();
 
@@ -1057,5 +1061,21 @@ class DatabaseService {
           .doc(partnerid)
           .set({'count': 1});
     }
+  }
+
+  // Logging reports in the database.
+  Future<void> report(String type, String reason,
+      DocumentReference reporterUser, DocumentReference accused) async {
+    await reportCollection
+        .doc()
+        .set({
+          'accused-ref': accused,
+          'reason': reason,
+          'reported-by-ref': reporterUser,
+          'reported-type': type,
+          'timestamp': DateTime.now(),
+        })
+        .then((value) => print("Report added"))
+        .catchError((error) => print(error.toString()));
   }
 }
