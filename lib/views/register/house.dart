@@ -127,7 +127,7 @@ class _HouseState extends State<House> {
                                   padding:
                                       const EdgeInsets.symmetric(vertical: 8.0),
                                   child: Text(
-                                    "Which year do graduate?",
+                                    "Which year do you graduate?",
                                     style: CustomTheme.textTheme.headline2,
                                   ),
                                 ),

@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import 'package:zesti/services/database.dart';
 import 'package:zesti/theme/theme.dart';
@@ -103,27 +104,37 @@ class _InfoState extends State<Info> {
                                   onPressed: () async {
                                     // Form validation:
                                     //  Does nothing if validation is incorrect.
-                                    if (_formKey.currentState!.validate()) {
-                                      // Do not upload if dynamic imageFile is null.
-                                      ZestiLoadingAsync().show(context);
-                                      if (profpic != null) {
-                                        // Update user document with the reference.
+                                    if (profpic == null) {
+                                      showDialog(
+                                          context: context,
+                                          barrierDismissible: false,
+                                          builder: (context) =>
+                                              imageRequiredDialog(
+                                                context,
+                                              ));
+                                    } else {
+                                      if (_formKey.currentState!.validate()) {
+                                        // Do not upload if dynamic imageFile is null.
+                                        ZestiLoadingAsync().show(context);
+                                        if (profpic != null) {
+                                          // Update user document with the reference.
+                                          await DatabaseService(uid: user!.uid)
+                                              .updatePhoto(profpic);
+                                        }
+                                        // Update user document with bio.
                                         await DatabaseService(uid: user!.uid)
-                                            .updatePhoto(profpic);
+                                            .updateBio(bio);
+                                        // Flag account as fully set up
+                                        await DatabaseService(uid: user.uid)
+                                            .updateAccountSetup();
+                                        ZestiLoadingAsync().dismiss();
+                                        // Navigate accordingly.
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) => ZestKey()),
+                                        );
                                       }
-                                      // Update user document with bio.
-                                      await DatabaseService(uid: user!.uid)
-                                          .updateBio(bio);
-                                      // Flag account as fully set up
-                                      await DatabaseService(uid: user.uid)
-                                          .updateAccountSetup();
-                                      ZestiLoadingAsync().dismiss();
-                                      // Navigate accordingly.
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) => ZestKey()),
-                                      );
                                     }
                                   },
                                 )
@@ -140,6 +151,32 @@ class _InfoState extends State<Info> {
           ),
         ),
       ),
+    );
+  }
+
+  // Must upload image dialog.
+  Widget imageRequiredDialog(BuildContext context) {
+    return AlertDialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+      title: Text("Please upload a picture!"),
+      content: SingleChildScrollView(
+        child: SizedBox(
+          width: double.infinity,
+          height: 150.0,
+          child:
+              SvgPicture.asset("assets/warning.svg", semanticsLabel: "Warning"),
+        ),
+      ),
+      actions: <Widget>[
+        TextButton(
+          child: Text("Ok", style: CustomTheme.textTheme.headline2),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+      ],
     );
   }
 }

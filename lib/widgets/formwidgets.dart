@@ -174,19 +174,19 @@ class ImageUpdate extends StatelessWidget {
                 size: 36.0,
               )),
         ),
-        Positioned(
-          top: 2.0,
-          right: 2.0,
-          child: InkWell(
-              onTap: () {
-                clearImage();
-              },
-              child: Icon(
-                Icons.do_not_disturb_on,
-                color: Colors.red,
-                size: 36.0,
-              )),
-        ),
+        // Positioned(
+        //   top: 2.0,
+        //   right: 2.0,
+        //   child: InkWell(
+        //       onTap: () {
+        //         clearImage();
+        //       },
+        //       child: Icon(
+        //         Icons.do_not_disturb_on,
+        //         color: Colors.red,
+        //         size: 36.0,
+        //       )),
+        // ),
       ],
     );
   }
@@ -199,11 +199,11 @@ class ImageUpdate extends StatelessWidget {
     this.callback(file);
   }
 
-  // Clears the image:
-  //  Reverts the dynamic ImageFile back to null.
-  void clearImage() {
-    this.callback(null);
-  }
+  // // Clears the image:
+  // //  Reverts the dynamic ImageFile back to null.
+  // void clearImage() {
+  //   this.callback(null);
+  // }
 
   // Widget for the image choosing bottom sheet (camera or gallery).
   Widget bottomSheet(Size size) {
