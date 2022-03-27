@@ -242,7 +242,7 @@ exports.onRegisterRecommendations = functions.firestore
         // Filter out outgoing reactions and matches from all users
         var allUsers = collectionQuery.docs.map(qdoc => qdoc.id);
         var availableUsers = allUsers.filter(x => !allReactions.includes(x) && !allMatches.includes(x));
-        var availableUsers = availableUsers.filter(x => x != doc.id);
+        var availableUsers = availableUsers.filter(x => x != context.params.userId);
 
         // Query for users within interests
         var snapshot;
