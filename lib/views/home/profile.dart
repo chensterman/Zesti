@@ -416,16 +416,16 @@ class _EditProfileState extends State<EditProfile> {
                                               }
                                               await DatabaseService(
                                                       uid: widget.user.uid)
+                                                  .updateDatingIntent(
+                                                      dIntent!.toLowerCase());
+                                              await DatabaseService(
+                                                      uid: widget.user.uid)
                                                   .updateDatingInterest(tmp);
                                               if (profpic is File ||
                                                   profpic == null) {
                                                 await DatabaseService(
                                                         uid: widget.user.uid)
                                                     .updatePhoto(profpic);
-                                                await DatabaseService(
-                                                        uid: widget.user.uid)
-                                                    .updateDatingIntent(
-                                                        dIntent!.toLowerCase());
                                               }
                                               ZestiLoadingAsync().dismiss();
 

@@ -116,6 +116,190 @@ exports.notifyNewMatch = functions.firestore.document('/users/{id}/matched/{matc
 
 //   });
 
+exports.onRegisterRecommendations = functions.firestore
+    .document('users/{userId}')
+    .onUpdate(async (change, context) => {
+      var data = change.after.data();
+      if (data["account-setup"]) {
+        // Get user collection
+        var collectionQuery = await userCollection.get();
+
+        // Get current user
+        var userRef = userCollection.doc(context.params.userId);
+
+        // Get user data of current doc
+        var currUser = await _userRefToObject(userRef);
+
+        // Skip over if registration incomplete
+        if (!currUser["dating-identity"] || !currUser["dating-interest"]) {
+          return null;
+        }
+
+        // Get querying parameters based on user info
+        var queryIdentity = [];
+        var queryInterest = [];
+        switch (currUser["dating-identity"]) {
+          case 'non-binary':
+            {
+              switch (currUser["dating-interest"]) {
+                case 'everyone':
+                  {
+                    queryIdentity = ['man', 'woman', 'non-binary'];
+                    queryInterest = ['everyone'];
+                  }
+                  break;
+
+                case 'man':
+                  {
+                    queryIdentity = ['man'];
+                    queryInterest = ['everyone'];
+                  }
+                  break;
+
+                case 'woman':
+                  {
+                    queryIdentity = ['woman'];
+                    queryInterest = ['everyone'];
+                  }
+                  break;
+              }
+            }
+            break;
+
+          case 'man':
+            {
+              switch (currUser["dating-interest"]) {
+                case 'everyone':
+                  {
+                    queryIdentity = ['man', 'woman', 'non-binary'];
+                    queryInterest = ['man', 'everyone'];
+                  }
+                  break;
+
+                case 'man':
+                  {
+                    queryIdentity = ['man'];
+                    queryInterest = ['man', 'everyone'];
+                  }
+                  break;
+
+                case 'woman':
+                  {
+                    queryIdentity = ['woman'];
+                    queryInterest = ['man', 'everyone'];
+                  }
+                  break;
+              }
+            }
+            break;
+
+          case 'woman':
+            {
+              switch (currUser["dating-interest"]) {
+                case 'everyone':
+                  {
+                    queryIdentity = ['man', 'woman', 'non-binary'];
+                    queryInterest = ['woman', 'everyone'];
+                  }
+                  break;
+
+                case 'man':
+                  {
+                    queryIdentity = ['man'];
+                    queryInterest = ['woman', 'everyone'];
+                  }
+                  break;
+
+                case 'woman':
+                  {
+                    queryIdentity = ['woman'];
+                    queryInterest = ['woman', 'everyone'];
+                  }
+                  break;
+                default:
+                  {
+                    queryIdentity = ['man'];
+                    queryInterest = ['woman'];
+                  }
+                  break;
+              }
+            }
+            break;
+        }
+
+        // Get outgoing reactions and matches of current user
+        var reactionsSnapshot = await userRef.collection('outgoing').get();
+        var matchesSnapshot = await userRef.collection('matched').get();
+        var allReactions = reactionsSnapshot.docs.map(function (qdoc) {
+          var data = qdoc.data();
+          return data['user-ref'].id;
+        });
+        var allMatches = matchesSnapshot.docs.map(function (qdoc) {
+          var data = qdoc.data();
+          return data['user-ref'].id;
+        });
+
+        // Filter out outgoing reactions and matches from all users
+        var allUsers = collectionQuery.docs.map(qdoc => qdoc.id);
+        var availableUsers = allUsers.filter(x => !allReactions.includes(x) && !allMatches.includes(x));
+        var availableUsers = availableUsers.filter(x => x != doc.id);
+
+        // Query for users within interests
+        var snapshot;
+        if (queryIdentity.length > 1) {
+          snapshot = await userCollection
+              .where('dating-interest', 'in', queryInterest)
+              .get();
+        } else {
+          snapshot = await userCollection
+              .where('dating-identity', '==', queryIdentity[0])
+              .where('dating-interest', 'in', queryInterest)
+              .get();
+        }
+
+        // Get list of potential recommendations
+        var snapshotUserRefs = snapshot.docs.map(qdoc => qdoc.id);
+        var potentialUserRefs = availableUsers.filter(x => snapshotUserRefs.includes(x));
+
+        // Determine max list length
+        var userListMaxLength;
+        if (potentialUserRefs.length < 5) {
+          userListMaxLength = potentialUserRefs.length;
+        } else {
+          userListMaxLength = 5;
+        }
+
+        // If potential user list over 5, randomly select 5
+        var potentialSet = new Set(potentialUserRefs);
+        var userList = [];
+        while (userList.length < userListMaxLength) {
+          var potentialArray = Array.from(potentialSet);
+          var selectedUID = potentialArray[Math.floor((Math.random() * potentialArray.length))];
+          potentialSet.delete(selectedUID);
+          userList.push(selectedUID);
+        }
+
+        // Delete all currently stored recommendations.
+        var recommendations = await userRef.collection("recommendations").get();
+        recommendations.docs.forEach(async function (rec) {
+          await rec.ref.delete();
+        });
+
+        // Populate recommendations collection with newly generated users.
+        var ts = admin.firestore.Timestamp.now();
+        userList.forEach(async function (uid) {
+          await userRef
+              .collection("recommendations")
+              .doc(uid)
+              .set({
+            "timestamp": ts,
+            "user-ref": userCollection.doc(uid),
+          });
+        });
+      }
+      return null;
+    });
+
 exports.generateRecommendations = functions.pubsub.schedule('every 24 hours').onRun(async context => {
   console.log('This will be run every 24 hours!');
 
