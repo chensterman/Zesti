@@ -199,18 +199,7 @@ class _RedeemState extends State<Redeem> {
                     text: 'Redeem',
                     onPressed: () async {
                       // Check for amount of uses left here for Grendel's
-                      if (widget.partnerid != 'grendels') {
-                        showDialog(
-                            context: context,
-                            barrierDismissible: false,
-                            builder: (context) => redeemDialog(
-                                  context,
-                                  widget.partnerid,
-                                  "Are you sure? Be ready to show the next screen to restaurant staff.",
-                                  widget.vendor,
-                                  widget.partnerPic,
-                                ));
-                      } else {
+                      if (widget.partnerid == 'grendels') {
                         DocumentSnapshot snapshot =
                             await DatabaseService(uid: widget.uid)
                                 .userCollection
@@ -236,6 +225,7 @@ class _RedeemState extends State<Redeem> {
                                     widget.partnerid,
                                     "You have $remaining uses left for this coupon. Be ready to show the next screen to restaurant staff.",
                                     widget.vendor,
+                                    widget.description,
                                     widget.partnerPic,
                                   ));
                         } else {
@@ -244,6 +234,54 @@ class _RedeemState extends State<Redeem> {
                               barrierDismissible: false,
                               builder: (context) => redeemFailDialog(context));
                         }
+                        // Check for first Jefe's chips and guac deal. Bad repeated code.
+                      } else if (widget.partnerid == 'eljefes-first') {
+                        DocumentSnapshot snapshot =
+                            await DatabaseService(uid: widget.uid)
+                                .userCollection
+                                .doc(widget.uid)
+                                .collection('metrics')
+                                .doc(widget.partnerid)
+                                .get();
+                        num remaining;
+                        if (snapshot.exists) {
+                          Map<String, dynamic> data =
+                              snapshot.data() as Map<String, dynamic>;
+                          remaining = 1 - data['count'];
+                        } else {
+                          remaining = 1;
+                        }
+
+                        if (remaining != 0) {
+                          showDialog(
+                              context: context,
+                              barrierDismissible: false,
+                              builder: (context) => redeemDialog(
+                                    context,
+                                    widget.partnerid,
+                                    "You have $remaining uses left for this coupon. Be ready to show the next screen to restaurant staff.",
+                                    widget.vendor,
+                                    widget.description,
+                                    widget.partnerPic,
+                                  ));
+                        } else {
+                          showDialog(
+                              context: context,
+                              barrierDismissible: false,
+                              builder: (context) => redeemFailDialog(context));
+                        }
+                      } else {
+                        showDialog(
+                            context: context,
+                            barrierDismissible: false,
+                            builder: (context) => redeemDialog(
+                                  context,
+                                  widget.partnerid,
+                                  "Are you sure? Be ready to show the next screen to restaurant staff.",
+                                  widget.vendor,
+                                  widget.description,
+                                  widget.partnerPic,
+                                ));
                       }
                     }),
                 SizedBox(height: 20.0),
@@ -256,7 +294,7 @@ class _RedeemState extends State<Redeem> {
   }
 
   Widget redeemDialog(BuildContext context, String partnerid, String message,
-      String vendor, ImageProvider<Object> pic) {
+      String vendor, String description, ImageProvider<Object> pic) {
     final user = Provider.of<User?>(context);
     return AlertDialog(
       shape: RoundedRectangleBorder(
@@ -284,7 +322,7 @@ class _RedeemState extends State<Redeem> {
                 barrierDismissible: false,
                 builder: (context) => redeemedDialog(
                       context,
-                      "You have redeemed the $vendor discount. Please show this to staff and then press 'Done'.",
+                      "You have redeemed the $vendor coupon: $description Please show this message to staff.",
                       pic,
                     ));
           },

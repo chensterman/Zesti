@@ -29,6 +29,7 @@ class _HomeState extends State<Home> {
   void resetCallback() {
     setState(() {});
   }
+
   String notificationTitle = 'No Title';
   String notificationBody = 'No Body';
   String notificationData = 'No Data';

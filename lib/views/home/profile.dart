@@ -533,9 +533,9 @@ class _EditProfileState extends State<EditProfile> {
               RoundedButton(
                   text: 'Logout',
                   onPressed: () async {
-                    ZestiLoadingAsync().show(context);
+                    // ZestiLoadingAsync().show(context);
                     await AuthService().signOut();
-                    ZestiLoadingAsync().dismiss();
+                    // ZestiLoadingAsync().dismiss();
                     Navigator.of(context).popUntil((route) => route.isFirst);
                   }),
             ],
