@@ -4,7 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:zesti/services/database.dart';
 import 'package:zesti/theme/theme.dart';
-import 'package:zesti/views/register/house.dart';
+import 'package:zesti/views/register/identity.dart';
 import 'package:zesti/widgets/loading.dart';
 import 'package:zesti/widgets/formwidgets.dart';
 
@@ -58,7 +58,7 @@ class Intents extends StatelessWidget {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                          builder: (context) => House()),
+                                          builder: (context) => Identity()),
                                     );
                                   },
                                 ),
@@ -77,7 +77,7 @@ class Intents extends StatelessWidget {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                          builder: (context) => House()),
+                                          builder: (context) => Identity()),
                                     );
                                   },
                                 ),
@@ -90,13 +90,13 @@ class Intents extends StatelessWidget {
                                     } else {
                                       ZestiLoadingAsync().show(context);
                                       await DatabaseService(uid: user.uid)
-                                          .updateDatingInterest("both");
+                                          .updateDatingIntent("both");
                                       ZestiLoadingAsync().dismiss();
                                     }
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                          builder: (context) => House()),
+                                          builder: (context) => Identity()),
                                     );
                                   },
                                 ),

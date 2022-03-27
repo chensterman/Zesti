@@ -99,8 +99,7 @@ class UserCard extends StatelessWidget {
                           child: Container(
                             padding: EdgeInsets.all(4.0),
                             child: Icon(
-                              Icons.warning_rounded,
-                              color: Colors.redAccent[700],
+                              Icons.more_horiz,
                               size: 30.0,
                             ),
                             decoration: BoxDecoration(
@@ -332,8 +331,7 @@ class UserCardDummy extends StatelessWidget {
                           child: Container(
                             padding: EdgeInsets.all(4.0),
                             child: Icon(
-                              Icons.warning_rounded,
-                              color: Colors.redAccent[700],
+                              Icons.more_horiz,
                               size: 30.0,
                             ),
                             decoration: BoxDecoration(

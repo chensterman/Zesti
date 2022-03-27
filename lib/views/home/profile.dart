@@ -338,7 +338,7 @@ class _EditProfileState extends State<EditProfile> {
                                     padding: const EdgeInsets.symmetric(
                                         vertical: 8.0),
                                     child: Text(
-                                      "Identity:",
+                                      "You identify as...",
                                       style: CustomTheme.textTheme.headline2,
                                     ),
                                   ),
@@ -352,21 +352,7 @@ class _EditProfileState extends State<EditProfile> {
                                     padding: const EdgeInsets.symmetric(
                                         vertical: 8.0),
                                     child: Text(
-                                      "Interest:",
-                                      style: CustomTheme.textTheme.headline2,
-                                    ),
-                                  ),
-                                  SizedBox(height: 20.0),
-                                  DropDownField(
-                                      callback: dInterestCallback,
-                                      initValue: dInterest,
-                                      houseList: _interestList),
-                                  SizedBox(height: 20.0),
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 8.0),
-                                    child: Text(
-                                      "Intent:",
+                                      "You are looking for...",
                                       style: CustomTheme.textTheme.headline2,
                                     ),
                                   ),
@@ -375,6 +361,20 @@ class _EditProfileState extends State<EditProfile> {
                                       callback: dIntentCallback,
                                       initValue: dIntent,
                                       houseList: _intentList),
+                                  SizedBox(height: 20.0),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 8.0),
+                                    child: Text(
+                                      "You want to see...",
+                                      style: CustomTheme.textTheme.headline2,
+                                    ),
+                                  ),
+                                  SizedBox(height: 20.0),
+                                  DropDownField(
+                                      callback: dInterestCallback,
+                                      initValue: dInterest,
+                                      houseList: _interestList),
                                   SizedBox(height: 20.0),
                                   Center(
                                       child: RoundedButton(
@@ -533,9 +533,9 @@ class _EditProfileState extends State<EditProfile> {
               RoundedButton(
                   text: 'Logout',
                   onPressed: () async {
-                    ZestiLoadingAsync().show(context);
+                    // ZestiLoadingAsync().show(context);
                     await AuthService().signOut();
-                    ZestiLoadingAsync().dismiss();
+                    // ZestiLoadingAsync().dismiss();
                     Navigator.of(context).popUntil((route) => route.isFirst);
                   }),
             ],

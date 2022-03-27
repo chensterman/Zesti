@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:zesti/services/database.dart';
 import 'package:zesti/theme/theme.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:zesti/views/register/identity.dart';
+import 'package:zesti/views/register/intents.dart';
 import 'package:zesti/widgets/formwidgets.dart';
 import 'package:zesti/widgets/loading.dart';
 
@@ -103,7 +103,7 @@ class _NameState extends State<Name> {
                                         Navigator.push(
                                           context,
                                           MaterialPageRoute(
-                                              builder: (context) => Identity()),
+                                              builder: (context) => Intents()),
                                         );
                                       }
                                     }),

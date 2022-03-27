@@ -4,7 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:zesti/services/database.dart';
 import 'package:zesti/theme/theme.dart';
-import 'package:zesti/views/register/intents.dart';
+import 'package:zesti/views/register/house.dart';
 import 'package:zesti/widgets/loading.dart';
 import 'package:zesti/widgets/formwidgets.dart';
 
@@ -58,7 +58,7 @@ class Interest extends StatelessWidget {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                          builder: (context) => Intents()),
+                                          builder: (context) => House()),
                                     );
                                   },
                                 ),
@@ -77,7 +77,7 @@ class Interest extends StatelessWidget {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                          builder: (context) => Intents()),
+                                          builder: (context) => House()),
                                     );
                                   },
                                 ),
@@ -96,7 +96,7 @@ class Interest extends StatelessWidget {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                          builder: (context) => Intents()),
+                                          builder: (context) => House()),
                                     );
                                   },
                                 ),
