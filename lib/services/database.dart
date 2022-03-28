@@ -390,13 +390,14 @@ class DatabaseService {
 
   // Send a chat message.
   Future<void> sendMessage(
-      DocumentReference chatRef, String type, String content) async {
+      DocumentReference chatRef, String sendeeId, String type, String content) async {
     await chatRef
         .collection('messages')
         .doc()
         .set({
           'timestamp': DateTime.now(),
           'sender-ref': userCollection.doc(uid),
+          'sendee-ref': sendeeId == "" ? "fail" : userCollection.doc(sendeeId),
           'type': type,
           'content': content,
         })

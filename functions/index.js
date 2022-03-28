@@ -63,58 +63,43 @@ exports.notifyNewMatch = functions.firestore.document('/users/{id}/matched/{matc
 
   });
 
-// exports.notifyNewChat = functions.firestore.document('chats/{id}/messages/{messageID}')
-//   .onCreate(async (snap, context) => {
-//     var chatRef = db.doc(`chats/${context.params.id}`);
-//     var chatObject = await _chatRefToObject(chatRef);
+exports.notifyNewChatMsg = functions.firestore.document('chats/{id}/messages/{messageID}')
+  .onCreate(async (snap, context) => {
+    var sender = await _userRefToObject(snap.data()["sender-ref"]);
+    var receiver = await _userRefToObject(snap.data()["sendee-ref"]);
 
-//     var sender = await _userRefToObject(snap.data()["sender-ref"]);
-//     var receiverRef;
+    let tokens = receiver['tokens'];
 
-//     var users = [chatObject['user1-ref'], chatObject['user2-ref']];
-//     users.forEach((user, index) => {
-//       if (user.toString() != snap.data()["sender-ref"].toString()) {
-//         receiverRef = user;
-//       }
-//     });
-//     var receiver = await _userRefToObject(receiverRef);
+    // Notification details.
+    const payload = {
+      notification: {
+        title: `${sender['first-name']} sent a message.`,
+        body: `${snap.data()['content']}`,
+      }
+    };
 
-//     console.log("AFF");
-//     console.log(sender['first-name']);
-//     console.log(receiver['first-name']);
+    // Send notifications to all tokens.
+    const response = await admin.messaging().sendToDevice(tokens, payload);
+    // For each message check if there was an error.
+    const tokensToRemove = [];
+    response.results.forEach((result, index) => {
+      const error = result.error;
+      if (error) {
+        functions.logger.error(
+          'Failure sending notification to',
+          tokens[index],
+          error
+        );
+        // Cleanup the tokens who are not registered anymore.
+        if (error.code === 'messaging/invalid-registration-token' ||
+            error.code === 'messaging/registration-token-not-registered') {
+          tokensToRemove.push(tokensSnapshot.ref.child(tokens[index]).remove());
+        }
+      }
+    });
+    return Promise.all(tokensToRemove);
 
-//     let tokens = receiver['tokens'];
-
-//     // Notification details.
-//     const payload = {
-//       notification: {
-//         title: `${sender['first-name']} sent a message.`,
-//         body: `${snap.data()['content']}`,
-//       }
-//     };
-
-//     // Send notifications to all tokens.
-//     const response = await admin.messaging().sendToDevice(tokens, payload);
-//     // For each message check if there was an error.
-//     const tokensToRemove = [];
-//     response.results.forEach((result, index) => {
-//       const error = result.error;
-//       if (error) {
-//         functions.logger.error(
-//           'Failure sending notification to',
-//           tokens[index],
-//           error
-//         );
-//         // Cleanup the tokens who are not registered anymore.
-//         if (error.code === 'messaging/invalid-registration-token' ||
-//             error.code === 'messaging/registration-token-not-registered') {
-//           tokensToRemove.push(tokensSnapshot.ref.child(tokens[index]).remove());
-//         }
-//       }
-//     });
-//     return Promise.all(tokensToRemove);
-
-//   });
+  });
 
 exports.onRegisterRecommendations = functions.firestore
     .document('users/{userId}')

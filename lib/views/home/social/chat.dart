@@ -404,7 +404,7 @@ class _ChatState extends State<Chat> {
   // Call database service to send message.
   sendMessage(
       String uid, DocumentReference chatRef, String type, String content) {
-    DatabaseService(uid: uid).sendMessage(chatRef, type, content);
+    DatabaseService(uid: uid).sendMessage(chatRef, "", type, content);
     // Reset the text editor controller after message is sent.
     messageText.text = '';
   }

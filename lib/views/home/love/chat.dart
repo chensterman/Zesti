@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -35,10 +37,26 @@ class _ChatState extends State<Chat> {
   // Stream to retrieve messages from a specific chat (initialied during initState).
   Stream<QuerySnapshot>? messages;
 
+  String sendeeId = "";
+
   @override
   void initState() {
     messages = DatabaseService(uid: widget.uid).getMessages(widget.chatRef);
     super.initState();
+
+    String sendToId = "";
+
+    DatabaseService(uid: widget.uid).getChatInfo(widget.chatRef).then(
+      (data) {
+        if (data['user1-ref'].id == widget.uid) {
+          sendToId = data['user2-ref'].id;
+        } else {
+          sendToId = data['user1-ref'].id;
+        }
+        setState(() {
+          sendeeId = sendToId;
+        });
+      });
   }
 
   @override
@@ -338,7 +356,7 @@ class _ChatState extends State<Chat> {
   // Call database service to send message.
   sendMessage(
       String uid, DocumentReference chatRef, String type, String content) {
-    DatabaseService(uid: uid).sendMessage(chatRef, type, content);
+    DatabaseService(uid: uid).sendMessage(chatRef, sendeeId, type, content);
     // Reset the text editor controller after message is sent.
     messageText.text = '';
   }
