@@ -468,6 +468,44 @@ class DatabaseService {
     }
   }
 
+  // Handles blocking a user.
+  Future<void> blockUser(String youid) async {
+    // Define timestamp and for the interaction
+    DateTime ts = DateTime.now();
+
+    // Update requester's "blocked" collection.
+    await userCollection.doc(uid).collection("blocked").doc(youid).set({
+      "timestamp": ts,
+      "user-ref": userCollection.doc(youid),
+    });
+
+    // Update requestee's "blockedby" collection.
+    await userCollection.doc(youid).collection("blockedby").doc(uid).set({
+      "timestamp": ts,
+      "user-ref": userCollection.doc(uid),
+    });
+
+    // Delete from the requester's "recommendations" collection.
+    await userCollection
+        .doc(uid)
+        .collection("recommendations")
+        .doc(youid)
+        .delete();
+
+    // Delete from the requestee's "recommendations" collection.
+    await userCollection
+        .doc(youid)
+        .collection("recommendations")
+        .doc(uid)
+        .delete();
+
+    // Delete from the requester's "incoming" collection.
+    await userCollection.doc(uid).collection("incoming").doc(youid).delete();
+
+    // Delete from the requestee's "incoming" collection.
+    await userCollection.doc(youid).collection("incoming").doc(uid).delete();
+  }
+
   // Handles the interactions a user conducts on an incoming match request.
   Future<void> incomingInteraction(String youid, bool accepted) async {
     // Initialize timestamp for the match.

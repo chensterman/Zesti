@@ -345,39 +345,100 @@ class _ChatState extends State<Chat> {
 
   Widget unmatchDialog(BuildContext context, String message, String uid,
       String youid, String chatid) {
-    return AlertDialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
-      title: Text(message),
-      content: SingleChildScrollView(
-        child: SizedBox(
-          width: double.infinity,
-          height: 150.0,
-          child:
-              SvgPicture.asset("assets/warning.svg", semanticsLabel: "Warning"),
+    String reason = "";
+    bool reportCheck = false;
+    bool blockCheck = false;
+    return StatefulBuilder(builder: (context, setState) {
+      return AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
         ),
-      ),
-      actions: <Widget>[
-        TextButton(
-          child: Text("Yes", style: CustomTheme.textTheme.headline2),
-          onPressed: () async {
-            // Unmatch from database
-            ZestiLoadingAsync().show(context);
-            await DatabaseService(uid: uid).unmatch(youid, chatid);
-            ZestiLoadingAsync().dismiss();
-            // Pop pages
-            Navigator.pop(context);
-            Navigator.pop(context);
-          },
+        title: Text(message),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(
+                  width: double.infinity,
+                  height: 150.0,
+                  child: SvgPicture.asset("assets/warning.svg",
+                      semanticsLabel: "Unmatch")),
+              SizedBox(height: 20.0),
+              CheckboxListTile(
+                title: Text("Report this user:",
+                    style: CustomTheme.textTheme.headline5),
+                value: reportCheck,
+                onChanged: (bool? value) {
+                  setState(() {
+                    reportCheck = value!;
+                  });
+                },
+              ),
+              reportCheck
+                  ? TextFormField(
+                      decoration: InputDecoration(
+                          hintText: "(Optional) What's wrong?",
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10.0),
+                          )),
+                      onChanged: (val) {
+                        setState(() {
+                          reason = val;
+                          print(reason);
+                        });
+                      },
+                    )
+                  : Container(),
+              SizedBox(height: 20.0),
+              CheckboxListTile(
+                title: Text("Block this user:",
+                    style: CustomTheme.textTheme.headline5),
+                value: blockCheck,
+                onChanged: (bool? value) {
+                  setState(() {
+                    blockCheck = value!;
+                  });
+                },
+              ),
+              SizedBox(height: 20.0),
+              Text(
+                  "Blocked users will be removed from your recommendations and incoming requests. They will never be able to interact with you again.",
+                  style: CustomTheme.textTheme.bodyText2)
+            ],
+          ),
         ),
-        TextButton(
-          child: Text("No", style: CustomTheme.textTheme.headline2),
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-        ),
-      ],
-    );
+        actions: <Widget>[
+          TextButton(
+            child: Text("Yes", style: CustomTheme.textTheme.headline2),
+            onPressed: () async {
+              // Unmatch from database
+              ZestiLoadingAsync().show(context);
+              if (reportCheck) {
+                await DatabaseService(uid: uid).report(
+                  "user",
+                  reason,
+                  DatabaseService(uid: uid).userCollection.doc(uid),
+                  DatabaseService(uid: uid).userCollection.doc(youid),
+                );
+              }
+              if (blockCheck) {
+                await DatabaseService(uid: uid).blockUser(youid);
+              }
+              await DatabaseService(uid: uid).unmatch(youid, chatid);
+              ZestiLoadingAsync().dismiss();
+              // Pop pages
+              Navigator.pop(context);
+              Navigator.pop(context);
+            },
+          ),
+          TextButton(
+            child: Text("No", style: CustomTheme.textTheme.headline2),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+      );
+    });
   }
 }
