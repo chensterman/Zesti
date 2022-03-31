@@ -396,6 +396,135 @@ class UserCardDummy extends StatelessWidget {
   }
 }
 
+// Has no decision buttons, used for when chat is generated and has to report/block button.
+class UserCardAfterChat extends StatelessWidget {
+  final DocumentReference userRef;
+
+  UserCardAfterChat({
+    required this.userRef,
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final user = Provider.of<User?>(context);
+    final size = MediaQuery.of(context).size;
+    // FutureBuilder used to fetch user photo from Firebase storage.
+    return FutureBuilder(
+        future: DatabaseService(uid: user!.uid).getUserInfo(userRef),
+        builder: (context, AsyncSnapshot<ZestiUser> snapshot) {
+          // On error.
+          if (snapshot.hasError) {
+            return Text(snapshot.error.toString());
+          }
+          // On success.
+          else if (snapshot.connectionState == ConnectionState.done) {
+            return Container(
+              height: size.height * 0.7,
+              width: size.width * 0.95,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                // User profile pic on card.
+                image: DecorationImage(
+                  image: snapshot.data!.profPic,
+                  fit: BoxFit.cover,
+                ),
+              ),
+              child: Container(
+                // Box decoraion and gradient.
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(color: Colors.black12, spreadRadius: 0.5),
+                  ],
+                  gradient: LinearGradient(
+                    colors: [Colors.black12, Colors.black87],
+                    begin: Alignment.center,
+                    stops: [0.4, 1],
+                    end: Alignment.bottomCenter,
+                  ),
+                ),
+                child: Stack(
+                  children: [
+                    Positioned(
+                      left: 10,
+                      top: 10,
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          snapshot.data!.dIntent == "both" ||
+                                  snapshot.data!.dIntent == "friendship"
+                              ? intentTagTile(
+                                  "Friendship", Colors.yellow.shade600)
+                              : Container(),
+                          snapshot.data!.dIntent == "both" ||
+                                  snapshot.data!.dIntent == "love"
+                              ? intentTagTile(
+                                  "Love", CustomTheme.reallyBrightOrange)
+                              : Container(),
+                        ],
+                      ),
+                    ),
+                    Positioned(
+                      right: 10,
+                      left: 10,
+                      bottom: 10,
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Flexible(child: buildUserInfo(snapshot.data!)),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
+          // On loading, return an empty container.
+          else {
+            return Container(
+                height: size.height * 0.7,
+                width: size.width * 0.95,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  color: Colors.white,
+                ),
+                child: ZestiLoading());
+          }
+        });
+  }
+
+  // Put user information onto the cards.
+  Widget buildUserInfo(ZestiUser userOnCard) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      // Column displaying user info
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text('${userOnCard.first}, ${userOnCard.year}',
+              style: CustomTheme.textTheme.subtitle1),
+          Text(
+            '${userOnCard.house} House',
+            style: CustomTheme.textTheme.subtitle2,
+          ),
+          SizedBox(height: 8),
+          Text(
+            userOnCard.bio,
+            style: CustomTheme.textTheme.subtitle2,
+          ),
+          SizedBox(height: 4),
+        ],
+      ),
+    );
+  }
+}
+
+// Used during chat (UserCardAfterChat).
 class UserOverview extends StatelessWidget {
   final DocumentReference userRef;
   final String name;
@@ -418,7 +547,7 @@ class UserOverview extends StatelessWidget {
           height: size.height,
           decoration: CustomTheme.mode,
           padding: EdgeInsets.all(16.0),
-          child: UserCardDummy(userRef: userRef)),
+          child: UserCardAfterChat(userRef: userRef)),
     );
   }
 }
@@ -441,62 +570,83 @@ Widget intentTagTile(String intent, Color color) {
 // Global widget used by both regular and dummy user cards.
 Widget reportDialog(
     BuildContext context, String message, String uid, String youid) {
-  // Text field controller for reasoning.
-  TextEditingController reasonController = TextEditingController();
-
-  return AlertDialog(
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(20),
-    ),
-    title: Text(message),
-    content: SingleChildScrollView(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          SizedBox(
-              width: double.infinity,
-              height: 150.0,
-              child: SvgPicture.asset("assets/warning.svg",
-                  semanticsLabel: "Report")),
-          SizedBox(height: 20.0),
-          TextFormField(
-            controller: reasonController,
-            decoration: InputDecoration(
-                hintText: "(Optional) What's wrong?",
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10.0),
-                )),
-          ),
-        ],
+  String reason = "";
+  bool blockCheck = false;
+  return StatefulBuilder(builder: (context, setState) {
+    return AlertDialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
       ),
-    ),
-    actions: <Widget>[
-      TextButton(
-        child: Text("Cancel", style: CustomTheme.textTheme.headline2),
-        onPressed: () {
-          Navigator.of(context).pop();
-        },
+      title: Text(message),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+                width: double.infinity,
+                height: 150.0,
+                child: SvgPicture.asset("assets/warning.svg",
+                    semanticsLabel: "Report")),
+            SizedBox(height: 20.0),
+            TextFormField(
+              decoration: InputDecoration(
+                  hintText: "(Optional) What's wrong?",
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10.0),
+                  )),
+              onChanged: (val) {
+                setState(() => reason = val);
+              },
+            ),
+            SizedBox(height: 20.0),
+            CheckboxListTile(
+              title: Text("Block this user:",
+                  style: CustomTheme.textTheme.headline5),
+              value: blockCheck,
+              onChanged: (bool? value) {
+                setState(() {
+                  blockCheck = value!;
+                });
+              },
+            ),
+            SizedBox(height: 20.0),
+            Text(
+                "Blocked users will be removed from your recommendations and incoming requests. They will never be able to interact with you again.",
+                style: CustomTheme.textTheme.bodyText2)
+          ],
+        ),
       ),
-      TextButton(
-        child: Text("Confirm", style: CustomTheme.textTheme.headline1),
-        onPressed: () async {
-          ZestiLoadingAsync().show(context);
-          await DatabaseService(uid: uid).report(
-            "user",
-            reasonController.text,
-            DatabaseService(uid: uid).userCollection.doc(uid),
-            DatabaseService(uid: uid).userCollection.doc(youid),
-          );
-          ZestiLoadingAsync().dismiss();
-          Navigator.of(context).pop();
-          showDialog(
-              context: context,
-              barrierDismissible: false,
-              builder: (context) => reportStatusDialog(context));
-        },
-      ),
-    ],
-  );
+      actions: <Widget>[
+        TextButton(
+          child: Text("Cancel", style: CustomTheme.textTheme.headline2),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
+        TextButton(
+          child: Text("Confirm", style: CustomTheme.textTheme.headline1),
+          onPressed: () async {
+            ZestiLoadingAsync().show(context);
+            await DatabaseService(uid: uid).report(
+              "user",
+              reason,
+              DatabaseService(uid: uid).userCollection.doc(uid),
+              DatabaseService(uid: uid).userCollection.doc(youid),
+            );
+            if (blockCheck) {
+              await DatabaseService(uid: uid).blockUser(youid);
+            }
+            ZestiLoadingAsync().dismiss();
+            Navigator.of(context).pop();
+            showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (context) => reportStatusDialog(context));
+          },
+        ),
+      ],
+    );
+  });
 }
 
 // Global widget used by both regular and dummy user cards.
