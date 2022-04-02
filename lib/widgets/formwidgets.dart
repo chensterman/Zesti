@@ -52,10 +52,12 @@ class TextFieldContainer extends StatelessWidget {
 class RoundedButton extends StatelessWidget {
   final String text;
   final VoidCallback? onPressed;
+  final Color? color;
   RoundedButton({
     Key? key,
     this.text = '',
     this.onPressed,
+    this.color,
   }) : super(key: key);
 
   @override
@@ -65,7 +67,7 @@ class RoundedButton extends StatelessWidget {
       width: size.width * 0.5,
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
-            primary: CustomTheme.reallyBrightOrange,
+            primary: color != null ? color : CustomTheme.reallyBrightOrange,
             padding: EdgeInsets.symmetric(vertical: 20, horizontal: 40),
             shape: new RoundedRectangleBorder(
                 borderRadius: new BorderRadius.circular(30.0))),

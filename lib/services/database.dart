@@ -36,6 +36,10 @@ class DatabaseService {
   final CollectionReference reportCollection =
       FirebaseFirestore.instance.collection('reports');
 
+  // Access to 'metadata' collection.
+  final CollectionReference metadataCollection =
+      FirebaseFirestore.instance.collection('metadata');
+
   // Random id generator.
   final uuid = Uuid();
 
@@ -93,6 +97,7 @@ class DatabaseService {
   //  completes steps in "register" folder.
   Future<void> updateAccountSetup() async {
     await userCollection.doc(uid).update({'account-setup': true});
+    await setupAccount(DateTime.now());
   }
 
   // Update user first and last name.
@@ -234,6 +239,58 @@ class DatabaseService {
         .collection('groups')
         .orderBy('timestamp', descending: true)
         .snapshots();
+  }
+
+  // Update metadata recommendation refresh time.
+  //   Related to Cloud Function onRefreshRecommendations.
+  Future<bool> updateRecRefresh(DateTime ts) async {
+    DocumentSnapshot lastRefreshSnapshot = await userCollection
+        .doc(uid)
+        .collection("metadata")
+        .doc("lastrecrefresh")
+        .get();
+    Map<String, dynamic> lastRefreshInfo =
+        lastRefreshSnapshot.data() as Map<String, dynamic>;
+    DocumentSnapshot refreshSnapshot =
+        await metadataCollection.doc("recommendationrefresh").get();
+    Map<String, dynamic> refreshInfo =
+        refreshSnapshot.data() as Map<String, dynamic>;
+    if (!lastRefreshSnapshot.exists) {
+      await userCollection
+          .doc(uid)
+          .collection("metadata")
+          .doc("lastrecrefresh")
+          .set({
+        "timestamp": ts,
+      });
+      return true;
+    }
+
+    if (lastRefreshInfo["timestamp"]
+        .toDate()
+        .isBefore(refreshInfo["timestamp"].toDate())) {
+      await userCollection
+          .doc(uid)
+          .collection("metadata")
+          .doc("lastrecrefresh")
+          .set({
+        "timestamp": ts,
+      });
+      return true;
+    }
+    return false;
+  }
+
+  // Update metadata account setup flag.
+  //   Related to Cloud Function onRegisterRecommendations.
+  Future<void> setupAccount(DateTime ts) async {
+    await userCollection
+        .doc(uid)
+        .collection("metadata")
+        .doc("accountsetup")
+        .set({
+      "timestamp": ts,
+    });
   }
 
   //////////////////////////////////////////////////////////////////////////////////////////
@@ -389,8 +446,8 @@ class DatabaseService {
   }
 
   // Send a chat message.
-  Future<void> sendMessage(
-      DocumentReference chatRef, String sendeeId, String type, String content) async {
+  Future<void> sendMessage(DocumentReference chatRef, String sendeeId,
+      String type, String content) async {
     await chatRef
         .collection('messages')
         .doc()
@@ -831,6 +888,55 @@ class DatabaseService {
         .then((value) => print("Incoming request deleted."))
         .catchError(
             (error) => print("Failed to delete incoming request: $error"));
+  }
+
+  // Update metadata recommendation refresh time.
+  //   Related to Cloud Function onGroupRefreshRecommendations.
+  Future<bool> updateGroupRecRefresh(DateTime ts, String gid) async {
+    DocumentSnapshot groupSnapshot = await groupCollection.doc(gid).get();
+    Map<String, dynamic> groupInfo =
+        groupSnapshot.data() as Map<String, dynamic>;
+    if (groupInfo["user-count"] < 2) {
+      print(groupInfo);
+      return false;
+    }
+
+    DocumentSnapshot lastRefreshSnapshot = await groupCollection
+        .doc(gid)
+        .collection("metadata")
+        .doc("lastrecrefresh")
+        .get();
+    Map<String, dynamic> lastRefreshInfo =
+        lastRefreshSnapshot.data() as Map<String, dynamic>;
+    DocumentSnapshot refreshSnapshot =
+        await metadataCollection.doc("recommendationrefresh").get();
+    Map<String, dynamic> refreshInfo =
+        refreshSnapshot.data() as Map<String, dynamic>;
+
+    if (!lastRefreshSnapshot.exists) {
+      await groupCollection
+          .doc(gid)
+          .collection("metadata")
+          .doc("lastrecrefresh")
+          .set({
+        "timestamp": ts,
+      });
+      return true;
+    }
+
+    if (lastRefreshInfo["timestamp"]
+        .toDate()
+        .isBefore(refreshInfo["timestamp"].toDate())) {
+      await groupCollection
+          .doc(gid)
+          .collection("metadata")
+          .doc("lastrecrefresh")
+          .set({
+        "timestamp": ts,
+      });
+      return true;
+    }
+    return false;
   }
 
   // Stream to retrieve all partner info.
