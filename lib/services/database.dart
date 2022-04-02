@@ -255,7 +255,12 @@ class DatabaseService {
         await metadataCollection.doc("recommendationrefresh").get();
     Map<String, dynamic> refreshInfo =
         refreshSnapshot.data() as Map<String, dynamic>;
-    if (lastRefreshInfo["timestamp"].isBefore(refreshInfo["timestamp"])) {
+    if (!lastRefreshSnapshot.exists ||
+        lastRefreshInfo["timestamp"]
+            .toDate()
+            .isBefore(refreshInfo["timestamp"].toDate())) {
+      print(lastRefreshInfo["timestamp"].toDate());
+      print(refreshInfo["timestamp"].toDate());
       await userCollection
           .doc(uid)
           .collection("metadata")
@@ -271,13 +276,6 @@ class DatabaseService {
   // Update metadata account setup flag.
   //   Related to Cloud Function onRegisterRecommendations.
   Future<void> setupAccount(DateTime ts) async {
-    await userCollection
-        .doc(uid)
-        .collection("metadata")
-        .doc("lastrecrefresh")
-        .set({
-      "timestamp": ts,
-    });
     await userCollection
         .doc(uid)
         .collection("metadata")

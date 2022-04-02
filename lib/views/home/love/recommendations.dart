@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:zesti/widgets/errors.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:zesti/widgets/loading.dart';
 import 'package:zesti/widgets/usercard.dart';
 import 'package:zesti/widgets/formwidgets.dart';
@@ -74,9 +75,16 @@ class _RecommendationsState extends State<Recommendations> {
                             text: "Refresh",
                             color: CustomTheme.mildlyBrightOrange,
                             onPressed: () async {
+                              ZestiLoadingAsync().show(context);
                               bool status =
                                   await DatabaseService(uid: widget.uid)
                                       .updateRecRefresh(DateTime.now());
+                              ZestiLoadingAsync().dismiss();
+                              showDialog(
+                                  context: context,
+                                  barrierDismissible: false,
+                                  builder: (context) =>
+                                      refreshStatusDialog(context, status));
                             },
                           ),
                         );
@@ -99,4 +107,32 @@ class _RecommendationsState extends State<Recommendations> {
           }),
     );
   }
+}
+
+Widget refreshStatusDialog(BuildContext context, bool status) {
+  return AlertDialog(
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(20),
+    ),
+    title: status
+        ? Text("Recommendations refreshed!")
+        : Text(
+            "Check back in right after 12:00PM or 6:00PM EST for new recommendations!"),
+    content: SingleChildScrollView(
+      child: SizedBox(
+          width: double.infinity,
+          height: 150.0,
+          child: status
+              ? SvgPicture.asset("assets/match.svg")
+              : SvgPicture.asset("assets/warning.svg")),
+    ),
+    actions: <Widget>[
+      TextButton(
+        child: Text("Ok", style: CustomTheme.textTheme.headline1),
+        onPressed: () {
+          Navigator.of(context).pop();
+        },
+      ),
+    ],
+  );
 }
