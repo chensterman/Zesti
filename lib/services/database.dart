@@ -255,12 +255,20 @@ class DatabaseService {
         await metadataCollection.doc("recommendationrefresh").get();
     Map<String, dynamic> refreshInfo =
         refreshSnapshot.data() as Map<String, dynamic>;
-    if (!lastRefreshSnapshot.exists ||
-        lastRefreshInfo["timestamp"]
-            .toDate()
-            .isBefore(refreshInfo["timestamp"].toDate())) {
-      print(lastRefreshInfo["timestamp"].toDate());
-      print(refreshInfo["timestamp"].toDate());
+    if (!lastRefreshSnapshot.exists) {
+      await userCollection
+          .doc(uid)
+          .collection("metadata")
+          .doc("lastrecrefresh")
+          .set({
+        "timestamp": ts,
+      });
+      return true;
+    }
+
+    if (lastRefreshInfo["timestamp"]
+        .toDate()
+        .isBefore(refreshInfo["timestamp"].toDate())) {
       await userCollection
           .doc(uid)
           .collection("metadata")
@@ -880,6 +888,55 @@ class DatabaseService {
         .then((value) => print("Incoming request deleted."))
         .catchError(
             (error) => print("Failed to delete incoming request: $error"));
+  }
+
+  // Update metadata recommendation refresh time.
+  //   Related to Cloud Function onGroupRefreshRecommendations.
+  Future<bool> updateGroupRecRefresh(DateTime ts, String gid) async {
+    DocumentSnapshot groupSnapshot = await groupCollection.doc(gid).get();
+    Map<String, dynamic> groupInfo =
+        groupSnapshot.data() as Map<String, dynamic>;
+    if (groupInfo["user-count"] < 2) {
+      print(groupInfo);
+      return false;
+    }
+
+    DocumentSnapshot lastRefreshSnapshot = await groupCollection
+        .doc(gid)
+        .collection("metadata")
+        .doc("lastrecrefresh")
+        .get();
+    Map<String, dynamic> lastRefreshInfo =
+        lastRefreshSnapshot.data() as Map<String, dynamic>;
+    DocumentSnapshot refreshSnapshot =
+        await metadataCollection.doc("recommendationrefresh").get();
+    Map<String, dynamic> refreshInfo =
+        refreshSnapshot.data() as Map<String, dynamic>;
+
+    if (!lastRefreshSnapshot.exists) {
+      await groupCollection
+          .doc(gid)
+          .collection("metadata")
+          .doc("lastrecrefresh")
+          .set({
+        "timestamp": ts,
+      });
+      return true;
+    }
+
+    if (lastRefreshInfo["timestamp"]
+        .toDate()
+        .isBefore(refreshInfo["timestamp"].toDate())) {
+      await groupCollection
+          .doc(gid)
+          .collection("metadata")
+          .doc("lastrecrefresh")
+          .set({
+        "timestamp": ts,
+      });
+      return true;
+    }
+    return false;
   }
 
   // Stream to retrieve all partner info.

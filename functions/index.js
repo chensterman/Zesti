@@ -10,6 +10,8 @@ const userCollection = db.collection('users');
 const groupCollection = db.collection('groups');
 const metadataCollection = db.collection('metadata');
 
+/////////////////////// GLOBALLY USED ///////////////////////
+
 // Globally used function to convert user reference to JS object.
 async function _userRefToObject(userRef) {
   var userSnapshot = await userRef.get();
@@ -17,6 +19,30 @@ async function _userRefToObject(userRef) {
   userData['user-ref'] = userRef;
   return userData;
 }
+
+// Globally used function to update the recommendation schedule.
+async function _updateRefreshSchedule() {
+  var ts = admin.firestore.Timestamp.now();
+  await metadataCollection
+      .doc("recommendationrefresh")
+      .set({
+    "timestamp": ts,
+  });
+}
+
+// Scheduled recommendation refresh 12:00pm EST every day.
+exports.noonRecRefresh = functions.pubsub.schedule("0 12 * * *")
+  .timeZone('America/New_York')
+  .onRun(async context => {
+    await _updateRefreshSchedule();
+  });
+
+// Scheduled recommendation refresh 6:00pm EST every day.
+exports.sixRecRefresh = functions.pubsub.schedule("0 18 * * *")
+  .timeZone('America/New_York')
+  .onRun(async context => {
+    await _updateRefreshSchedule();
+  });
 
 /////////////////////// PUSH NOTIFICATIONS ///////////////////////
 
@@ -100,32 +126,6 @@ exports.notifyNewChatMsg = functions.firestore.document('chats/{id}/messages/{me
   });
 
 /////////////////////// USER RECOMMENDATIONS ///////////////////////
-
-// Globally used function to update the recommendation schedule.
-async function _updateRefreshSchedule() {
-  var ts = admin.firestore.Timestamp.now();
-  await metadataCollection
-      .doc("recommendationrefresh")
-      .set({
-    "timestamp": ts,
-  });
-}
-
-// Scheduled recommendation refresh 12:00pm EST every day.
-exports.noonRecRefresh = functions.pubsub.schedule("0 12 * * *")
-  .timeZone('America/New_York')
-  .onRun(async context => {
-    await _updateRefreshSchedule();
-  });
-
-
-
-// Scheduled recommendation refresh 6:00pm EST every day.
-exports.sixRecRefresh = functions.pubsub.schedule("0 18 * * *")
-  .timeZone('America/New_York')
-  .onRun(async context => {
-    await _updateRefreshSchedule();
-  });
 
 // Globally used function to generate recommendations for a given userid.
 async function _generateRecommendations(userid) {
@@ -324,10 +324,14 @@ exports.onRegisterRecommendations = functions.firestore
       return null;
     });
 
-// Generate recommendations as soon as user sets up their account.
+// Generate recommendations on refresh.
 exports.onRefreshRecommendations = functions.firestore
     .document('users/{userId}/metadata/lastrecrefresh')
     .onWrite(async (change, context) => {
+      if (!change.before.exists) {
+        await _generateRecommendations(context.params.userId);
+        return null;
+      }
       var before = change.before.data();
       var lastRefresh = before["timestamp"].toDate();
       var metadataQuery = await metadataCollection.doc("recommendationrefresh").get();
@@ -342,82 +346,97 @@ exports.onRefreshRecommendations = functions.firestore
 /////////////////////// GROUP RECOMMENDATIONS ///////////////////////
 
 // Generate recommendations for every group every X hours.
-exports.generateGroupRecommendations = functions.pubsub.schedule('every 6 hours').onRun(async context => {
-  console.log('This will be run every 6 hours!');
-
+async function _generateGroupRecommendations(groupid) {
   // Get entire group collection
   var collectionQuery = await groupCollection.get();
 
-  // Loop through all group documents
-  collectionQuery.docs.forEach(async function (doc) {
+  // Get current group
+  var groupRef = groupCollection.doc(groupid);
 
-    // Get outgoing reactions and matches
-    var reactionsSnapshot =
-        await doc.ref.collection("outgoing").get();
-    var allReactions =
-        reactionsSnapshot.docs.map(function (qdoc) {
-          var data = qdoc.data();
-          return data['group-ref'].id;
-        });
-    var matchesSnapshot =
-        await doc.ref.collection("matched").get();
-    var allMatches =
-        matchesSnapshot.docs.map(function (qdoc) {
-          var data = qdoc.data();
-          return data['group-ref'].id;
-        });
-
-    // Get all group docs in list
-    var groupsSnapshot = await groupCollection.get();
-    var allGroups = groupsSnapshot.docs.map(qdoc => qdoc.id);
-
-    // Filter for viable groups
-    var availableGroups = allGroups.filter(x => !allReactions.includes(x) && !allMatches.includes(x));
-    availableGroups = availableGroups.filter(x => x != doc.id);
-
-    // Query based on the given parameters
-    var snapshot =
-        await groupCollection.where('user-count', '>', 1).get();
-
-    // Create a list of potential recommendations
-    var snapshotGIDs = snapshot.docs.map(qdoc => qdoc.id);
-    var potentialGIDs =
-        availableGroups.filter(x => snapshotGIDs.includes(x));
-
-    // Randomly pick from potentialUIDs. Max 3 picks, unless there are less than
-    // 3 potenialUIDs
-    var groupListMaxLength;
-    if (potentialGIDs.length < 5) {
-      groupListMaxLength = potentialGIDs.length;
-    } else {
-      groupListMaxLength = 5;
-    }
-
-    var potentialSet = new Set(potentialGIDs);
-    var groupList = [];
-    while (groupList.length < groupListMaxLength) {
-      var potentialArray = Array.from(potentialSet);
-      var selectedGID = potentialArray[Math.floor((Math.random() * potentialArray.length))];
-      potentialSet.delete(selectedGID);
-      groupList.push(selectedGID);
-    }
-
-    // Delete all currently stored recommendations.
-    var recommendations = await doc.ref.collection("recommendations").get();
-    recommendations.docs.forEach(async function (rec) {
-      await rec.ref.delete();
-    });
-
-    // Populate recommendations collection with newly generated groups.
-    var ts = admin.firestore.Timestamp.now();
-    groupList.forEach(async function (gid) {
-      await doc.ref
-          .collection("recommendations")
-          .doc(gid)
-          .set({
-        "timestamp": ts,
-        "group-ref": groupCollection.doc(gid),
+  // Get outgoing reactions and matches
+  var reactionsSnapshot =
+      await groupRef.collection("outgoing").get();
+  var allReactions =
+      reactionsSnapshot.docs.map(function (qdoc) {
+        var data = qdoc.data();
+        return data['group-ref'].id;
       });
+  var matchesSnapshot =
+      await groupRef.collection("matched").get();
+  var allMatches =
+      matchesSnapshot.docs.map(function (qdoc) {
+        var data = qdoc.data();
+        return data['group-ref'].id;
+      });
+
+  // Get all group docs in list
+  var allGroups = collectionQuery.docs.map(qdoc => qdoc.id);
+
+  // Filter for viable groups
+  var availableGroups = allGroups.filter(x => !allReactions.includes(x) && !allMatches.includes(x));
+  availableGroups = availableGroups.filter(x => x != doc.id);
+
+  // Query based on the given parameters
+  var snapshot =
+      await groupCollection.where('user-count', '>', 1).get();
+
+  // Create a list of potential recommendations
+  var snapshotGIDs = snapshot.docs.map(qdoc => qdoc.id);
+  var potentialGIDs =
+      availableGroups.filter(x => snapshotGIDs.includes(x));
+
+  // Randomly pick from potentialUIDs. Max 3 picks, unless there are less than
+  // 3 potenialUIDs
+  var groupListMaxLength;
+  if (potentialGIDs.length < 5) {
+    groupListMaxLength = potentialGIDs.length;
+  } else {
+    groupListMaxLength = 5;
+  }
+
+  var potentialSet = new Set(potentialGIDs);
+  var groupList = [];
+  while (groupList.length < groupListMaxLength) {
+    var potentialArray = Array.from(potentialSet);
+    var selectedGID = potentialArray[Math.floor((Math.random() * potentialArray.length))];
+    potentialSet.delete(selectedGID);
+    groupList.push(selectedGID);
+  }
+
+  // Delete all currently stored recommendations.
+  var recommendations = await groupRef.collection("recommendations").get();
+  recommendations.docs.forEach(async function (rec) {
+    await rec.ref.delete();
+  });
+
+  // Populate recommendations collection with newly generated groups.
+  var ts = admin.firestore.Timestamp.now();
+  groupList.forEach(async function (gid) {
+    await groupRef
+        .collection("recommendations")
+        .doc(gid)
+        .set({
+      "timestamp": ts,
+      "group-ref": groupCollection.doc(gid),
     });
   });
-});
+};
+
+// Generate group recommendations on refresh.
+exports.onGroupRefreshRecommendations = functions.firestore
+    .document('groups/{groupId}/metadata/lastrecrefresh')
+    .onWrite(async (change, context) => {
+      if (!change.before.exists) {
+        await _generateGroupRecommendations(context.params.groupId);
+        return null;
+      }
+      var before = change.before.data();
+      var lastRefresh = before["timestamp"].toDate();
+      var metadataQuery = await metadataCollection.doc("recommendationrefresh").get();
+      var lastSchedule = metadataQuery.data()["timestamp"].toDate();
+
+      if (lastSchedule > lastRefresh) {
+        await _generateGroupRecommendations(context.params.groupId);
+      }
+      return null;
+    });
