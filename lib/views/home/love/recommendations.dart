@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:zesti/widgets/errors.dart';
 import 'package:zesti/widgets/loading.dart';
 import 'package:zesti/widgets/usercard.dart';
+import 'package:zesti/widgets/formwidgets.dart';
 import 'package:zesti/theme/theme.dart';
 import 'package:zesti/services/database.dart';
 
@@ -61,9 +62,23 @@ class _RecommendationsState extends State<Recommendations> {
                             tmp.docs.length == 0
                                 ? Empty(
                                     reason:
-                                        "Check back in a few hours for new recs!")
+                                        "Out of recommendations! Refresh for a new batch!")
                                 : Container(),
                           ]),
+                        );
+                      }
+
+                      if (index == tmp.docs.length + 1) {
+                        return Center(
+                          child: RoundedButton(
+                            text: "Refresh",
+                            color: CustomTheme.mildlyBrightOrange,
+                            onPressed: () async {
+                              bool status =
+                                  await DatabaseService(uid: widget.uid)
+                                      .updateRecRefresh(DateTime.now());
+                            },
+                          ),
                         );
                       }
 
@@ -78,7 +93,7 @@ class _RecommendationsState extends State<Recommendations> {
                     // SizedBox used as separated between user cards.
                     separatorBuilder: (context, index) =>
                         SizedBox(height: 16.0),
-                    itemCount: tmp.docs.length + 1)
+                    itemCount: tmp.docs.length + 2)
                 // When StreamBuilder hasn't loaded, show progress indicator.
                 : ZestiLoading();
           }),

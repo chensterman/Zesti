@@ -8,6 +8,7 @@ admin.initializeApp();
 const db = admin.firestore();
 const userCollection = db.collection('users');
 const groupCollection = db.collection('groups');
+const metadataCollection = db.collection('metadata');
 
 // Globally used function to convert user reference to JS object.
 async function _userRefToObject(userRef) {
@@ -99,6 +100,32 @@ exports.notifyNewChatMsg = functions.firestore.document('chats/{id}/messages/{me
   });
 
 /////////////////////// USER RECOMMENDATIONS ///////////////////////
+
+// Globally used function to update the recommendation schedule.
+async function _updateRefreshSchedule() {
+  var ts = admin.firestore.Timestamp.now();
+  await metadataCollection
+      .doc("recommendationrefresh")
+      .set({
+    "timestamp": ts,
+  });
+}
+
+// Scheduled recommendation refresh 12:00pm EST every day.
+exports.noonRecRefresh = functions.pubsub.schedule("0 12 * * *")
+  .timeZone('America/New_York')
+  .onRun(async context => {
+    await _updateRefreshSchedule();
+  });
+
+
+
+// Scheduled recommendation refresh 6:00pm EST every day.
+exports.sixRecRefresh = functions.pubsub.schedule("0 18 * * *")
+  .timeZone('America/New_York')
+  .onRun(async context => {
+    await _updateRefreshSchedule();
+  });
 
 // Globally used function to generate recommendations for a given userid.
 async function _generateRecommendations(userid) {
@@ -291,23 +318,22 @@ async function _generateRecommendations(userid) {
 
 // Generate recommendations as soon as user sets up their account.
 exports.onRegisterRecommendations = functions.firestore
-    .document('users/{userId}')
-    .onUpdate(async (change, context) => {
-      var dataInit = change.before.data();
-      var dataFinal = change.after.data();
-      if (dataInit["account-setup"] == false && dataFinal["account-setup"] == true) {
-        await _generateRecommendations(context.params.userId);
-      }
+    .document('users/{userId}/metadata/accountsetup')
+    .onCreate(async (change, context) => {
+      await _generateRecommendations(context.params.userId);
       return null;
     });
 
-// Generate recommendations as users deplete their current recommendations.
-exports.onCountRecommendations = functions.firestore
-    .document('users/{userId}/recommendations/{recId}')
-    .onDelete(async (change, context) => {
-      var currRecs = await userCollection.doc(context.params.userId).collection('recommendations').get();
-      var len = currRecs.docs.length;
-      if (len < 3) {
+// Generate recommendations as soon as user sets up their account.
+exports.onRefreshRecommendations = functions.firestore
+    .document('users/{userId}/metadata/lastrecrefresh')
+    .onUpdate(async (change, context) => {
+      var before = change.before.data();
+      var lastRefresh = before["timestamp"].toDate();
+      var metadataQuery = await metadataCollection.doc("recommendationrefresh").get();
+      var lastSchedule = metadataQuery.data()["timestamp"].toDate();
+
+      if (lastSchedule > lastRefresh) {
         await _generateRecommendations(context.params.userId);
       }
       return null;
@@ -510,6 +536,8 @@ exports.onCountRecommendations = functions.firestore
 // });
 
 /////////////////////// USER RECOMMENDATIONS ///////////////////////
+
+// 
 
 // Generate recommendations for every group every X hours.
 exports.generateGroupRecommendations = functions.pubsub.schedule('every 6 hours').onRun(async context => {
