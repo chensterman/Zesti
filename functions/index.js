@@ -374,7 +374,7 @@ async function _generateGroupRecommendations(groupid) {
 
   // Filter for viable groups
   var availableGroups = allGroups.filter(x => !allReactions.includes(x) && !allMatches.includes(x));
-  availableGroups = availableGroups.filter(x => x != doc.id);
+  availableGroups = availableGroups.filter(x => x != groupid);
 
   // Query based on the given parameters
   var snapshot =
