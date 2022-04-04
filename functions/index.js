@@ -29,6 +29,28 @@ async function _updateRefreshSchedule() {
     "timestamp": ts,
   });
 }
+/////// EXAMPLE BOOTLEG CODE TO SET EVERYONE'S ELJEFES-FIRST TO 0 /////
+// async function setJefesFirst (){
+//   var userRefs = (await userCollection.get()).docs.map(qdoc => {
+//     var data = qdoc.data();
+//     return qdoc.id;
+//   });
+
+//   userRefs.forEach(async function (ref) {
+//     await db.doc(`users/${ref}`)
+//           .collection("metrics")
+//           .doc("eljefes-first")
+//           .set({
+//             "count" : 0
+//           });
+//   });
+
+// }
+
+
+// exports.onetime = functions.pubsub.schedule("58 13 * * *").timeZone('America/New_York').onRun(async context => {
+//   await setJefesFirst();
+// });
 
 // Scheduled recommendation refresh 12:00pm EST every day.
 exports.noonRecRefresh = functions.pubsub.schedule("0 12 * * *")

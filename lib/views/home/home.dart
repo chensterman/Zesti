@@ -1,3 +1,4 @@
+import 'dart:ffi';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -235,7 +236,10 @@ class _HomeState extends State<Home> {
                                     ],
                                   )),
                             ]),
-                            jefes_first_btn(context, user.uid),
+                            Container(
+                              child: jefes_first_btn(context, user.uid),
+                            )
+
                       ]);
                   // During loading.
                 } else {
@@ -252,12 +256,13 @@ class _HomeState extends State<Home> {
     final user = Provider.of<User?>(context);
     Size size = MediaQuery.of(context).size;
     ImageProvider<Object> partnerPic = AssetImage("assets/profile.jpg");
+    double containerHeight = size.height * .20;
     return FutureBuilder(
       future: DatabaseService(uid: user!.uid).userCollection.doc(user.uid).collection('metrics').doc('eljefes-first').get(),
       builder: (BuildContext context, AsyncSnapshot<DocumentSnapshot<Map<String, dynamic>>> snapshot) {
         if (snapshot.data!['count'] == 0) {
           return Container(
-        height: size.height * .20,
+        height: containerHeight,
         child: Card(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
@@ -293,7 +298,7 @@ class _HomeState extends State<Home> {
                             ConnectionState.done) {
                           partnerPic = snapshot.data!;
                           return CircleAvatar(
-                            radius: 20.0,
+                            radius: containerHeight *.12,
                             backgroundImage: snapshot.data!,
                             backgroundColor: Colors.white,
                           );
@@ -302,11 +307,12 @@ class _HomeState extends State<Home> {
                           return ZestiLoading();
                         }
                       }),
-                  SizedBox(height: 8.0),
+                  SizedBox(height: containerHeight * .05),
                   Text("El Jefe's Taqueria",
                       textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.orange[900], fontSize: 12.0)),
-                  Text("One time free chips and guac for new users!",
+                      style: TextStyle(color: Colors.orange[900], fontSize: 15.0)),
+                  SizedBox(height: containerHeight * .1),
+                  Text("Click here to redeem your one time free chips and guac for new users!",
                       textAlign: TextAlign.center,
                       style: TextStyle(fontSize: 12.0)),
                 ],

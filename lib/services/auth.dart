@@ -22,6 +22,7 @@ class AuthService {
 
       // Store in database.
       await DatabaseService(uid: user!.uid).createUser();
+      await DatabaseService(uid: user.uid).userCollection.doc(user.uid).collection('metrics').doc('eljefes-first').set({'count': 0});
 
       // Return 0 on success.
       return 0;
