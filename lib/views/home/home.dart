@@ -12,6 +12,7 @@ import 'package:zesti/theme/theme.dart';
 import 'package:zesti/views/home/profile.dart';
 import 'package:zesti/views/home/love/love.dart';
 import 'package:zesti/views/home/social/choose.dart';
+import 'package:zesti/widgets/formwidgets.dart';
 import 'package:zesti/widgets/loading.dart';
 import 'package:zesti/services/notifications.dart';
 import 'package:zesti/views/home/deals.dart';
@@ -60,6 +61,7 @@ class _HomeState extends State<Home> {
     final user = Provider.of<User?>(context);
     Size size = MediaQuery.of(context).size;
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: Container(
         padding: EdgeInsets.symmetric(
             vertical: size.height * 0.1, horizontal: size.width * 0.1),
@@ -236,6 +238,7 @@ class _HomeState extends State<Home> {
                                     ],
                                   )),
                             ]),
+                            SizedBox(height: size.height * .01),
                             Container(
                               child: jefes_first_btn(context, user.uid),
                             )
@@ -256,7 +259,7 @@ class _HomeState extends State<Home> {
     final user = Provider.of<User?>(context);
     Size size = MediaQuery.of(context).size;
     ImageProvider<Object> partnerPic = AssetImage("assets/profile.jpg");
-    double containerHeight = size.height * .20;
+    double containerHeight = size.height * .25;
     return FutureBuilder(
       future: DatabaseService(uid: user!.uid).userCollection.doc(user.uid).collection('metrics').doc('eljefes-first').get(),
       builder: (BuildContext context, AsyncSnapshot<DocumentSnapshot<Map<String, dynamic>>> snapshot) {
@@ -268,20 +271,6 @@ class _HomeState extends State<Home> {
             borderRadius: BorderRadius.circular(20),
           ),
           margin: EdgeInsets.all(16.0),
-          child: InkWell(
-            splashColor: CustomTheme.reallyBrightOrange,
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => Redeem(
-                        partnerid: "eljefes-first",
-                        partnerPic: partnerPic,
-                        vendor: "El Jefe's Taqueria",
-                        description: "One time free chips and guac for new users!",
-                        uid: uid)),
-              );
-            },
             child: Padding(
               padding: EdgeInsets.all(8.0),
               child: Column(
@@ -311,14 +300,40 @@ class _HomeState extends State<Home> {
                   Text("El Jefe's Taqueria",
                       textAlign: TextAlign.center,
                       style: TextStyle(color: Colors.orange[900], fontSize: 15.0)),
-                  SizedBox(height: containerHeight * .1),
-                  Text("Click here to redeem your one time free chips and guac for new users!",
+                  SizedBox(height: containerHeight * .02),
+                  Text("One time free chips and guac",
                       textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 12.0)),
+                      style: TextStyle(color: Colors.black, fontSize: 12.0)),
+                  Text("for new users!",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Colors.black, fontSize: 12.0)),
+                  SizedBox(height: containerHeight * .05),
+                  Container(
+                      height: containerHeight * .2,
+                      child:
+                          RoundedButton(
+                              text: "Redeem",
+                              fontSize: 12,
+                              verticalEdgeInsets: 1,
+                              horizontalEdgeInsets: 10,
+                              onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => Redeem(
+                                              partnerid: "eljefes-first",
+                                              partnerPic: partnerPic,
+                                              vendor: "El Jefe's Taqueria",
+                                              description: "One time free chips and guac for new users!",
+                                              uid: uid)),
+                                    );
+                              }
+
+                            ),
+                  )
                 ],
               ),
             ),
-          ),
         ),
     );
         }

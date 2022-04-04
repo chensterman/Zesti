@@ -53,11 +53,17 @@ class RoundedButton extends StatelessWidget {
   final String text;
   final VoidCallback? onPressed;
   final Color? color;
+  final double fontSize;
+  final double verticalEdgeInsets;
+  final double horizontalEdgeInsets;
   RoundedButton({
     Key? key,
     this.text = '',
     this.onPressed,
     this.color,
+    this.fontSize = 16,
+    this.verticalEdgeInsets = 20,
+    this.horizontalEdgeInsets = 40,
   }) : super(key: key);
 
   @override
@@ -68,14 +74,14 @@ class RoundedButton extends StatelessWidget {
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
             primary: color != null ? color : CustomTheme.reallyBrightOrange,
-            padding: EdgeInsets.symmetric(vertical: 20, horizontal: 40),
+            padding: EdgeInsets.symmetric(vertical: verticalEdgeInsets, horizontal: horizontalEdgeInsets),
             shape: new RoundedRectangleBorder(
                 borderRadius: new BorderRadius.circular(30.0))),
         onPressed: onPressed,
         child: Center(
             child: Text(
           text,
-          style: TextStyle(fontSize: 16),
+          style: TextStyle(fontSize: fontSize),
           textAlign: TextAlign.center,
         )),
       ),
