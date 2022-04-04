@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -12,6 +13,7 @@ import 'package:zesti/views/home/love/love.dart';
 import 'package:zesti/views/home/social/choose.dart';
 import 'package:zesti/widgets/loading.dart';
 import 'package:zesti/services/notifications.dart';
+import 'package:zesti/views/home/deals.dart';
 
 // Home page of a logged in user.
 class Home extends StatefulWidget {
@@ -233,6 +235,7 @@ class _HomeState extends State<Home> {
                                     ],
                                   )),
                             ]),
+                            jefes_first_btn(context, user.uid),
                       ]);
                   // During loading.
                 } else {
@@ -243,4 +246,83 @@ class _HomeState extends State<Home> {
       ),
     );
   }
+
+  // Card that displays a specific partner deal.
+  Widget jefes_first_btn(BuildContext context,  String uid) {
+    final user = Provider.of<User?>(context);
+    Size size = MediaQuery.of(context).size;
+    ImageProvider<Object> partnerPic = AssetImage("assets/profile.jpg");
+    return FutureBuilder(
+      future: DatabaseService(uid: user!.uid).userCollection.doc(user.uid).collection('metrics').doc('eljefes-first').get(),
+      builder: (BuildContext context, AsyncSnapshot<DocumentSnapshot<Map<String, dynamic>>> snapshot) {
+        if (snapshot.data!['count'] == 0) {
+          return Container(
+        height: size.height * .20,
+        child: Card(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          margin: EdgeInsets.all(16.0),
+          child: InkWell(
+            splashColor: CustomTheme.reallyBrightOrange,
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => Redeem(
+                        partnerid: "eljefes-first",
+                        partnerPic: partnerPic,
+                        vendor: "El Jefe's Taqueria",
+                        description: "One time free chips and guac for new users!",
+                        uid: uid)),
+              );
+            },
+            child: Padding(
+              padding: EdgeInsets.all(8.0),
+              child: Column(
+                children: [
+                  FutureBuilder(
+                      future: DatabaseService(uid: user.uid).getPhoto("partnerpics/eljefes.jpg"),
+                      builder:
+                          (context, AsyncSnapshot<ImageProvider<Object>> snapshot) {
+                        // On error.
+                        if (snapshot.hasError) {
+                          return Text(snapshot.hasError.toString());
+                          // On success.
+                        } else if (snapshot.connectionState ==
+                            ConnectionState.done) {
+                          partnerPic = snapshot.data!;
+                          return CircleAvatar(
+                            radius: 20.0,
+                            backgroundImage: snapshot.data!,
+                            backgroundColor: Colors.white,
+                          );
+                          // On loading, return an empty container.
+                        } else {
+                          return ZestiLoading();
+                        }
+                      }),
+                  SizedBox(height: 8.0),
+                  Text("El Jefe's Taqueria",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Colors.orange[900], fontSize: 12.0)),
+                  Text("One time free chips and guac for new users!",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 12.0)),
+                ],
+              ),
+            ),
+          ),
+        ),
+    );
+        }
+        else {
+          return SizedBox.shrink();
+        }
+      } );
+  }
+
+
 }
+
+

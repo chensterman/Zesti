@@ -55,7 +55,7 @@ class Deals extends StatelessWidget {
                         );
                       }
 
-                      // Remaining indeces used for matchsheet widgets.
+                      // Remaining indices used for matchsheet widgets.
                       Map<String, dynamic> data =
                           tmp.docs[index - 1].data() as Map<String, dynamic>;
                       return dealCard(
