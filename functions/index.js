@@ -29,7 +29,7 @@ async function _updateRefreshSchedule() {
     "timestamp": ts,
   });
 }
-/////// EXAMPLE BOOTLEG CODE TO SET EVERYONE'S ELJEFES-FIRST TO 0 /////
+/////// EXAMPLE RATCHET CODE TO SET EVERYONE'S ELJEFES-FIRST TO 0 /////
 // async function setJefesFirst (){
 //   var userRefs = (await userCollection.get()).docs.map(qdoc => {
 //     var data = qdoc.data();
@@ -51,6 +51,7 @@ async function _updateRefreshSchedule() {
 // exports.onetime = functions.pubsub.schedule("58 13 * * *").timeZone('America/New_York').onRun(async context => {
 //   await setJefesFirst();
 // });
+
 
 // Scheduled recommendation refresh 12:00pm EST every day.
 exports.noonRecRefresh = functions.pubsub.schedule("0 12 * * *")
