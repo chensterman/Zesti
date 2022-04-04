@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:zesti/services/database.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:zesti/widgets/errors.dart';
 import 'package:zesti/widgets/groupcard.dart';
+import 'package:zesti/widgets/formwidgets.dart';
 import 'package:zesti/theme/theme.dart';
 import 'package:zesti/widgets/loading.dart';
 
@@ -62,6 +64,27 @@ class _RecommendationsState extends State<Recommendations> {
                         );
                       }
 
+                      if (index == tmp.docs.length + 1) {
+                        return Center(
+                          child: RoundedButton(
+                            text: "Refresh",
+                            color: CustomTheme.mildlyBrightOrange,
+                            onPressed: () async {
+                              ZestiLoadingAsync().show(context);
+                              bool status = await DatabaseService(uid: user.uid)
+                                  .updateGroupRecRefresh(
+                                      DateTime.now(), widget.gid);
+                              ZestiLoadingAsync().dismiss();
+                              showDialog(
+                                  context: context,
+                                  barrierDismissible: false,
+                                  builder: (context) =>
+                                      refreshStatusDialog(context, status));
+                            },
+                          ),
+                        );
+                      }
+
                       // Other indeces used to populate user cards in the ListView.
                       Map<String, dynamic> data =
                           tmp.docs[index - 1].data() as Map<String, dynamic>;
@@ -74,10 +97,38 @@ class _RecommendationsState extends State<Recommendations> {
                     // SizedBox used as separated between user cards.
                     separatorBuilder: (context, index) =>
                         SizedBox(height: 16.0),
-                    itemCount: tmp.docs.length + 1)
+                    itemCount: tmp.docs.length + 2)
                 // When StreamBuilder hasn't loaded, show progress indicator.
                 : ZestiLoading();
           }),
     );
   }
+}
+
+Widget refreshStatusDialog(BuildContext context, bool status) {
+  return AlertDialog(
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(20),
+    ),
+    title: status
+        ? Text("Recommendations refreshed!")
+        : Text(
+            "Make sure your group has at least two members, and check back in right after 12:00PM or 6:00PM EST for new recommendations!"),
+    content: SingleChildScrollView(
+      child: SizedBox(
+          width: double.infinity,
+          height: 150.0,
+          child: status
+              ? SvgPicture.asset("assets/match.svg")
+              : SvgPicture.asset("assets/warning.svg")),
+    ),
+    actions: <Widget>[
+      TextButton(
+        child: Text("Ok", style: CustomTheme.textTheme.headline1),
+        onPressed: () {
+          Navigator.of(context).pop();
+        },
+      ),
+    ],
+  );
 }

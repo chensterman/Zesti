@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:zesti/widgets/errors.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:zesti/widgets/loading.dart';
 import 'package:zesti/widgets/usercard.dart';
+import 'package:zesti/widgets/formwidgets.dart';
 import 'package:zesti/theme/theme.dart';
 import 'package:zesti/services/database.dart';
 
@@ -61,9 +63,30 @@ class _RecommendationsState extends State<Recommendations> {
                             tmp.docs.length == 0
                                 ? Empty(
                                     reason:
-                                        "Check back in a few hours for new recs!")
+                                        "Out of recommendations! Refresh for a new batch!")
                                 : Container(),
                           ]),
+                        );
+                      }
+
+                      if (index == tmp.docs.length + 1) {
+                        return Center(
+                          child: RoundedButton(
+                            text: "Refresh",
+                            color: CustomTheme.mildlyBrightOrange,
+                            onPressed: () async {
+                              ZestiLoadingAsync().show(context);
+                              bool status =
+                                  await DatabaseService(uid: widget.uid)
+                                      .updateRecRefresh(DateTime.now());
+                              ZestiLoadingAsync().dismiss();
+                              showDialog(
+                                  context: context,
+                                  barrierDismissible: false,
+                                  builder: (context) =>
+                                      refreshStatusDialog(context, status));
+                            },
+                          ),
                         );
                       }
 
@@ -78,10 +101,38 @@ class _RecommendationsState extends State<Recommendations> {
                     // SizedBox used as separated between user cards.
                     separatorBuilder: (context, index) =>
                         SizedBox(height: 16.0),
-                    itemCount: tmp.docs.length + 1)
+                    itemCount: tmp.docs.length + 2)
                 // When StreamBuilder hasn't loaded, show progress indicator.
                 : ZestiLoading();
           }),
     );
   }
+}
+
+Widget refreshStatusDialog(BuildContext context, bool status) {
+  return AlertDialog(
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(20),
+    ),
+    title: status
+        ? Text("Recommendations refreshed!")
+        : Text(
+            "Check back in right after 12:00PM or 6:00PM EST for new recommendations!"),
+    content: SingleChildScrollView(
+      child: SizedBox(
+          width: double.infinity,
+          height: 150.0,
+          child: status
+              ? SvgPicture.asset("assets/match.svg")
+              : SvgPicture.asset("assets/warning.svg")),
+    ),
+    actions: <Widget>[
+      TextButton(
+        child: Text("Ok", style: CustomTheme.textTheme.headline1),
+        onPressed: () {
+          Navigator.of(context).pop();
+        },
+      ),
+    ],
+  );
 }
