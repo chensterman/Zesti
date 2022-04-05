@@ -450,7 +450,6 @@ exports.onGroupRefreshRecommendations = functions.firestore
     .document('groups/{groupId}/metadata/lastrecrefresh')
     .onWrite(async (change, context) => {
       if (!change.before.exists) {
-        await _generateGroupRecommendations(context.params.groupId);
         return null;
       }
       var before = change.before.data();
