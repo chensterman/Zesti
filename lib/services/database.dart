@@ -249,12 +249,6 @@ class DatabaseService {
         .collection("metadata")
         .doc("lastrecrefresh")
         .get();
-    Map<String, dynamic> lastRefreshInfo =
-        lastRefreshSnapshot.data() as Map<String, dynamic>;
-    DocumentSnapshot refreshSnapshot =
-        await metadataCollection.doc("recommendationrefresh").get();
-    Map<String, dynamic> refreshInfo =
-        refreshSnapshot.data() as Map<String, dynamic>;
     if (!lastRefreshSnapshot.exists) {
       await userCollection
           .doc(uid)
@@ -265,6 +259,12 @@ class DatabaseService {
       });
       return true;
     }
+    Map<String, dynamic> lastRefreshInfo =
+        lastRefreshSnapshot.data() as Map<String, dynamic>;
+    DocumentSnapshot refreshSnapshot =
+        await metadataCollection.doc("recommendationrefresh").get();
+    Map<String, dynamic> refreshInfo =
+        refreshSnapshot.data() as Map<String, dynamic>;
 
     if (lastRefreshInfo["timestamp"]
         .toDate()
@@ -283,6 +283,7 @@ class DatabaseService {
 
   // Update metadata account setup flag.
   //   Related to Cloud Function onRegisterRecommendations.
+  //   Related to Cloud Function onRefreshRecommendations.
   Future<void> setupAccount(DateTime ts) async {
     await userCollection
         .doc(uid)
@@ -291,6 +292,13 @@ class DatabaseService {
         .set({
       "timestamp": ts,
     });
+    // await userCollection
+    //     .doc(uid)
+    //     .collection("metadata")
+    //     .doc("lastrecrefresh")
+    //     .set({
+    //   "timestamp": ts,
+    // });
   }
 
   //////////////////////////////////////////////////////////////////////////////////////////
@@ -672,6 +680,20 @@ class DatabaseService {
       'group-ref': groupRef,
       'timestamp': ts,
     });
+
+    await setupGroup(DateTime.now(), groupRef.id);
+  }
+
+  // Update group metadata.
+  //   Related to Cloud Function onGroupRefreshRecommendations.
+  Future<void> setupGroup(DateTime ts, String gid) async {
+    await groupCollection
+        .doc(gid)
+        .collection("metadata")
+        .doc("lastrecrefresh")
+        .set({
+      "timestamp": ts,
+    });
   }
 
   // Handles when a user attemps to add a user to the group.
@@ -897,7 +919,6 @@ class DatabaseService {
     Map<String, dynamic> groupInfo =
         groupSnapshot.data() as Map<String, dynamic>;
     if (groupInfo["user-count"] < 2) {
-      print(groupInfo);
       return false;
     }
 
@@ -906,13 +927,6 @@ class DatabaseService {
         .collection("metadata")
         .doc("lastrecrefresh")
         .get();
-    Map<String, dynamic> lastRefreshInfo =
-        lastRefreshSnapshot.data() as Map<String, dynamic>;
-    DocumentSnapshot refreshSnapshot =
-        await metadataCollection.doc("recommendationrefresh").get();
-    Map<String, dynamic> refreshInfo =
-        refreshSnapshot.data() as Map<String, dynamic>;
-
     if (!lastRefreshSnapshot.exists) {
       await groupCollection
           .doc(gid)
@@ -923,7 +937,12 @@ class DatabaseService {
       });
       return true;
     }
-
+    Map<String, dynamic> lastRefreshInfo =
+        lastRefreshSnapshot.data() as Map<String, dynamic>;
+    DocumentSnapshot refreshSnapshot =
+        await metadataCollection.doc("recommendationrefresh").get();
+    Map<String, dynamic> refreshInfo =
+        refreshSnapshot.data() as Map<String, dynamic>;
     if (lastRefreshInfo["timestamp"]
         .toDate()
         .isBefore(refreshInfo["timestamp"].toDate())) {
