@@ -19,7 +19,14 @@ class NumberLine extends StatelessWidget {
         width: width,
         padding: const EdgeInsets.only(bottom: 8),
         child: Center(
-            child: Text("$text", style: CustomTheme.textTheme.headline2)),
+            child: Text(
+          "$text",
+          style: TextStyle(
+              color: CustomTheme.blackText,
+              fontSize: 25,
+              fontWeight: FontWeight.bold,
+              fontFamily: 'Jost'),
+        )),
         decoration: BoxDecoration(
             border: Border(
                 bottom: BorderSide(

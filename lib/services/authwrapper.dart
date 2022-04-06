@@ -6,6 +6,7 @@ import 'package:zesti/services/database.dart';
 import 'package:zesti/views/auth/start.dart';
 import 'package:zesti/views/auth/verify.dart';
 import 'package:zesti/views/home/home.dart';
+// import 'package:zesti/views/register/birthday.dart';
 import 'package:zesti/widgets/loading.dart';
 
 // AuthWrapper class:

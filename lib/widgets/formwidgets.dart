@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:zesti/theme/theme.dart';
 
 // Text input used across multiple forms.
@@ -74,7 +75,8 @@ class RoundedButton extends StatelessWidget {
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
             primary: color != null ? color : CustomTheme.reallyBrightOrange,
-            padding: EdgeInsets.symmetric(vertical: verticalEdgeInsets, horizontal: horizontalEdgeInsets),
+            padding: EdgeInsets.symmetric(
+                vertical: verticalEdgeInsets, horizontal: horizontalEdgeInsets),
             shape: new RoundedRectangleBorder(
                 borderRadius: new BorderRadius.circular(30.0))),
         onPressed: onPressed,
@@ -174,7 +176,7 @@ class ImageUpdate extends StatelessWidget {
                 showModalBottomSheet(
                     backgroundColor: Colors.transparent,
                     context: context,
-                    builder: (builder) => bottomSheet(size));
+                    builder: (context) => bottomSheet(context, size));
               },
               child: Icon(
                 Icons.add_photo_alternate_rounded,
@@ -201,10 +203,36 @@ class ImageUpdate extends StatelessWidget {
 
   // Image Picker:
   //  Sets dynamic Imagefile to an image file if possible.
-  Future<void> pickImage(ImageSource source) async {
+  Future<void> pickImage(BuildContext context, ImageSource source) async {
+    // On failure (usualy due to large files), getImage() returns null pointer.
     final selected = await _picker.getImage(source: source);
-    File file = File(selected!.path);
-    this.callback(file);
+
+    // On null pointer returned, display error and return.
+    if (selected == null) {
+      showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => imageSizeDialog(
+                context,
+              ));
+    } else {
+      // Check for file size.
+      File file = File(selected.path);
+      int sizeInBytes = file.lengthSync();
+      double sizeInMb = sizeInBytes / (1024 * 1024);
+      if (sizeInMb > 8) {
+        // This file is too large
+        showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (context) => imageSizeDialog(
+                  context,
+                ));
+      } else {
+        // Update image through callback function.
+        this.callback(file);
+      }
+    }
   }
 
   // // Clears the image:
@@ -213,8 +241,34 @@ class ImageUpdate extends StatelessWidget {
   //   this.callback(null);
   // }
 
+  // Alert for image size too large.
+  Widget imageSizeDialog(BuildContext context) {
+    return AlertDialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+      title: Text("File error. Your image may be too large (over 8MB)!"),
+      content: SingleChildScrollView(
+        child: SizedBox(
+          width: double.infinity,
+          height: 150.0,
+          child:
+              SvgPicture.asset("assets/warning.svg", semanticsLabel: "Warning"),
+        ),
+      ),
+      actions: <Widget>[
+        TextButton(
+          child: Text("Ok", style: CustomTheme.textTheme.headline2),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+      ],
+    );
+  }
+
   // Widget for the image choosing bottom sheet (camera or gallery).
-  Widget bottomSheet(Size size) {
+  Widget bottomSheet(BuildContext context, Size size) {
     return Container(
       height: 200.0,
       width: size.width * 0.75,
@@ -238,14 +292,14 @@ class ImageUpdate extends StatelessWidget {
                 size: 48.0,
               ),
               onPressed: () {
-                pickImage(ImageSource.camera);
+                pickImage(context, ImageSource.camera);
               },
               label: Text("Camera", style: TextStyle(color: Colors.grey)),
             ),
             TextButton.icon(
               icon: Icon(Icons.image, color: Colors.grey, size: 48.0),
               onPressed: () {
-                pickImage(ImageSource.gallery);
+                pickImage(context, ImageSource.gallery);
               },
               label: Text("Gallery", style: TextStyle(color: Colors.grey)),
             ),
