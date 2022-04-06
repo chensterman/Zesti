@@ -110,6 +110,45 @@ exports.notifyNewMatch = functions.firestore.document('/users/{id}/matched/{matc
 
   });
 
+exports.notifyMatchRequest = functions.firestore.document('users/{id}/incoming/{incomingID}')
+  .onCreate(async (snap, context) => {
+
+    var recipientUserRef = db.doc(`users/${context.params.id}`);
+    var recipientUser = await _userRefToObject(recipientUserRef);
+
+    let tokens = recipientUser['tokens']
+
+    // Notification details.
+    const payload = {
+      notification: {
+        title: 'Zesti',
+        body: 'You have an incoming request!'
+      }
+    };
+
+    // Send notifications to all tokens.
+    const response = await admin.messaging().sendToDevice(tokens, payload);
+    // For each message check if there was an error.
+    const tokensToRemove = [];
+    response.results.forEach((result, index) => {
+      const error = result.error;
+      if (error) {
+        functions.logger.error(
+          'Failure sending notification to',
+          tokens[index],
+          error
+        );
+        // Cleanup the tokens who are not registered anymore.
+        if (error.code === 'messaging/invalid-registration-token' ||
+            error.code === 'messaging/registration-token-not-registered') {
+          tokensToRemove.push(tokensSnapshot.ref.child(tokens[index]).remove());
+        }
+      }
+    });
+    return Promise.all(tokensToRemove);
+  })
+
+
 exports.notifyNewChatMsg = functions.firestore.document('chats/{id}/messages/{messageID}')
   .onCreate(async (snap, context) => {
     var sender = await _userRefToObject(snap.data()["sender-ref"]);
@@ -346,6 +385,39 @@ async function _generateRecommendations(userid) {
       "user-ref": userCollection.doc(uid),
     });
   });
+
+  // Notify user of new reommendations
+  let tokens = currUser['tokens'];
+  // Notification details.
+  const payload = {
+    notification: {
+      title: 'Zesti',
+      body: 'You have new recommendations!'
+    }
+  };
+
+  // Send notifications to all tokens.
+  const response = await admin.messaging().sendToDevice(tokens, payload);
+  // For each message check if there was an error.
+  const tokensToRemove = [];
+  response.results.forEach((result, index) => {
+    const error = result.error;
+    if (error) {
+      functions.logger.error(
+        'Failure sending notification to',
+        tokens[index],
+        error
+      );
+      // Cleanup the tokens who are not registered anymore.
+      if (error.code === 'messaging/invalid-registration-token' ||
+          error.code === 'messaging/registration-token-not-registered') {
+        tokensToRemove.push(tokensSnapshot.ref.child(tokens[index]).remove());
+      }
+    }
+  });
+  return Promise.all(tokensToRemove);
+
+
 }
 
 // Generate recommendations as soon as user sets up their account.
@@ -362,6 +434,8 @@ exports.onRefreshRecommendations = functions.firestore
     .onWrite(async (change, context) => {
       if (!change.before.exists) {
         await _generateRecommendations(context.params.userId);
+
+
         return null;
       }
       var before = change.before.data();
@@ -456,6 +530,50 @@ async function _generateGroupRecommendations(groupid) {
       "group-ref": groupCollection.doc(gid),
     });
   });
+
+  var groupSnapshot = await groupRef.collection('users').get();
+  var allUsers = groupSnapshot.docs.map(function (qdoc) {
+    var data = qdoc.data();
+    return data['user-ref'].id;
+  });
+
+  tokens = [];
+
+  allUsers.forEach(function (userID) {
+      var userRef = db.doc(`users/${userID}`);
+      user = _userRefToObject(userRef);
+      tokens.push(user["tokens"]);
+  });
+
+  // Notification details.
+  const payload = {
+    notification: {
+      title: 'Zesti',
+      body: 'You have new group recommendations!'
+    }
+  };
+
+  // Send notifications to all tokens.
+  const response = await admin.messaging().sendToDevice(tokens, payload);
+  // For each message check if there was an error.
+  const tokensToRemove = [];
+  response.results.forEach((result, index) => {
+    const error = result.error;
+    if (error) {
+      functions.logger.error(
+        'Failure sending notification to',
+        tokens[index],
+        error
+      );
+      // Cleanup the tokens who are not registered anymore.
+      if (error.code === 'messaging/invalid-registration-token' ||
+          error.code === 'messaging/registration-token-not-registered') {
+        tokensToRemove.push(tokensSnapshot.ref.child(tokens[index]).remove());
+      }
+    }
+  });
+  return Promise.all(tokensToRemove);
+
 };
 
 // Generate group recommendations on refresh.
