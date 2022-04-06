@@ -46,17 +46,16 @@ class _ChatState extends State<Chat> {
 
     String sendToId = "";
 
-    DatabaseService(uid: widget.uid).getChatInfo(widget.chatRef).then(
-      (data) {
-        if (data['user1-ref'].id == widget.uid) {
-          sendToId = data['user2-ref'].id;
-        } else {
-          sendToId = data['user1-ref'].id;
-        }
-        setState(() {
-          sendeeId = sendToId;
-        });
+    DatabaseService(uid: widget.uid).getChatInfo(widget.chatRef).then((data) {
+      if (data['user1-ref'].id == widget.uid) {
+        sendToId = data['user2-ref'].id;
+      } else {
+        sendToId = data['user1-ref'].id;
+      }
+      setState(() {
+        sendeeId = sendToId;
       });
+    });
   }
 
   @override
@@ -340,7 +339,7 @@ class _ChatState extends State<Chat> {
                     bottomLeft:
                         sendByMe ? Radius.circular(24) : Radius.circular(0),
                   ),
-                  color: sendByMe ? Colors.orange : Colors.grey[350],
+                  color: sendByMe ? Colors.orange : Colors.grey,
                 ),
                 padding: EdgeInsets.all(16),
                 child: Text(

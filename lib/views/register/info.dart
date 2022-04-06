@@ -25,6 +25,7 @@ class _InfoState extends State<Info> {
   // Mutable bio.
   String bio = '';
 
+  // Callback function passed to ImageUpdate widget to update photo
   void profpicCallback(dynamic val) {
     setState(() {
       profpic = val;

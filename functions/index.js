@@ -153,7 +153,7 @@ exports.notifyNewChatMsg = functions.firestore.document('chats/{id}/messages/{me
 // Globally used function to generate recommendations for a given userid.
 async function _generateRecommendations(userid) {
   // Get user collection
-  var collectionQuery = await userCollection.get();
+  var collectionQuery = await userCollection.where('account-setup', '==', true).get();
 
   // Get current user
   var userRef = userCollection.doc(userid);
@@ -264,6 +264,11 @@ async function _generateRecommendations(userid) {
     var data = qdoc.data();
     return data['user-ref'].id;
   });
+  var incomingsSnapshot = await userRef.collection('incoming').get();
+  var allIncoming = incomingSnapshot.docs.map(function (qdoc) {
+    var data = qdoc.data();
+    return data['user-ref'].id;
+  });
   var matchesSnapshot = await userRef.collection('matched').get();
   var allMatches = matchesSnapshot.docs.map(function (qdoc) {
     var data = qdoc.data();
@@ -279,10 +284,14 @@ async function _generateRecommendations(userid) {
     var data = qdoc.data();
     return data['user-ref'].id;
   });
+  var testUsersSnapshot = await userCollection.where('test-account', '==', true).get();
+  var allTestUsers = testUsersSnapshot.docs.map(function (qdoc) {
+    return qdoc.id;
+  });
 
   // Filter out outgoing reactions and matches from all users
   var allUsers = collectionQuery.docs.map(qdoc => qdoc.id);
-  var availableUsers = allUsers.filter(x => !allReactions.includes(x) && !allMatches.includes(x) && !allBlocked.includes(x) && !allBlockedBy.includes(x));
+  var availableUsers = allUsers.filter(x => !allReactions.includes(x) && !allIncoming.includes(x) && !allMatches.includes(x) && !allBlocked.includes(x) && !allBlockedBy.includes(x) && !allTestUsers.includes(x));
   var availableUsers = availableUsers.filter(x => x != userid);
 
   // Query for users within interests
@@ -391,12 +400,16 @@ async function _generateGroupRecommendations(groupid) {
         var data = qdoc.data();
         return data['group-ref'].id;
       });
+  var testGroupsSnapshot = await groupCollection.where('test-group', '==', true).get();
+  var allTestGroups = testGroupsSnapshot.docs.map(function (qdoc) {
+        return qdoc.id;
+      });
 
   // Get all group docs in list
   var allGroups = collectionQuery.docs.map(qdoc => qdoc.id);
 
   // Filter for viable groups
-  var availableGroups = allGroups.filter(x => !allReactions.includes(x) && !allMatches.includes(x));
+  var availableGroups = allGroups.filter(x => !allReactions.includes(x) && !allMatches.includes(x) && !allTestGroups.includes(x));
   availableGroups = availableGroups.filter(x => x != groupid);
 
   // Query based on the given parameters
