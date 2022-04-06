@@ -264,7 +264,7 @@ async function _generateRecommendations(userid) {
     var data = qdoc.data();
     return data['user-ref'].id;
   });
-  var incomingsSnapshot = await userRef.collection('incoming').get();
+  var incomingSnapshot = await userRef.collection('incoming').get();
   var allIncoming = incomingSnapshot.docs.map(function (qdoc) {
     var data = qdoc.data();
     return data['user-ref'].id;
