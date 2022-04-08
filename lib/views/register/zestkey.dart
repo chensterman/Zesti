@@ -89,6 +89,9 @@ class _ZestKeyState extends State<ZestKey> {
                                         ZestiLoadingAsync().show(context);
                                         await DatabaseService(uid: user.uid)
                                             .updateZestKey(zestKey);
+                                        // Flag account as fully set up
+                                        await DatabaseService(uid: user.uid)
+                                            .updateAccountSetup();
                                         ZestiLoadingAsync().dismiss();
                                         Navigator.push(
                                           context,

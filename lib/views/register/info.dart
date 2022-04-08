@@ -125,9 +125,6 @@ class _InfoState extends State<Info> {
                                         // Update user document with bio.
                                         await DatabaseService(uid: user!.uid)
                                             .updateBio(bio);
-                                        // Flag account as fully set up
-                                        await DatabaseService(uid: user.uid)
-                                            .updateAccountSetup();
                                         ZestiLoadingAsync().dismiss();
                                         // Navigate accordingly.
                                         Navigator.push(
