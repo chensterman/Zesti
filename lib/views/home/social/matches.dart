@@ -138,6 +138,7 @@ class _MatchesState extends State<Matches> {
                     context,
                     MaterialPageRoute(
                         builder: (context) => Chat(
+                              uid: uid,
                               gid: widget.gid,
                               yougid: snapshot.data!.gid,
                               groupName: snapshot.data!.groupName,

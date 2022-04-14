@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -38,6 +36,7 @@ class _ChatState extends State<Chat> {
   Stream<QuerySnapshot>? messages;
 
   String sendeeId = "";
+  DateTime matchTimestamp = DateTime.now();
 
   @override
   void initState() {
@@ -54,6 +53,7 @@ class _ChatState extends State<Chat> {
       }
       setState(() {
         sendeeId = sendToId;
+        matchTimestamp = data['timestamp'].toDate();
       });
     });
   }
@@ -64,7 +64,7 @@ class _ChatState extends State<Chat> {
     final size = MediaQuery.of(context).size;
     return Scaffold(
       // endDrawer is the restaurant display for discounts.
-      endDrawer: Deals(),
+      endDrawer: Deals(matchTimestamp: matchTimestamp),
       appBar: AppBar(
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
