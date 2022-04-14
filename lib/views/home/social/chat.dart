@@ -12,6 +12,7 @@ import 'package:zesti/widgets/loading.dart';
 
 // Widget displaying the chat page for a specific match.
 class Chat extends StatefulWidget {
+  final String uid;
   final String gid;
   final String yougid;
   final DocumentReference chatRef;
@@ -22,6 +23,7 @@ class Chat extends StatefulWidget {
   final Map<DocumentReference, ImageProvider<Object>> youPhotoMap;
   Chat({
     Key? key,
+    required this.uid,
     required this.gid,
     required this.yougid,
     required this.chatRef,
@@ -39,6 +41,21 @@ class Chat extends StatefulWidget {
 class _ChatState extends State<Chat> {
   // Controls the text parameters for the chat text editor.
   TextEditingController messageText = TextEditingController();
+  // Stream to retrieve messages from a specific chat (initialied during initState).
+  Stream<QuerySnapshot>? messages;
+  DateTime matchTimestamp = DateTime.now();
+
+  @override
+  void initState() {
+    messages = DatabaseService(uid: widget.uid).getMessages(widget.chatRef);
+    super.initState();
+
+    DatabaseService(uid: widget.uid).getChatInfo(widget.chatRef).then((data) {
+      setState(() {
+        matchTimestamp = data['timestamp'].toDate();
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +63,7 @@ class _ChatState extends State<Chat> {
     final size = MediaQuery.of(context).size;
     return Scaffold(
       // endDrawer is the restaurant display for discounts.
-      endDrawer: Deals(),
+      endDrawer: Deals(matchTimestamp: matchTimestamp),
       appBar: AppBar(
         leading: IconButton(
           icon: Icon(Icons.arrow_back),

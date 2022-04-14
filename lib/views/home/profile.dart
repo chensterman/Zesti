@@ -58,7 +58,8 @@ class _EditProfileState extends State<EditProfile> {
     'Leverett',
     'Lowell',
     'Mather',
-    'Pfohozeimer',
+    'Pforzheimer',
+    'Prescotts',
     'Quincy',
     'Winthrop',
   ];

@@ -10,8 +10,10 @@ import 'package:zesti/widgets/loading.dart';
 
 // Widget to redeem discount codes.
 class Deals extends StatelessWidget {
+  final DateTime matchTimestamp;
   Deals({
     Key? key,
+    required this.matchTimestamp,
   }) : super(key: key);
 
   @override
@@ -55,20 +57,51 @@ class Deals extends StatelessWidget {
                         );
                       }
 
+                      // 7 day time limit for deals.
+                      DateTime now = DateTime.now();
+                      DateTime deadline =
+                          matchTimestamp.add(new Duration(days: 7));
+                      bool past = now.isAfter(deadline);
+                      if (index == 1) {
+                        String hoursLeft = past
+                            ? "0"
+                            : deadline.difference(now).inHours.toString();
+                        return Card(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          margin: EdgeInsets.all(16.0),
+                          child: Padding(
+                            padding: EdgeInsets.all(16.0),
+                            child: Text(
+                              "You have " +
+                                  hoursLeft +
+                                  " hours left to redeem coupons for this match.",
+                              style: CustomTheme.textTheme.headline3,
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        );
+                      }
+
                       // Remaining indices used for matchsheet widgets.
-                      Map<String, dynamic> data =
-                          tmp.docs[index - 1].data() as Map<String, dynamic>;
-                      return dealCard(
-                          context,
-                          tmp.docs[index - 1].id,
-                          data['photo-ref'],
-                          data['name'],
-                          data['description'],
-                          user.uid);
+                      if (!past) {
+                        Map<String, dynamic> data =
+                            tmp.docs[index - 2].data() as Map<String, dynamic>;
+                        return dealCard(
+                            context,
+                            tmp.docs[index - 2].id,
+                            data['photo-ref'],
+                            data['name'],
+                            data['description'],
+                            user.uid);
+                      } else {
+                        return Container();
+                      }
                     },
                     // A divider widgets is placed in between each matchsheet widget.
                     separatorBuilder: (context, index) => SizedBox(height: 8.0),
-                    itemCount: tmp.docs.length + 1)
+                    itemCount: tmp.docs.length + 2)
                 // StreamBuilder loading indicator.
                 : ZestiLoading();
           },
