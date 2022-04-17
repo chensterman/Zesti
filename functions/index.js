@@ -7,6 +7,7 @@ admin.initializeApp();
 
 const db = admin.firestore();
 const userCollection = db.collection('users');
+const chatCollection = db.collection('chats');
 const groupCollection = db.collection('groups');
 const metadataCollection = db.collection('metadata');
 
@@ -22,7 +23,7 @@ async function _userRefToObject(userRef) {
 
 // Globally used function to update the recommendation schedule.
 async function _updateRefreshSchedule() {
-  var ts = admin.firestore.Timestamp.now();
+  var ts = db.Timestamp;
   await metadataCollection
       .doc("recommendationrefresh")
       .set({
@@ -54,9 +55,9 @@ async function _updateRefreshSchedule() {
 
 /////// EXAMPLE RATCHET CODE TO CORRECT EVERYONE'S PFOHO HOUSE SPELLING /////
 async function correctPfoho (){
-  var pfohoSnapshot = await userCollection.where('house', '==', 'Pfohozeimer').get();
+  var chatSnapshot = await userCollection.where('house', '==', 'Pfohozeimer').get();
 
-  pfohoSnapshot.forEach(async function (qdoc) {
+  chatSnapshot.forEach(async function (qdoc) {
     await userCollection.doc(qdoc.id).update({
       'house': 'Pforzheimer',
     });
@@ -65,6 +66,28 @@ async function correctPfoho (){
 
 exports.oneTimeCorrectPfoho = functions.pubsub.schedule('5 11 * * *').timeZone('America/New_York').onRun(async context => {
   await correctPfoho();
+});
+
+// Scheduled recommendation refresh 12:00pm EST every day.
+exports.noonRecRefresh = functions.pubsub.schedule("0 12 * * *")
+  .timeZone('America/New_York')
+  .onRun(async context => {
+    await _updateRefreshSchedule();
+  });
+
+/////// EXAMPLE RATCHET CODE TO CORRECT EVERYONE'S PFOHO HOUSE SPELLING /////
+async function changeTiming (){
+  var chatSnapshot = await chatCollection.get();
+  var ts = admin.firestore.Timestamp.now();
+  chatSnapshot.forEach(async function (qdoc) {
+    await chatCollection.doc(qdoc.id).update({
+      'timestamp': ts,
+    });
+  });
+}
+
+exports.oneTimeChangeTiming = functions.pubsub.schedule('5 11 * * *').timeZone('America/New_York').onRun(async context => {
+  await changeTiming();
 });
 
 // Scheduled recommendation refresh 12:00pm EST every day.
