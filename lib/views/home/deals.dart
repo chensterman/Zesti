@@ -63,9 +63,15 @@ class Deals extends StatelessWidget {
                           matchTimestamp.add(new Duration(days: 7));
                       bool past = now.isAfter(deadline);
                       if (index == 1) {
-                        String hoursLeft = past
-                            ? "0"
-                            : deadline.difference(now).inHours.toString();
+                        int daysLeft = deadline.difference(now).inHours ~/ 24;
+                        int hoursLeft = deadline.difference(now).inHours % 24;
+                        String expText = !past
+                            ? "You have " +
+                                daysLeft.toString() +
+                                " days and " +
+                                hoursLeft.toString() +
+                                " hours left to redeem coupons for this match."
+                            : "You have 0 days and 0 hours left to redeem coupons for this match.";
                         return Card(
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20),
@@ -74,9 +80,7 @@ class Deals extends StatelessWidget {
                           child: Padding(
                             padding: EdgeInsets.all(16.0),
                             child: Text(
-                              "You have " +
-                                  hoursLeft +
-                                  " hours left to redeem coupons for this match.",
+                              expText,
                               style: CustomTheme.textTheme.headline3,
                               textAlign: TextAlign.center,
                             ),

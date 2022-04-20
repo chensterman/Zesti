@@ -40,6 +40,9 @@ class _MatchesState extends State<Matches> {
               QuerySnapshot? tmp = snapshot.data;
               return tmp != null
                   ? ListView.separated(
+                      // Amount of space to be cached.
+                      //  This stops the FutureBuilder from being super jumpy.
+                      cacheExtent: size.height * 1.5,
                       padding: EdgeInsets.symmetric(
                           vertical: size.height * CustomTheme.paddingMultiplier,
                           horizontal:
