@@ -40,6 +40,7 @@ class _MatchesState extends State<Matches> {
               QuerySnapshot? tmp = snapshot.data;
               return tmp != null
                   ? ListView.separated(
+                      cacheExtent: size.height * 0.7 * 3,
                       padding: EdgeInsets.symmetric(
                           vertical: size.height * CustomTheme.paddingMultiplier,
                           horizontal:
