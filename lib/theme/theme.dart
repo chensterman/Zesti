@@ -21,14 +21,14 @@ class CustomTheme {
       color: CustomTheme.reallyBrightOrange,
       fontSize: 30,
       fontWeight: FontWeight.bold,
-      fontFamily: 'Jost',
-      shadows: <Shadow>[
+      fontFamily: 'Hind',
+      /*shadows: <Shadow>[
         Shadow(
           offset: Offset(2.0, 2.0),
           blurRadius: 1.0,
           color: Colors.grey.shade400,
         ),
-      ],
+      ], */
     ),
     headline2: TextStyle(
         color: CustomTheme.blackText,
@@ -39,14 +39,7 @@ class CustomTheme {
       color: CustomTheme.reallyBrightOrange,
       fontSize: 20,
       fontWeight: FontWeight.bold,
-      fontFamily: 'Jost',
-      shadows: <Shadow>[
-        Shadow(
-          offset: Offset(2.0, 2.0),
-          blurRadius: 1.0,
-          color: Colors.grey.shade400,
-        ),
-      ],
+      fontFamily: 'Hind',
     ),
     headline4: TextStyle(
       color: Colors.white,
